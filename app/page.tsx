@@ -1,14 +1,13 @@
-import { Wrapper } from "@/components/Wrapper";
-import { Greeting } from "@/components/Greeting";
+import { Wrapper } from "@/components/Wrapper"
 
 const Home = () => {
   return (
     <main>
       <Wrapper>
-        <Greeting />
+        <></>
       </Wrapper>
     </main>
-  );
-};
+  )
+}
 
-export default Home;
+export default Home
