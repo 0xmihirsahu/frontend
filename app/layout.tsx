@@ -7,6 +7,8 @@ import { Providers } from "@/components/Providers"
 import { Header } from "@/components/Header"
 import { ToastContainer } from "react-toastify"
 import { cn } from "@/lib/utils"
+import { headers } from "next/headers"
+import { getUser } from "@/lib/getUser"
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -17,11 +19,17 @@ export const metadata: Metadata = {
   description: "Spout Dashboard for asset tokenization",
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const headersList = await headers()
+
+  const pathname = headersList.get("x-invoke-path") || "/"
+
+  const { username } = await getUser()
+
   return (
     <html lang="en">
       <body
@@ -31,7 +39,7 @@ export default function RootLayout({
         )}
       >
         <Providers>
-          <Header />
+          <Header pathname={pathname} username={username} />
           {children}
         </Providers>
         <ToastContainer />
