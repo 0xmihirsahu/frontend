@@ -13,9 +13,8 @@ const fontSans = FontSans({
   variable: "--font-sans",
 })
 export const metadata: Metadata = {
-  title: "Solidity Next.js Starter",
-  description:
-    "A starter kit for building full stack Ethereum dApps with Solidity and Next.js",
+  title: "Spout Dashboard",
+  description: "Spout Dashboard for asset tokenization",
 }
 
 export default function RootLayout({

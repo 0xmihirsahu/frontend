@@ -10,6 +10,57 @@ A front-end dApp starter built with Next.js, designed for fast development. This
 - **rainbowkit**: A toolkit for building wallet connection UIs.
 - **shadcn-ui** and **acterenity ui**: Component libraries for modern UI elements.
 
+## Dashboard for Institutions
+
+This starter includes a dynamic dashboard system designed for institutions to manage their own token balances. Each institution has access to a personalized dashboard where they can view and interact with their token holdings securely.
+
+### Key Features
+
+- **Dynamic Routing**: Each institution has a unique dashboard route, e.g., `/dashboard/[institution]`, where `[institution]` is the institution's unique identifier (such as a name or address).
+- **Token Balance Management**: Institutions can view their token balances and interact with their assets directly from the dashboard.
+- **Secure & Isolated**: Each dashboard is isolated to the institution, ensuring privacy and security.
+
+### File Structure
+
+```
+app/
+  dashboard/
+    [institution]/
+      page.tsx   // Dashboard page for each institution
+```
+
+### Example Implementation
+
+**Dynamic Dashboard Route:**
+
+```tsx
+// app/dashboard/[institution]/page.tsx
+import { getTokenBalances } from "@/lib/token"
+
+export default async function DashboardPage({ params }) {
+  const { institution } = params
+  const balances = await getTokenBalances(institution)
+  return (
+    <div>
+      <h1>Dashboard for {institution}</h1>
+      {/* Render token balances and management UI here */}
+    </div>
+  )
+}
+```
+
+**Navigating to an Institution's Dashboard:**
+
+```tsx
+import Link from "next/link"
+;<Link href="/dashboard/acme-corp">Go to Acme Corp's Dashboard</Link>
+```
+
+### Extending the Dashboard
+
+- Add more features such as transaction history, token transfers, or admin controls by editing the files in `app/dashboard/[institution]/`.
+- Integrate with smart contracts to enable on-chain actions directly from the dashboard.
+
 ## Getting Started
 
 ### Prerequisites
