@@ -8,14 +8,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { getUser } from "@/lib/getUser"
 
 import { Icons } from "@/components/icons/icons"
 
-export default function PortfolioPage({ username }: { username: string }) {
+export default async function PortfolioPage() {
+  const { username } = await getUser()
   return (
     <Card className="w-full mx-auto mt-12">
       <CardHeader className="items-center">
         <Icons.DollarSign className="mb-2" />
+        {username}
         <CardTitle></CardTitle>
         <CardDescription></CardDescription>
         <CardAction></CardAction>
