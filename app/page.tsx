@@ -1,13 +1,9 @@
 import { Wrapper } from "@/components/Wrapper"
+import { redirect } from "next/navigation"
 
 const Home = () => {
-  return (
-    <main>
-      <Wrapper>
-        <></>
-      </Wrapper>
-    </main>
-  )
+  redirect("/dashboard")
+  return null
 }
 
 export default Home
