@@ -24,10 +24,6 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const headersList = await headers()
-
-  const pathname = headersList.get("x-invoke-path") || "/"
-
   const { username } = await getUser()
 
   return (
@@ -39,8 +35,10 @@ export default async function RootLayout({
         )}
       >
         <Providers>
-          <Header pathname={pathname} username={username} />
-          {children}
+          <div className="py-8 mb-10 px-10 md:px-28 lg:px-40 xl:px-56">
+            <Header username={username} />
+            {children}
+          </div>
         </Providers>
         <ToastContainer />
       </body>

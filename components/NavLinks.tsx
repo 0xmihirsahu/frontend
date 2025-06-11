@@ -4,9 +4,9 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
 const navLinks = [
-  { label: "Portfolio", href: "/dashboard/portfolio" },
-  { label: "Statements & Legal", href: "/dashboard/statements" },
-  { label: "Settings", href: "/dashboard/settings" },
+  { label: "Portfolio", href: "/dashboard/paul/portfolio" },
+  { label: "Statements & Legal", href: "/dashboard/paul/statements" },
+  { label: "Settings", href: "/dashboard/paul/settings" },
 ]
 
 export function NavLinks() {

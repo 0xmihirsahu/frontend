@@ -4,16 +4,9 @@ import Link from "next/link"
 import { UserMenu } from "@/components/UserMenu"
 import { NavLinks } from "@/components/NavLinks"
 
-const Header = ({
-  pathname,
-  username,
-}: {
-  pathname: string
-  username: string
-}) => {
-  console.log("pathname:", pathname)
+const Header = ({ username }: { username: string }) => {
   return (
-    <header className="py-8 mb-10 px-10 md:px-28 lg:px-40 xl:px-56">
+    <header>
       <div className="flex items-center justify-between w-full">
         <Link href="/dashboard/portfolio">
           <div className="flex items-center cursor-pointer">
