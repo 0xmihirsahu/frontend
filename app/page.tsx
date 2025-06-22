@@ -1,4 +1,3 @@
-import { Wrapper } from "@/components/Wrapper"
 import { redirect } from "next/navigation"
 
 const Home = () => {
