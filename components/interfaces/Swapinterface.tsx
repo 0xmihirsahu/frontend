@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import {
   Card,
   CardContent,
@@ -27,6 +27,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import Image from "next/image"
 
 export default function Swapinterface() {
   const [swapMode, setSwapMode] = useState<"buy" | "sell">("buy")
@@ -34,6 +35,30 @@ export default function Swapinterface() {
   const [buyAmount, setBuyAmount] = useState("")
   const [sellToken, setSellToken] = useState("RWA")
   const [buyToken, setBuyToken] = useState("USDC")
+
+  // Custom hook to fetch ask price for LQD
+  const [askPrice, setAskPrice] = useState<number | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    setLoading(true)
+    fetch("/api/marketdata?symbol=LQD")
+      .then((res) => res.json())
+      .then((data) => {
+        const ap = data?.quotes?.LQD?.ap
+        if (typeof ap === "number") {
+          setAskPrice(ap)
+        } else {
+          setError("Ask price not found")
+        }
+        setLoading(false)
+      })
+      .catch(() => {
+        setError("Failed to fetch")
+        setLoading(false)
+      })
+  }, [])
 
   const handleSwapTokens = () => {
     const tempToken = sellToken
@@ -102,9 +127,17 @@ export default function Swapinterface() {
                           variant="outline"
                           className="flex items-center space-x-2"
                         >
-                          <div
-                            className={`w-6 h-6 rounded-full ${sellToken === "USDC" ? "bg-blue-500" : "bg-purple-500"}`}
-                          ></div>
+                          {sellToken === "USDC" ? (
+                            <Image
+                              src="/USD.png"
+                              alt="USDC"
+                              width={24}
+                              height={24}
+                              className="rounded-full w-6 h-6 object-cover"
+                            />
+                          ) : (
+                            <div className="w-6 h-6 rounded-full bg-purple-500"></div>
+                          )}
                           <span>{sellToken}</span>
                         </Button>
                       </DropdownMenuTrigger>
@@ -155,9 +188,17 @@ export default function Swapinterface() {
                           variant="outline"
                           className="flex items-center space-x-2"
                         >
-                          <div
-                            className={`w-6 h-6 rounded-full ${buyToken === "USDC" ? "bg-blue-500" : "bg-purple-500"}`}
-                          ></div>
+                          {buyToken === "USDC" ? (
+                            <Image
+                              src="/USD.png"
+                              alt="USDC"
+                              width={24}
+                              height={24}
+                              className="rounded-full w-6 h-6 object-cover"
+                            />
+                          ) : (
+                            <div className="w-6 h-6 rounded-full bg-purple-500"></div>
+                          )}
                           <span>{buyToken}</span>
                         </Button>
                       </DropdownMenuTrigger>
@@ -204,9 +245,17 @@ export default function Swapinterface() {
                           variant="outline"
                           className="flex items-center space-x-2"
                         >
-                          <div
-                            className={`w-6 h-6 rounded-full ${sellToken === "USDC" ? "bg-blue-500" : "bg-purple-500"}`}
-                          ></div>
+                          {sellToken === "USDC" ? (
+                            <Image
+                              src="/USD.png"
+                              alt="USDC"
+                              width={24}
+                              height={24}
+                              className="rounded-full w-6 h-6 object-cover"
+                            />
+                          ) : (
+                            <div className="w-6 h-6 rounded-full bg-purple-500"></div>
+                          )}
                           <span>{sellToken}</span>
                         </Button>
                       </DropdownMenuTrigger>
@@ -257,9 +306,17 @@ export default function Swapinterface() {
                           variant="outline"
                           className="flex items-center space-x-2"
                         >
-                          <div
-                            className={`w-6 h-6 rounded-full ${buyToken === "USDC" ? "bg-blue-500" : "bg-purple-500"}`}
-                          ></div>
+                          {buyToken === "USDC" ? (
+                            <Image
+                              src="/USD.png"
+                              alt="USDC"
+                              width={24}
+                              height={24}
+                              className="rounded-full w-6 h-6 object-cover"
+                            />
+                          ) : (
+                            <div className="w-6 h-6 rounded-full bg-purple-500"></div>
+                          )}
                           <span>{buyToken}</span>
                         </Button>
                       </DropdownMenuTrigger>
@@ -289,7 +346,14 @@ export default function Swapinterface() {
           <div className="mt-6 p-4 bg-blue-50 rounded-lg">
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Exchange Rate</span>
-              <span className="font-medium">1 SUSC = 1.00 USDC</span>
+              <span className="font-medium">
+                {loading && "Loading..."}
+                {error && `Error: ${error}`}
+                {askPrice !== null &&
+                  !loading &&
+                  !error &&
+                  `1 LQD = ${askPrice} USD`}
+              </span>
             </div>
             <div className="flex justify-between text-sm mt-1">
               <span className="text-gray-600">Network Fee</span>
