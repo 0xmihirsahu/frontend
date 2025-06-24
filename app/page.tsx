@@ -1,8 +1,13 @@
-import { redirect } from "next/navigation"
+import { useRouter } from "next/navigation"
 
 const Home = () => {
-  redirect("/dashboard")
-  return null
+  const router = useRouter()
+  router.push("/portfolio")
+  return (
+    <div>
+      <h1>Home</h1>
+    </div>
+  )
 }
 
 export default Home

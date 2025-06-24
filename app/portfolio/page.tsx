@@ -8,13 +8,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { getUser } from "@/lib/getUser"
+// import { getUser } from "@/lib/getUser"
 import { Icons } from "@/components/icons/icons"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import Swapinterface from "@/components/interfaces/Swapinterface"
 
 export default async function PortfolioPage({ amount }: { amount: Number }) {
-  const { username } = await getUser()
+  const username = "Paul van Mierlo"
   return (
     <>
       <Card className="w-full mx-auto mt-12">
