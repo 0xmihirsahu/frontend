@@ -14,9 +14,12 @@ const fontSans = FontSans({
   subsets: ["latin"],
   variable: "--font-sans",
 })
+
 export const metadata: Metadata = {
   title: "Spout Dashboard",
-  description: "Spout Dashboard for asset tokenization",
+  description: "Spout Dashboard for asset tokenization and portfolio management",
+  keywords: ["finance", "portfolio", "trading", "stocks", "investment"],
+  viewport: "width=device-width, initial-scale=1",
 }
 
 export default async function RootLayout({
@@ -30,18 +33,29 @@ export default async function RootLayout({
     <html lang="en">
       <body
         className={cn(
-          "min-h-screen flex flex-col justify-between bg-background font-sans antialiased",
+          "min-h-screen flex flex-col bg-gray-50 font-sans antialiased",
           fontSans.variable
         )}
       >
         <Providers>
-          <div className="flex-1 py-8 mb-10 px-10 md:px-28 lg:px-40 xl:px-56">
-            <Header username={username} />
+          <Header username={username} />
+          <main className="flex-1 px-4 py-6 md:px-8 lg:px-12 xl:px-16 max-w-7xl mx-auto w-full">
             {children}
-          </div>
-          <ToastContainer />
+          </main>
+          <Footer />
+          <ToastContainer 
+            position="bottom-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+          />
         </Providers>
-        <Footer />
       </body>
     </html>
   )
