@@ -7,6 +7,8 @@ import { Providers } from "@/components/Providers"
 import Navbar from "@/components/NavBar"
 import { cn } from "@/lib/utils"
 import { Toaster } from "sonner"
+import { ConditionalNavbar } from "@/components/ConditionalNavbar"
+
 const publicSans = Public_Sans({
   subsets: ["latin"],
   variable: "--font-sans",
@@ -38,8 +40,8 @@ export default async function RootLayout({
         )}
       >
         <Providers>
-          <Navbar />
-          <main className="flex-1 px-4 py-6 md:px-8 lg:px-12 xl:px-16 max-w-7xl mx-auto w-full">
+          <ConditionalNavbar />
+          <main className="flex-1">
             {children}
           </main>
           <Toaster />

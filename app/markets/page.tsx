@@ -158,7 +158,7 @@ export default function MarketsPage() {
   }, [])
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="px-6 py-10 md:p-8 lg:p-12 xl:p-16 max-w-7xl mx-auto w-full">
       <div className="mb-8 flex justify-between items-center">
         <div>
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Markets</h1>

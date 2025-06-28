@@ -22,8 +22,8 @@ import {
 
 export default function SettingsPage() {
   return (
-    <div className="max-w-4xl mx-auto py-8">
-      <div className="mb-8">
+    <div className="space-y-6">
+      <div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Settings</h1>
         <p className="text-gray-600">Manage your account preferences and configuration</p>
       </div>

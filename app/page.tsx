@@ -1,8 +1,7 @@
 "use client"
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowRight, TrendingUp, PieChart, FileText, Settings, BarChart3, DollarSign } from 'lucide-react'
+import { ArrowRight, BarChart3 } from 'lucide-react'
 import { PixelTrail } from '@/components/ui/pixel-trail'
 import { useScreenSize } from '@/hooks/use-screen-size'
 import { GradientBars } from '@/components/gradient-bar'
@@ -17,14 +16,14 @@ export default function HomePage() {
   ]
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen px-4 py-6 md:px-8 lg:px-12 xl:px-16 max-w-7xl mx-auto w-full">
       {/* Hero Section */}
-      <section className="py-12 md:py-20">
-      <div className="absolute inset-0 z-0">
-        {/* <PixelTrail fadeDuration={0}
-          delay={1200} pixelClassName="rounded-full bg-emerald-600" pixelSize={screenSize.lessThan(`md`) ? 48 : 80}/> */}
-      </div>
-        <div className="text-center z-10">
+      <section className="relative py-12 md:py-20">
+        <div className="absolute inset-0 z-0">
+          {/* <PixelTrail fadeDuration={0}
+            delay={1200} pixelClassName="rounded-full bg-emerald-600" pixelSize={screenSize.lessThan(`md`) ? 48 : 80}/> */}
+        </div>
+        <div className="relative z-10 text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
             Your Financial
             <span className="text-emerald-600 block">Dashboard</span>
@@ -33,17 +32,17 @@ export default function HomePage() {
             Track markets, manage your portfolio, and make informed investment decisions with real-time data and professional-grade analytics.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/markets">
-              <Button size="lg" className="w-full sm:w-auto bg-emerald-600 text-white">
+            <Link href="/markets" className="w-full sm:w-auto block">
+              <Button size="lg" className="w-full bg-emerald-600 text-white hover:bg-emerald-700 transition-colors">
                 <BarChart3 className="mr-2 h-5 w-5" />
                 Explore Markets
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <Link href="/portfolio">
-              <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                <PieChart className="mr-2 h-5 w-5" />
-                View Portfolio
+            <Link href="/app" className="w-full sm:w-auto block">
+              <Button size="lg" className="w-full bg-emerald-600 text-white hover:bg-emerald-700 transition-colors">
+                <ArrowRight className="ml-2 h-5 w-5" />
+                Launch App
               </Button>
             </Link>
           </div>
@@ -84,7 +83,7 @@ export default function HomePage() {
         <div className="absolute inset-0 z-0">
           <GradientBars/>
         </div>
-        <div className="text-center z-10">
+        <div className="relative z-10 text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-8">Platform Overview</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
