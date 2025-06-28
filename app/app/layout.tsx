@@ -66,12 +66,11 @@ function SidebarNavContent() {
             </SidebarMenuButton>
           </SidebarMenuItem>
 
-
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive('/app/earn')}>
               <Link href="/app/earn" className="flex items-center gap-3">
                 <BarChart3 className="h-4 w-4" />
-                <span>Earn</span>
+                <span>Staking & Rewards</span>
                 <Badge variant="secondary" className="ml-auto">
                   Soon
                 </Badge>

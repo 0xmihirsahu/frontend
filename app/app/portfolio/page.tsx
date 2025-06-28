@@ -7,7 +7,6 @@ import {
   TrendingDown, 
   DollarSign, 
   PieChart, 
-  BarChart3, 
   Plus, 
   Minus,
   RefreshCw,
@@ -93,7 +92,7 @@ export default async function PortfolioPage() {
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
-          <Link href="/markets">
+          <Link href="/app/markets">
             <Button size="sm">
               <Plus className="h-4 w-4 mr-2" />
               Add Position
@@ -191,7 +190,7 @@ export default async function PortfolioPage() {
                       <p className="text-xs text-gray-500">{holding.allocation}% of portfolio</p>
                     </div>
                     <div className="flex gap-2 ml-4">
-                      <Link href={`/markets/${holding.symbol}`}>
+                      <Link href={`/app/markets/${holding.symbol}`}>
                         <Button variant="outline" size="sm">
                           <Eye className="h-4 w-4" />
                         </Button>
