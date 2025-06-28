@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 // Alpha Vantage API configuration
-const ALPHA_VANTAGE_API_KEY = 'CYKSPQ2Z65EXTJGW'
+const ALPHA_VANTAGE_API_KEY = process.env.ALPHA_VANTAGE_API_KEY || ''
 
 interface AlphaVantageTimeSeries {
   [date: string]: {
