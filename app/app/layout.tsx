@@ -37,21 +37,22 @@ function SidebarNavContent() {
       <SidebarHeader className="p-4 border-b">
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center">
-            <Image src="/Whale.png" alt="spout finance logo" width={32} height={32} />
+            <Image className="cursor-pointer" onClick={() => router.push('/')} src="/Whale.png" alt="spout finance logo" width={32} height={32} />
           </div>
           {open && (
-            <h1 className="text-lg font-bold text-gray-900">Spout Finance</h1>
+            <h1 onClick={() => router.push('/')} className="text-lg font-semibold text-gray-900 cursor-pointer">spout finance</h1>
           )}
         </div>
       </SidebarHeader>
 
       <SidebarContent className="px-2 py-4">
         <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isActive('/markets')}>
-              <Link href="/markets" className="flex items-center gap-3">
-                <Store className="h-4 w-4" />
-                <span>Markets</span>
+          
+        <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive('/app/trade')}>
+              <Link href="/app/trade" className="flex items-center gap-3">
+                <FlaskConical className="h-4 w-4" />
+                <span>Trade</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -65,14 +66,6 @@ function SidebarNavContent() {
             </SidebarMenuButton>
           </SidebarMenuItem>
 
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isActive('/app/trade')}>
-              <Link href="/app/trade" className="flex items-center gap-3">
-                <FlaskConical className="h-4 w-4" />
-                <span>Trade</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
 
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive('/app/earn')}>
@@ -82,6 +75,15 @@ function SidebarNavContent() {
                 <Badge variant="secondary" className="ml-auto">
                   Soon
                 </Badge>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive('/app/markets')}>
+              <Link href="/app/markets" className="flex items-center gap-3">
+                <Store className="h-4 w-4" />
+                <span>Markets</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -110,13 +112,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="flex min-h-screen w-full bg-gray-50">
-        <Sidebar collapsible="icon" className="border-r bg-white">
+        <Sidebar collapsible="none" className="border-r bg-white">
           <SidebarNavContent />
         </Sidebar>
 
         <SidebarInset className="flex-1">
           <header className="flex h-16 shrink-0 items-center gap-2 border-b bg-white px-4">
-            <SidebarTrigger className="-ml-1" />
             <div className="ml-4 text-sm text-gray-600">
               Dashboard
             </div>

@@ -13,10 +13,9 @@ import {
 import React, { useState } from "react";
 import CustomConnectButton from "@/components/custom-connect-wallet";
 const navItems = [
-  { name: "Buy", link: "/buy" },
-  { name: "Sell", link: "/sell" },
-  { name: "Portfolio", link: "/portfolio" },
-  { name: "Markets", link: "/markets" },
+  { name: "Markets", link: "/app/markets" },
+  { name: "Trade", link: "/app/trade" },
+  { name: "Earn", link: "/app/earn" },
 ];
 
 export default function Navbar() {
