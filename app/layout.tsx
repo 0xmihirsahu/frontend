@@ -4,12 +4,9 @@ import "react-toastify/dist/ReactToastify.css"
 import type { Metadata } from "next"
 import { Inter as FontSans } from "next/font/google"
 import { Providers } from "@/components/Providers"
-import { Header } from "@/components/Header"
-import { ToastContainer } from "react-toastify"
+import Navbar from "@/components/NavBar"
 import { cn } from "@/lib/utils"
-import { getUser } from "@/lib/getUser"
-import Footer from "@/components/Footer"
-
+import { Toaster } from "sonner"
 const fontSans = FontSans({
   subsets: ["latin"],
   variable: "--font-sans",
@@ -27,7 +24,6 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { username } = await getUser()
 
   return (
     <html lang="en">
@@ -38,23 +34,11 @@ export default async function RootLayout({
         )}
       >
         <Providers>
-          <Header username={username} />
+          <Navbar />
           <main className="flex-1 px-4 py-6 md:px-8 lg:px-12 xl:px-16 max-w-7xl mx-auto w-full">
             {children}
           </main>
-          <Footer />
-          <ToastContainer 
-            position="bottom-right"
-            autoClose={3000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="light"
-          />
+          <Toaster />
         </Providers>
       </body>
     </html>
