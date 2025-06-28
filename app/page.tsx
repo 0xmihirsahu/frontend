@@ -45,12 +45,11 @@ export default function HomePage() {
               Live Trading Platform
             </Badge>
             
-            <h1 className="text-6xl md:text-8xl font-bold text-slate-900 mb-8 tracking-tight">
-              Your Financial
-              <span className="block text-emerald-600 mt-2">Dashboard</span>
+            <h1 className="text-4xl md:text-6xl font-bold text-slate-900 mb-8 tracking-tight">
+              Spout Finance
             </h1>
             
-            <p className="text-xl md:text-2xl text-slate-600 mb-12 max-w-3xl mx-auto font-light leading-relaxed">
+            <p className="text-lg md:text-xl text-slate-600 mb-12 max-w-3xl mx-auto font-light leading-relaxed">
               Professional trading platform with real-time market data, portfolio analytics, 
               and seamless token swapping. Built for serious investors.
             </p>

@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { TrendingUp, TrendingDown, RefreshCw } from 'lucide-react'
+import { TrendingUp, TrendingDown, RefreshCw, Search, Filter, BarChart3, Activity, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 // Popular stocks with company names - prices will be fetched from API
 const popularStocks = [
@@ -99,6 +100,7 @@ export default function MarketsPage() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
 
   const formatMarketCap = (value: number) => {
     if (value >= 1e12) return `$${(value / 1e12).toFixed(2)}T`
@@ -157,33 +159,101 @@ export default function MarketsPage() {
     fetchAllStocks()
   }, [])
 
+  const filteredStocks = stocks.filter(stock => 
+    stock.ticker.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    stock.name.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  const marketStats = [
+    { label: 'Total Stocks', value: '500+', icon: BarChart3 },
+    { label: 'Market Cap', value: '$45.2T', icon: TrendingUp },
+    { label: 'Active Traders', value: '1,247', icon: Activity },
+    { label: 'Avg Volume', value: '$2.4B', icon: RefreshCw }
+  ]
+
   return (
-    <div className="px-6 py-10 md:p-8 lg:p-12 xl:p-16 max-w-7xl mx-auto w-full">
-      <div className="mb-8 flex justify-between items-center">
-        <div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Markets</h1>
-          <p className="text-lg text-gray-600">Track real-time stock prices and market data</p>
+    <div className="space-y-8">
+      {/* Header Section */}
+      <div className="bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 rounded-3xl p-8 text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(255,255,255,0.1),transparent_50%)]"></div>
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-4">
+            <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+              <Zap className="w-4 h-4 mr-2" />
+              Live Markets
+            </Badge>
+          </div>
+          <h1 className="text-4xl font-bold mb-3">Stock Markets</h1>
+          <p className="text-emerald-100 text-lg mb-6 max-w-2xl">
+            Track real-time stock prices and market data. Professional-grade analytics and insights for informed trading decisions.
+          </p>
           {lastUpdated && (
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-emerald-200 text-sm">
               Last updated: {lastUpdated.toLocaleTimeString()}
             </p>
           )}
         </div>
-        <Button 
-          onClick={fetchAllStocks} 
-          variant="outline"
-          size="sm"
-          className={refreshing ? 'opacity-50 cursor-not-allowed' : ''}
-        >
-          <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-          {refreshing ? 'Refreshing...' : 'Refresh'}
-        </Button>
       </div>
 
+      {/* Market Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {marketStats.map((stat, index) => {
+          const IconComponent = stat.icon;
+          return (
+            <Card key={index} className="border-0 shadow-md hover:shadow-lg transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-2 bg-emerald-50 rounded-xl">
+                    <IconComponent className="h-5 w-5 text-emerald-600" />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-slate-600">{stat.label}</p>
+                  <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Search and Filter */}
+      <Card className="border-0 shadow-md">
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input 
+                placeholder="Search stocks..." 
+                className="pl-10 bg-slate-50 border-slate-200"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" size="sm">
+                <Filter className="h-4 w-4 mr-2" />
+                Filter
+              </Button>
+              <Button 
+                onClick={fetchAllStocks} 
+                variant="outline"
+                size="sm"
+                className={refreshing ? 'opacity-50 cursor-not-allowed' : ''}
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                {refreshing ? 'Refreshing...' : 'Refresh'}
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Stocks Grid */}
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {[...Array(8)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
+            <Card key={i} className="animate-pulse border-0 shadow-md">
               <CardHeader className="pb-3">
                 <div className="flex justify-between items-start">
                   <div className="space-y-2">
@@ -210,23 +280,25 @@ export default function MarketsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {stocks.map((stock) => (
-            <Link href={`/markets/${stock.ticker}`} key={stock.ticker}>
-              <Card className="hover:shadow-lg transition-shadow duration-200 cursor-pointer relative">
+          {filteredStocks.map((stock) => (
+            <Link href={`/app/markets/${stock.ticker}`} key={stock.ticker}>
+              <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer relative border-0 shadow-md group">
                 {stock.dataSource === 'mock' && (
-                  <div className="absolute top-2 right-2 z-10">
-                    <Badge variant="secondary" className="text-xs">DEMO</Badge>
+                  <div className="absolute top-3 right-3 z-10">
+                    <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-700">DEMO</Badge>
                   </div>
                 )}
                 <CardHeader className="pb-3">
                   <div className="flex justify-between items-start">
                     <div>
-                      <CardTitle className="text-xl font-bold">{stock.ticker}</CardTitle>
+                      <CardTitle className="text-xl font-bold group-hover:text-emerald-600 transition-colors">{stock.ticker}</CardTitle>
                       <CardDescription className="text-sm text-gray-600">
                         {stock.name}
                       </CardDescription>
                     </div>
-                    <Badge variant={stock.change >= 0 ? "default" : "destructive"} className="text-xs">
+                    <Badge variant={stock.change >= 0 ? "default" : "destructive"} className={`text-xs ${
+                      stock.change >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                    }`}>
                       {stock.change >= 0 ? (
                         <TrendingUp className="w-3 h-3 mr-1" />
                       ) : (
@@ -237,7 +309,7 @@ export default function MarketsPage() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <div className="flex justify-between items-center">
                       <span className="text-2xl font-bold">
                         ${stock.price.toLocaleString()}
@@ -248,14 +320,14 @@ export default function MarketsPage() {
                         {stock.change >= 0 ? '+' : ''}${stock.change.toFixed(2)}
                       </span>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
-                      <div>
-                        <span className="block">Volume</span>
-                        <span className="font-medium">{stock.volume}</span>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="p-2 bg-slate-50 rounded-lg">
+                        <span className="block text-xs text-slate-500">Volume</span>
+                        <span className="font-medium text-sm">{stock.volume}</span>
                       </div>
-                      <div>
-                        <span className="block">Market Cap</span>
-                        <span className="font-medium">{stock.marketCap}</span>
+                      <div className="p-2 bg-slate-50 rounded-lg">
+                        <span className="block text-xs text-slate-500">Market Cap</span>
+                        <span className="font-medium text-sm">{stock.marketCap}</span>
                       </div>
                     </div>
                   </div>
@@ -266,38 +338,32 @@ export default function MarketsPage() {
         </div>
       )}
 
-      <div className="mt-12">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Market Overview</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">S&P 500</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">4,567.89</div>
-              <div className="text-green-600 text-sm">+12.34 (+0.27%)</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">NASDAQ</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">14,234.56</div>
-              <div className="text-red-600 text-sm">-45.67 (-0.32%)</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Dow Jones</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">34,789.12</div>
-              <div className="text-green-600 text-sm">+89.23 (+0.26%)</div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+      {/* Market Overview */}
+      <Card className="border-0 shadow-md">
+        <CardHeader>
+          <CardTitle className="text-2xl">Market Overview</CardTitle>
+          <CardDescription>Major market indices and performance</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl">
+              <h3 className="text-lg font-semibold text-blue-900 mb-2">S&P 500</h3>
+              <div className="text-3xl font-bold text-blue-900">4,567.89</div>
+              <div className="text-green-600 text-sm font-medium">+12.34 (+0.27%)</div>
+            </div>
+            <div className="p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl">
+              <h3 className="text-lg font-semibold text-purple-900 mb-2">NASDAQ</h3>
+              <div className="text-3xl font-bold text-purple-900">14,234.56</div>
+              <div className="text-red-600 text-sm font-medium">-45.67 (-0.32%)</div>
+            </div>
+            <div className="p-6 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl">
+              <h3 className="text-lg font-semibold text-emerald-900 mb-2">Dow Jones</h3>
+              <div className="text-3xl font-bold text-emerald-900">34,789.12</div>
+              <div className="text-green-600 text-sm font-medium">+89.23 (+0.26%)</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
-} 
+}
