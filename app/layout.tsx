@@ -2,21 +2,24 @@ import "./globals.css"
 import "@rainbow-me/rainbowkit/styles.css"
 import "react-toastify/dist/ReactToastify.css"
 import type { Metadata } from "next"
-import { Inter as FontSans } from "next/font/google"
+import { Public_Sans, IBM_Plex_Mono } from "next/font/google"
 import { Providers } from "@/components/Providers"
 import Navbar from "@/components/NavBar"
 import { cn } from "@/lib/utils"
 import { Toaster } from "sonner"
-const fontSans = FontSans({
+const publicSans = Public_Sans({
   subsets: ["latin"],
   variable: "--font-sans",
 })
-
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-mono",
+})
 export const metadata: Metadata = {
-  title: "Spout Dashboard",
-  description: "Spout Dashboard for asset tokenization and portfolio management",
-  keywords: ["finance", "portfolio", "trading", "stocks", "investment"],
-  viewport: "width=device-width, initial-scale=1",
+  title: "Spout FInance",
+  description: "Spout Finance is a RWA platform tokenizing T-Bills and Corporate Bonds",
+  keywords: ["finance", "portfolio", "trading", "stocks", "investment", "RWA", "T-Bills", "Corporate Bonds"],
 }
 
 export default async function RootLayout({
@@ -30,7 +33,8 @@ export default async function RootLayout({
       <body
         className={cn(
           "min-h-screen flex flex-col bg-gray-50 font-sans antialiased",
-          fontSans.variable
+          publicSans.variable,
+          ibmPlexMono.variable
         )}
       >
         <Providers>

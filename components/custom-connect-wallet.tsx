@@ -18,11 +18,9 @@ const CustomConnectButton = () => {
   const { disconnectAsync  } = useDisconnect();
   const copyAddress = (address: string) => {
     navigator.clipboard.writeText(address);
-    // You can add a toast notification here
-    console.log("Address copied to clipboard");
   };
 
-  return (
+  return (  
     <ConnectButton.Custom>
       {({
         account,
@@ -60,8 +58,7 @@ const CustomConnectButton = () => {
                 return (
                   <Button 
                     onClick={openConnectModal}
-                    variant="ghost" 
-                    className="hover:bg-gray-100 hover:text-white cursor-pointer rounded-none px-3 py-2 transition-colors text-white border border-gray-600/50"
+                    className="text-white focus:outline-none hover:text-white bg-black cursor-pointer rounded-xl px-3 py-2 transition-colors border border-gray-600/50"
                   >
                     Connect Wallet
                   </Button>
@@ -71,8 +68,8 @@ const CustomConnectButton = () => {
               return (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="flex text-white items-center gap-2 bg-muted hover:bg-muted/80 rounded-none py-0.5 pl-0.5 pr-4 border-0 border-gray-600/50 transition-colors">
-                      <div className="w-8 h-8 rounded-none">
+                    <button className="flex focus:outline-none text-black items-center gap-2 bg-emerald-700/20 hover:bg-emerald-700/35 rounded-xl py-0.5 pl-0.5 pr-4 border-0 border-gray-600/50 transition-colors">
+                      <div className="w-8 h-8 rounded-xl">
                         <Image
                           src="/1.png"
                           className="w-full h-full"
@@ -86,7 +83,7 @@ const CustomConnectButton = () => {
                       </span>
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56 bg-black">
+                  <DropdownMenuContent align="end" className="w-56 bg-white">
                     <DropdownMenuItem 
                       onClick={() => copyAddress(account.address)} 
                       className="cursor-pointer"
