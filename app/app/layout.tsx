@@ -12,7 +12,7 @@ import {
   SidebarFooter,
 } from '@/components/ui/sidebar';
 import { Badge } from '@/components/ui/badge';
-import { Trophy, Store, FlaskConical, BarChart3, Users } from 'lucide-react';
+import { Trophy, Store, FlaskConical, BarChart3, Users, Shield } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSidebar, SidebarProvider } from '@/components/ui/sidebar';
@@ -70,10 +70,19 @@ function SidebarNavContent() {
             <SidebarMenuButton asChild isActive={isActive('/app/earn')}>
               <Link href="/app/earn" className="flex items-center gap-3">
                 <BarChart3 className="h-4 w-4" />
-                <span>Staking & Rewards</span>
+                <span>Earn</span>
                 <Badge variant="secondary" className="ml-auto">
                   Soon
                 </Badge>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive('/app/proof-of-reserve')}>
+              <Link href="/app/proof-of-reserve" className="flex items-center gap-3">
+                <Shield className="h-4 w-4" />
+                <span>Proof of Reserve</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

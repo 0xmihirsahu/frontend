@@ -87,16 +87,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="relative py-24 bg-white overflow-hidden">
-        <PixelTrail 
-            fadeDuration={1200}
-            delay={300} 
-            pixelClassName="rounded-2xl bg-emerald-600/15" 
-            pixelSize={screenSize.lessThan('md') ? 40 : 60}
-          />
-        <Features />
-      </section>
+
       
       {/* Proof of Reserve Section */}
       <section className="relative py-24 bg-gradient-to-b from-neutral-800 to-emerald-800 overflow-hidden">
@@ -250,6 +241,17 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Features Section */}
+      <section className="relative py-24 bg-white overflow-hidden">
+        <PixelTrail 
+            fadeDuration={1200}
+            delay={300} 
+            pixelClassName="rounded-2xl bg-emerald-600/15" 
+            pixelSize={screenSize.lessThan('md') ? 40 : 60}
+          />
+        <Features />
+      </section>
+      
       {/* Animated Footer */}
       <DefaultFooter />
     </div>
