@@ -32,6 +32,22 @@ export default function StockChart({ data, ticker, height = 400 }: StockChartPro
 
   console.log('StockChart received data:', data?.length, 'points for', ticker)
 
+  // Filter data based on time range - moved before early return
+  const filteredData = React.useMemo(() => {
+    if (!data || !data.length) return []
+    
+    let daysToShow = 90
+    if (timeRange === "30d") daysToShow = 30
+    else if (timeRange === "7d") daysToShow = 7
+    
+    return data.slice(-daysToShow).map(item => ({
+      ...item,
+      date: item.time,
+      price: item.close,
+      volumeFormatted: (item.volume / 1000000).toFixed(1) + "M"
+    }))
+  }, [data, timeRange])
+
   if (!data || data.length === 0) {
     return (
       <div 
@@ -45,22 +61,6 @@ export default function StockChart({ data, ticker, height = 400 }: StockChartPro
       </div>
     )
   }
-
-  // Filter data based on time range
-  const filteredData = React.useMemo(() => {
-    if (!data.length) return []
-    
-    let daysToShow = 90
-    if (timeRange === "30d") daysToShow = 30
-    else if (timeRange === "7d") daysToShow = 7
-    
-    return data.slice(-daysToShow).map(item => ({
-      ...item,
-      date: item.time,
-      price: item.close,
-      volumeFormatted: (item.volume / 1000000).toFixed(1) + "M"
-    }))
-  }, [data, timeRange])
 
   const formatPrice = (value: number) => `$${value.toFixed(2)}`
   const formatVolume = (value: number) => `${(value / 1000000).toFixed(1)}M`

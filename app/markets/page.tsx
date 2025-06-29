@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -136,7 +136,7 @@ export default function MarketsPage() {
     return null
   }
 
-  const fetchAllStocks = async () => {
+  const fetchAllStocks = useCallback(async () => {
     setRefreshing(true)
     try {
       const promises = popularStocks.map(stock => fetchStockData(stock.ticker))
@@ -151,11 +151,11 @@ export default function MarketsPage() {
       setLoading(false)
       setRefreshing(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     fetchAllStocks()
-  }, [])
+  }, [fetchAllStocks])
 
   return (
     <div className="px-6 py-10 md:p-8 lg:p-12 xl:p-16 max-w-7xl mx-auto w-full">
