@@ -8,6 +8,7 @@ import { GradientBars } from '@/components/gradient-bar'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Features } from '@/components/features'
+import DefaultFooter from '@/components/Footer'
 
 export default function HomePage() {
   const screenSize = useScreenSize()
@@ -29,11 +30,11 @@ export default function HomePage() {
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 z-0 bg-gradient-to-br from-slate-50 via-emerald-50/20 to-slate-100">
+        <div className="absolute inset-0 z-0">
           <PixelTrail 
             fadeDuration={1200}
             delay={300} 
-            pixelClassName="rounded-xl bg-emerald-600/15" 
+            pixelClassName="rounded-2xl bg-emerald-600/15" 
             pixelSize={screenSize.lessThan('md') ? 40 : 60}
           />
         </div>
@@ -85,16 +86,27 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Features Section */}
+      <section className="relative py-24 bg-white overflow-hidden">
+        <PixelTrail 
+            fadeDuration={1200}
+            delay={300} 
+            pixelClassName="rounded-2xl bg-emerald-600/15" 
+            pixelSize={screenSize.lessThan('md') ? 40 : 60}
+          />
+        <Features />
+      </section>
+      
       {/* Live Markets Section */}
-      <section className="relative py-24 bg-gradient-to-r from-emerald-900 via-emerald-800 to-emerald-900 overflow-hidden">
+      <section className="relative py-24 bg-gradient-to-b from-white via-white to-emerald-900/30 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <GradientBars />
         </div>
         
         <div className="relative z-10 max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-5xl font-bold text-white mb-6">Live Market Data</h2>
-            <p className="text-xl text-emerald-100 max-w-2xl mx-auto">
+            <h2 className="text-5xl font-bold text-slate-900 mb-6">Live Market Data</h2>
+            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
               Real-time stock prices, volume data, and market analytics. 
               Updated every second.
             </p>
@@ -106,8 +118,8 @@ export default function HomePage() {
                 <CardContent className="p-8">
                   <div className="flex items-center justify-between mb-6">
                     <div>
-                      <div className="text-2xl font-bold text-white">{stock.symbol}</div>
-                      <div className="text-emerald-200 text-sm">Live Price</div>
+                      <div className="text-2xl font-bold text-slate-900">{stock.symbol}</div>
+                      <div className="text-slate-600 text-sm">Live Price</div>
                     </div>
                     <div className={`px-4 py-2 rounded-full text-sm font-bold ${
                       stock.change.startsWith('+') 
@@ -120,12 +132,12 @@ export default function HomePage() {
                   
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-emerald-200">Price</span>
-                      <span className="font-bold text-white text-xl">{stock.price}</span>
+                      <span className="text-slate-600">Price</span>
+                      <span className="font-bold text-slate-900 text-xl">{stock.price}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-emerald-200">Volume</span>
-                      <span className="font-semibold text-emerald-300">{stock.volume}</span>
+                      <span className="text-slate-600">Volume</span>
+                      <span className="font-semibold text-slate-900">{stock.volume}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -135,7 +147,7 @@ export default function HomePage() {
 
           <div className="text-center">
             <Link href="/markets">
-              <Button variant="outline" size="lg" className="border-2 border-white/30 hover:border-white text-white hover:bg-white/10 px-8 py-3 rounded-xl">
+              <Button variant="outline" size="lg" className="border-2 border-slate-300 hover:border-emerald-600 text-slate-700 hover:text-emerald-600 px-8 py-3 rounded-xl">
                 View All Markets
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
@@ -144,39 +156,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <Features />
 
-      {/* CTA Section */}
-      <section className="py-24 bg-gradient-to-br from-slate-900 via-emerald-900 to-slate-900 text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(16,185,129,0.1),transparent_50%)]"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(16,185,129,0.1),transparent_50%)]"></div>
-        
-        <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-5xl font-bold mb-6">
-            Start Trading Today
-          </h2>
-          <p className="text-xl text-slate-300 mb-12 max-w-2xl mx-auto">
-            Join thousands of traders using our platform for real-time market data, 
-            portfolio management, and seamless trading.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-6 justify-center">
-            <Link href="/app">
-              <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white px-12 py-4 text-lg font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
-                Launch Platform
-                <ArrowRight className="ml-3 h-5 w-5" />
-              </Button>
-            </Link>
-            <Link href="/markets">
-              <Button variant="outline" size="lg" className="border-2 border-white/30 hover:border-white text-white hover:bg-white/10 px-12 py-4 text-lg font-semibold rounded-2xl">
-                <Eye className="mr-3 h-5 w-5" />
-                View Demo
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
+      {/* Animated Footer */}
+      <DefaultFooter />
     </div>
   )
 }

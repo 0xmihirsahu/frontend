@@ -13,3 +13,14 @@ export function ConditionalNavbar() {
   
   return <Navbar />;
 } 
+
+export function ConditionalFooter() {
+  const pathname = usePathname();
+  
+  // Hide footer when in /app routes  
+  if (pathname?.startsWith('/app')) {
+    return null;
+  }
+  
+  return null; // Footer is handled in layout
+}
