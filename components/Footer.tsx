@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Link from 'next/link';
 import { Heart, ArrowUp } from 'lucide-react';
-
+import Image from 'next/image';
 interface LinkItem {
   href: string;
   label: string;
@@ -86,13 +86,13 @@ export const Footer: React.FC<FooterProps> = ({
   return (
     <footer
       ref={footerRef}
-      className="bg-slate-900 text-white relative flex flex-col w-full h-full justify-between lg:h-screen select-none"
+      className="bg-slate-900 text-white relative flex flex-col w-full h-full justify-between select-none"
     >
-      <div className="container mx-auto flex flex-col md:flex-row justify-between w-full gap-8 pb-24 pt-16 px-6 lg:px-12">
+      <div className="container mx-auto flex flex-col md:flex-row justify-between w-full gap-8 py-16 px-6 lg:px-12">
         <div className="space-y-6">
           <div className="flex items-center space-x-3 mb-6">
             <div className="w-10 h-10 bg-emerald-600 rounded-2xl flex items-center justify-center">
-              <span className="text-white font-bold text-lg">S</span>
+              <Image src="/Whale.png" alt="spout finance logo" width={32} height={32} />
             </div>
             <span className="font-bold text-2xl text-white">Spout Finance</span>
           </div>
@@ -173,31 +173,6 @@ export const Footer: React.FC<FooterProps> = ({
               </button>
             </div>
           </div>
-        </div>
-      </div>
-      
-      <div
-        id="waveContainer"
-        aria-hidden="true"
-        style={{ overflow: "hidden", height: 200 }}
-        className="relative"
-      >
-        <div style={{ marginTop: 0 }}>
-          {Array.from({ length: barCount }).map((_, index) => (
-            <div
-              key={index}
-              ref={(el) => { waveRefs.current[index] = el; }}
-              className="wave-segment"
-              style={{
-                height: `${index + 1}px`,
-                backgroundColor: "rgb(16, 185, 129)",
-                transition: "transform 0.1s ease",
-                willChange: "transform",
-                marginTop: "-2px",
-                opacity: 0.8 + (index / barCount) * 0.2,
-              }}
-            />
-          ))}
         </div>
       </div>
     </footer>

@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Features } from '@/components/features'
 import DefaultFooter from '@/components/Footer'
+import { Waves } from '@/components/wave-background'
 
 export default function HomePage() {
   const screenSize = useScreenSize()
@@ -97,65 +98,157 @@ export default function HomePage() {
         <Features />
       </section>
       
-      {/* Live Markets Section */}
-      <section className="relative py-24 bg-gradient-to-b from-white via-white to-emerald-900/30 overflow-hidden">
+      {/* Proof of Reserve Section */}
+      <section className="relative py-24 bg-gradient-to-b from-neutral-800 to-emerald-800 overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <GradientBars />
+          <Waves />
         </div>
         
         <div className="relative z-10 max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-5xl font-bold text-slate-900 mb-6">Live Market Data</h2>
+            <h2 className="text-5xl font-bold text-slate-900 mb-6">Proof of Reserve</h2>
             <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-              Real-time stock prices, volume data, and market analytics. 
-              Updated every second.
+              Every token is fully backed 1:1 by investment-grade bond ETFs, 
+              held by qualified U.S. custodians for maximum security.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            {liveMarkets.map((stock, index) => (
-              <Card key={index} className="bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15 transition-all duration-300 rounded-2xl">
-                <CardContent className="p-8">
-                  <div className="flex items-center justify-between mb-6">
-                    <div>
-                      <div className="text-2xl font-bold text-slate-900">{stock.symbol}</div>
-                      <div className="text-slate-600 text-sm">Live Price</div>
-                    </div>
-                    <div className={`px-4 py-2 rounded-full text-sm font-bold ${
-                      stock.change.startsWith('+') 
-                        ? 'bg-green-500/20 text-green-300' 
-                        : 'bg-red-500/20 text-red-300'
-                    }`}>
-                      {stock.change}
-                    </div>
+            <Card className="bg-white/90 backdrop-blur-md border-emerald-200/30 hover:bg-white/95 transition-all duration-300 rounded-2xl shadow-xl">
+              <CardContent className="p-8">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <div className="text-2xl font-bold text-slate-900">$2.4B</div>
+                    <div className="text-slate-600 text-sm">Total Reserve Value</div>
                   </div>
-                  
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-slate-600">Price</span>
-                      <span className="font-bold text-slate-900 text-xl">{stock.price}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-slate-600">Volume</span>
-                      <span className="font-semibold text-slate-900">{stock.volume}</span>
-                    </div>
+                  <div className="px-4 py-2 rounded-full text-sm font-bold bg-emerald-100 text-emerald-800">
+                    Verified
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600">Backing Ratio</span>
+                    <span className="font-bold text-slate-900 text-xl">1:1</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600">Last Audit</span>
+                    <span className="font-semibold text-slate-900">Today</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/90 backdrop-blur-md border-emerald-200/30 hover:bg-white/95 transition-all duration-300 rounded-2xl shadow-xl">
+              <CardContent className="p-8">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <div className="text-2xl font-bold text-slate-900">AAA-Rated</div>
+                    <div className="text-slate-600 text-sm">ETF Backing</div>
+                  </div>
+                  <div className="px-4 py-2 rounded-full text-sm font-bold bg-blue-100 text-blue-800">
+                    LQD
+                  </div>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600">Primary ETF</span>
+                    <span className="font-bold text-slate-900 text-xl">LQD</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600">Custodian</span>
+                    <span className="font-semibold text-slate-900">U.S. Qualified</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/90 backdrop-blur-md border-emerald-200/30 hover:bg-white/95 transition-all duration-300 rounded-2xl shadow-xl">
+              <CardContent className="p-8">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <div className="text-2xl font-bold text-slate-900">100%</div>
+                    <div className="text-slate-600 text-sm">Collateralized</div>
+                  </div>
+                  <div className="px-4 py-2 rounded-full text-sm font-bold bg-green-100 text-green-800">
+                    Secure
+                  </div>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600">Reserve Type</span>
+                    <span className="font-bold text-slate-900 text-xl">Bonds</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600">Insurance</span>
+                    <span className="font-semibold text-slate-900">FDIC</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 mb-12 border border-emerald-200/30">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div>
+                <h3 className="text-2xl font-bold text-slate-900 mb-4">Investment-Grade Security</h3>
+                <p className="text-slate-600 leading-relaxed mb-4">
+                  Each token is backed 1:1 by investment-grade bond ETFs like LQD, 
+                  held by a qualified U.S. custodian. This ensures maximum security 
+                  and stability for your investments.
+                </p>
+                <ul className="space-y-2 text-slate-600">
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                    AAA-rated corporate bond ETFs
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                    Qualified U.S. custodian oversight
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                    Real-time reserve verification
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold text-slate-900 mb-4">Transparent Reserves</h3>
+                <p className="text-slate-600 leading-relaxed mb-4">
+                  Our proof of reserve system provides complete transparency. 
+                  View real-time data showing exactly how your tokens are backed 
+                  by high-quality, liquid assets.
+                </p>
+                <ul className="space-y-2 text-slate-600">
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                    Daily reserve audits
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                    Public blockchain verification
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                    Independent third-party validation
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
 
           <div className="text-center">
-            <Link href="/markets">
+            <Link href="/app">
               <Button variant="outline" size="lg" className="border-2 border-slate-300 hover:border-emerald-600 text-slate-700 hover:text-emerald-600 px-8 py-3 rounded-xl">
-                View All Markets
+                View Reserve Details
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
           </div>
         </div>
       </section>
-
 
       {/* Animated Footer */}
       <DefaultFooter />
