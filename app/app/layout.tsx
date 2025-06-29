@@ -12,13 +12,14 @@ import {
   SidebarFooter,
 } from '@/components/ui/sidebar';
 import { Badge } from '@/components/ui/badge';
-import { Trophy, Store, FlaskConical, BarChart3, Users, Shield } from 'lucide-react';
+import { Trophy, Store, FlaskConical, BarChart3, Users, Shield, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSidebar, SidebarProvider } from '@/components/ui/sidebar';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import CustomConnectWallet from '@/components/custom-connect-wallet';
 
 function SidebarNavContent() {
   const pathname = usePathname();
@@ -79,9 +80,18 @@ function SidebarNavContent() {
           </SidebarMenuItem>
 
           <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive('/app/kyc')}>
+              <Link href="/app/kyc" className="flex items-center gap-3">
+                <Shield className="h-4 w-4" />
+                <span>KYC Verification</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive('/app/proof-of-reserve')}>
               <Link href="/app/proof-of-reserve" className="flex items-center gap-3">
-                <Shield className="h-4 w-4" />
+                <TrendingUp className="h-4 w-4" />
                 <span>Proof of Reserve</span>
               </Link>
             </SidebarMenuButton>
@@ -125,10 +135,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </Sidebar>
 
         <SidebarInset className="flex-1">
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b bg-white px-4">
+          <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b bg-white px-4">
             <div className="ml-4 text-sm text-gray-600">
               Dashboard
             </div>
+            <CustomConnectWallet />
           </header>
           <main className="flex-1 p-6 bg-gray-50">{children}</main>
         </SidebarInset>
