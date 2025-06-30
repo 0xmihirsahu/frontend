@@ -305,27 +305,6 @@ const Page = () => {
               </div>
             </CardContent>
           </Card>
-
-          {/* Trading Tips */}
-          <Card className="border-0 shadow-md bg-gradient-to-br from-slate-50 to-slate-100">
-            <CardHeader>
-              <CardTitle className="text-lg">Trading Tips</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-start gap-3">
-                <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2"></div>
-                <p className="text-sm text-slate-600">Check slippage before large trades</p>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                <p className="text-sm text-slate-600">Monitor gas fees during peak hours</p>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-2 h-2 bg-purple-500 rounded-full mt-2"></div>
-                <p className="text-sm text-slate-600">Set price alerts for better timing</p>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
   </div>

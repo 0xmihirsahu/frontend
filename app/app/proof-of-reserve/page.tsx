@@ -83,7 +83,7 @@ const ProofOfReservePage = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between">
-        <div>
+    <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Proof of Reserve</h1>
           <p className="text-gray-600">Real-time verification of our reserve holdings and backing</p>
         </div>
