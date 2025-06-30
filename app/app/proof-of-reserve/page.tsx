@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useReserveContract } from '@/hooks/useReserveContract';
 import { 
   TrendingUp, 
   Shield, 
@@ -22,8 +23,8 @@ import {
 
 // Mock data for T-bills and Corporate Bonds
 const tBillsData = {
-  totalBalance: 1250000000, // $1.25B
-  totalValue: 1248750000, // $1.24875B
+  totalBalance: 425000, // $1.25B
+  totalValue: 424500, // $1.24875B
   price: 99.90,
   change: 0.05,
   changePercent: 0.05,
@@ -31,15 +32,15 @@ const tBillsData = {
   yield: 2.15,
   lastUpdated: '2024-01-15T10:30:00Z',
   holdings: [
-    { ticker: 'TB3M', name: '3-Month T-Bill', balance: 500000000, value: 499500000, price: 99.90, yield: 2.15 },
-    { ticker: 'TB6M', name: '6-Month T-Bill', balance: 400000000, value: 399600000, price: 99.90, yield: 2.25 },
-    { ticker: 'TB1Y', name: '1-Year T-Bill', balance: 350000000, value: 349650000, price: 99.90, yield: 2.35 }
+    { ticker: 'TB3M', name: '3-Month T-Bill', balance: 45000, value: 44955, price: 99.90, yield: 2.15 },
+    { ticker: 'TB6M', name: '6-Month T-Bill', balance: 36000, value: 35976, price: 99.90, yield: 2.25 },
+    { ticker: 'TB1Y', name: '1-Year T-Bill', balance: 31500, value: 31471.5, price: 99.90, yield: 2.35 }
   ]
 };
 
 const corporateBondsData = {
-  totalBalance: 1150000000, // $1.15B
-  totalValue: 1148850000, // $1.14885B
+  totalBalance: 21500, // $1.15B
+  totalValue: 21485, // $1.14885B
   price: 99.87,
   change: -0.03,
   changePercent: -0.03,
@@ -47,9 +48,9 @@ const corporateBondsData = {
   yield: 3.85,
   lastUpdated: '2024-01-15T10:30:00Z',
   holdings: [
-    { ticker: 'LQD', name: 'iShares iBoxx $ Investment Grade Corporate Bond ETF', balance: 600000000, value: 599220000, price: 99.87, yield: 3.85 },
-    { ticker: 'VCIT', name: 'Vanguard Intermediate-Term Corporate Bond ETF', balance: 350000000, value: 349545000, price: 99.87, yield: 3.95 },
-    { ticker: 'IGIB', name: 'iShares Intermediate-Term Corporate Bond ETF', balance: 200000000, value: 199740000, price: 99.87, yield: 3.75 }
+    { ticker: 'LQD', name: 'iShares iBoxx $ Investment Grade Corporate Bond ETF', balance: 60000, value: 59922, price: 99.87, yield: 3.85 },
+    { ticker: 'VCIT', name: 'Vanguard Intermediate-Term Corporate Bond ETF', balance: 35000, value: 34954.5, price: 99.87, yield: 3.95 },
+    { ticker: 'IGIB', name: 'iShares Intermediate-Term Corporate Bond ETF', balance: 20000, value: 19974, price: 99.87, yield: 3.75 }
   ]
 };
 
@@ -70,17 +71,28 @@ const ProofOfReservePage = () => {
   const totalReserveValue = tBillsData.totalValue + corporateBondsData.totalValue;
   const totalBalance = tBillsData.totalBalance + corporateBondsData.totalBalance;
   const reserveRatio = (totalReserveValue / totalBalance) * 100;
+  const RESERVE_CONTRACT_ADDRESS = '0xf26c960Abf98875f87764502f64e8F5ef9134C20'
+
+  const { requestReserves, isRequestPending, totalReserves, refetchReserves } = useReserveContract(RESERVE_CONTRACT_ADDRESS);
+
+  const handleRequestReserves = () => {
+    requestReserves(BigInt(379));
+  };
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between">
-    <div>
+        <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Proof of Reserve</h1>
           <p className="text-gray-600">Real-time verification of our reserve holdings and backing</p>
         </div>
         <div className="flex gap-2 mt-4 md:mt-0">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleRequestReserves} isDisabled={isRequestPending}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRequestPending ? 'animate-spin' : ''}`} />
+            {isRequestPending ? 'Requesting...' : 'Request Reserves'}
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => refetchReserves()}>
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
@@ -99,7 +111,9 @@ const ProofOfReservePage = () => {
             <Shield className="h-4 w-4 text-emerald-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalReserveValue)}</div>
+            <div className="text-2xl font-bold">
+              {totalReserves ? formatCurrency(Number(totalReserves) / 1e6) : formatCurrency(totalReserveValue)}
+            </div>
             <div className="flex items-center text-xs text-emerald-600">
               <CheckCircle className="h-3 w-3 mr-1" />
               Fully Backed

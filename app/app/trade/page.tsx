@@ -1,41 +1,108 @@
-import Swapinterface from '@/components/interfaces/Swapinterface'
+"use client"
+import StockChart from '@/components/StockChart'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { ArrowUpDown, TrendingUp, Zap, Shield, Clock, DollarSign } from 'lucide-react'
-import React from 'react'
+import { ArrowUpDown, TrendingUp, Zap, Shield, Clock, DollarSign, ArrowDownCircle, ArrowUpCircle } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
+import { useAccount, useConfig } from 'wagmi'
+import {encryptValue} from '@/lib/inco-lite'
+import { useERC20Approve } from '@/hooks/useERC20Approve'
+import { useConfidentialOrdersContract } from '@/hooks/useConfidentialOrdersContract'
+import { waitForTransactionReceipt } from 'wagmi/actions'
 
-const page = () => {
-  const tradingStats = [
-    {
-      title: 'Trading Fee',
-      value: '0.1%',
-      description: 'Industry-leading low fees',
-      icon: DollarSign,
-      color: 'text-emerald-600'
-    },
-    {
-      title: 'Execution Speed',
-      value: '<1s',
-      description: 'Lightning-fast trades',
-      icon: Clock,
-      color: 'text-blue-600'
-    },
-    {
-      title: 'Security',
-      value: '100%',
-      description: 'Bank-level protection',
-      icon: Shield,
-      color: 'text-purple-600'
-    },
-    {
-      title: 'Success Rate',
-      value: '99.9%',
-      description: 'Reliable execution',
-      icon: TrendingUp,
-      color: 'text-green-600'
+const TOKENS = [
+  { label: 'LQD', value: 'LQD' },
+  { label: 'MSFT', value: 'MSFT' },
+  { label: 'AAPL', value: 'AAPL' },
+]
+
+const CONFIDENTIAL_ORDERS_ADDRESS = '0x02A3bf058A4B74CeeA4A4cA141908Cef33990de0'
+const USDC_ADDRESS = '0x036CbD53842c5426634e7929541eC2318f3dCF7e'
+const RWA_TOKEN_ADDRESS = '0xB5F83286a6F8590B4d01eC67c885252Ec5d0bdDB'
+
+const Page = () => {
+  const [selectedToken, setSelectedToken] = useState('LQD')
+  const [tokenData, setTokenData] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [buyUsdc, setBuyUsdc] = useState('')
+  const [sellToken, setSellToken] = useState('')
+
+  // Mock balances
+  const mockUsdcBalance = 1234.56
+  const mockTokenBalance = 789.01
+
+  const { address: userAddress } = useAccount()
+  const { approve, isPending: isApprovePending } = useERC20Approve(USDC_ADDRESS)
+  const { buyAsset, isBuyAssetPending } = useConfidentialOrdersContract(CONFIDENTIAL_ORDERS_ADDRESS)
+  const config = useConfig()
+
+  useEffect(() => {
+    async function fetchTokenData() {
+      setLoading(true)
+      try {
+        const res = await fetch(`/api/stocks/${selectedToken}`)
+        const json = await res.json()
+        setTokenData(json.data || [])
+      } catch (e) {
+        setTokenData([])
+      }
+      setLoading(false)
     }
-  ]
+    fetchTokenData()
+  }, [selectedToken])
+
+  // Get latest price
+  const latestPrice = tokenData.length > 0 ? tokenData[tokenData.length - 1].close : 0
+
+  // Estimate calculations
+  const estimatedTokens = buyUsdc && latestPrice ? (parseFloat(buyUsdc) / latestPrice).toFixed(4) : ''
+  const estimatedUsdc = sellToken && latestPrice ? (parseFloat(sellToken) * latestPrice).toFixed(2) : ''
+
+  const handleBuy = async () => {
+    if (!userAddress || !buyUsdc) return
+    const amount = BigInt(Math.floor(Number(buyUsdc) * 1e6)) // USDC has 6 decimals
+    try {
+      console.log('Starting approve for', CONFIDENTIAL_ORDERS_ADDRESS, 'amount', amount.toString())
+      const approveTx = await approve(CONFIDENTIAL_ORDERS_ADDRESS, amount)
+      console.log('Approve tx sent:', approveTx)
+      console.log('Waiting for approve confirmation...')
+      await waitForTransactionReceipt(config, { hash: approveTx })
+      console.log('Approve confirmed')
+      // 2. Encrypt the amount
+      console.log('Encrypting amount:', amount.toString())
+      const encryptedAmount = await encryptValue({
+        value: amount,
+        address: userAddress,
+        contractAddress: CONFIDENTIAL_ORDERS_ADDRESS,
+      })
+      console.log('Encrypted amount:', encryptedAmount)
+      // 3. Call buyAsset
+      console.log('Calling buyAsset with:', {
+        asset: selectedToken,
+        ticker: selectedToken,
+        token: RWA_TOKEN_ADDRESS,
+        encryptedAmount,
+        subscriptionId: BigInt(379),
+        orderAddr: userAddress
+      })
+      buyAsset(
+        selectedToken, // asset
+        selectedToken, // ticker
+        RWA_TOKEN_ADDRESS as `0x${string}`,
+        encryptedAmount as `0x${string}`,
+        BigInt(379), // subscriptionId (mock)
+        userAddress as `0x${string}`
+      )
+      console.log('buyAsset transaction sent')
+    } catch (err) {
+      console.error('Error in handleBuy:', err)
+    }
+  }
+  const handleSell = () => {
+    // TODO: Implement sell logic for selectedToken
+    alert(`Sell ${sellToken} ${selectedToken} for ≈ ${estimatedUsdc} USDC`)
+  }
 
   const recentTrades = [
     { pair: 'USDC → RWA', amount: '1,000', time: '2 min ago', status: 'Completed' },
@@ -44,7 +111,7 @@ const page = () => {
   ]
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 max-w-5xl mx-auto px-2 md:px-0">
       {/* Header Section */}
       <div className="bg-gradient-to-r from-purple-600 via-purple-700 to-purple-800 rounded-3xl p-8 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(255,255,255,0.1),transparent_50%)]"></div>
@@ -57,7 +124,7 @@ const page = () => {
           </div>
           <h1 className="text-4xl font-bold mb-3">Token Trading</h1>
           <p className="text-purple-100 text-lg mb-6 max-w-2xl">
-            Swap between SUSC tokens and USDC instantly with industry-leading low fees and lightning-fast execution.
+            Trade between supported tokens and USDC instantly with industry-leading low fees and lightning-fast execution.
           </p>
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
@@ -72,34 +139,117 @@ const page = () => {
         </div>
       </div>
 
-      {/* Trading Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {tradingStats.map((stat, index) => {
-          const IconComponent = stat.icon;
-          return (
-            <Card key={index} className="border-0 shadow-md hover:shadow-lg transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="p-2 bg-slate-50 rounded-xl">
-                    <IconComponent className={`h-5 w-5 ${stat.color}`} />
-                  </div>
+      {/* Token Selector */}
+      <div className="flex justify-center gap-4 mt-4">
+        {TOKENS.map(token => (
+          <Button
+            key={token.value}
+            variant={selectedToken === token.value ? 'default' : 'outline'}
+            onClick={() => setSelectedToken(token.value)}
+            className="min-w-[80px]"
+          >
+            {token.label}
+          </Button>
+        ))}
+      </div>
+
+      {/* Chart Section */}
+      <div className="mb-8">
+        <StockChart data={tokenData} ticker={selectedToken} />
+      </div>
+      {/* Buy/Sell Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+        {/* Buy */}
+        <Card className="shadow-lg border-0 bg-gradient-to-br from-emerald-50 to-white hover:shadow-xl transition-shadow duration-200">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <div className="flex items-center gap-2">
+              <ArrowDownCircle className="text-emerald-500 w-6 h-6" />
+              <div>
+                <CardTitle className="text-lg">Buy {selectedToken}</CardTitle>
+                <CardDescription className="text-xs">Deposit USDC to receive {selectedToken}</CardDescription>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-xs text-slate-500">USDC Balance</div>
+              <div className="font-bold text-emerald-700 text-base">{mockUsdcBalance.toLocaleString()} USDC</div>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="mb-4">
+              <label className="block text-xs text-slate-600 mb-1">USDC Amount</label>
+              <input
+                type="number"
+                min="0"
+                value={buyUsdc}
+                onChange={e => setBuyUsdc(e.target.value)}
+                placeholder={`USDC to deposit`}
+                className="border border-emerald-200 focus:border-emerald-400 rounded px-3 py-2 w-full bg-white shadow-sm focus:outline-none transition"
+              />
+            </div>
+            {buyUsdc && latestPrice > 0 && (
+              <div className="mb-4 p-3 rounded-lg bg-emerald-50 border border-emerald-100">
+                <div className="text-sm text-emerald-700 mb-1">
+                  You will receive ≈ <span className="font-bold">{estimatedTokens} {selectedToken}</span>
                 </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-slate-600">{stat.title}</p>
-                  <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
-                  <p className="text-sm text-slate-500">{stat.description}</p>
+                <div className="text-xs text-orange-500">
+                  Slippage (1%): You may receive as little as <span className="font-semibold">{(parseFloat(estimatedTokens) * 0.99).toFixed(4)} {selectedToken}</span>
                 </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+              </div>
+            )}
+            <Button className="w-full mt-2 font-semibold text-base py-2" onClick={handleBuy} isDisabled={!buyUsdc || isApprovePending || isBuyAssetPending}>
+              {isApprovePending || isBuyAssetPending ? 'Processing...' : `Buy ${selectedToken}`}
+            </Button>
+          </CardContent>
+        </Card>
+        {/* Sell */}
+        <Card className="shadow-lg border-0 bg-gradient-to-br from-slate-50 to-white hover:shadow-xl transition-shadow duration-200">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <div className="flex items-center gap-2">
+              <ArrowUpCircle className="text-blue-500 w-6 h-6" />
+              <div>
+                <CardTitle className="text-lg">Sell {selectedToken}</CardTitle>
+                <CardDescription className="text-xs">Sell {selectedToken} for USDC</CardDescription>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-xs text-slate-500">{selectedToken} Balance</div>
+              <div className="font-bold text-blue-700 text-base">{mockTokenBalance.toLocaleString()} {selectedToken}</div>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="mb-4">
+              <label className="block text-xs text-slate-600 mb-1">{selectedToken} Amount</label>
+              <input
+                type="number"
+                min="0"
+                value={sellToken}
+                onChange={e => setSellToken(e.target.value)}
+                placeholder={`Amount of ${selectedToken} to sell`}
+                className="border border-blue-200 focus:border-blue-400 rounded px-3 py-2 w-full bg-white shadow-sm focus:outline-none transition"
+              />
+            </div>
+            {sellToken && latestPrice > 0 && (
+              <div className="mb-4 p-3 rounded-lg bg-blue-50 border border-blue-100">
+                <div className="text-sm text-blue-700 mb-1">
+                  You will receive ≈ <span className="font-bold">{estimatedUsdc} USDC</span>
+                </div>
+                <div className="text-xs text-orange-500">
+                  Slippage (1%): You may receive as little as <span className="font-semibold">{(parseFloat(estimatedUsdc) * 0.99).toFixed(2)} USDC</span>
+                </div>
+              </div>
+            )}
+            <Button className="w-full mt-2 font-semibold text-base py-2" onClick={handleSell} isDisabled={!sellToken}>
+              Sell {selectedToken}
+            </Button>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Main Trading Interface */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Swap Interface */}
         <div className="lg:col-span-2">
-          <Swapinterface />
+          {/* Placeholder for the Swapinterface */}
         </div>
 
         {/* Trading Info Sidebar */}
@@ -178,8 +328,8 @@ const page = () => {
           </Card>
         </div>
       </div>
-    </div>
+  </div>
   )
 }
 
-export default page
+export default Page
