@@ -7,16 +7,7 @@ import {
   useReadContract,
   useWaitForTransactionReceipt,
 } from "wagmi"
-import {
-  parseEther,
-  encodePacked,
-  keccak256,
-  concatHex,
-  encodeAbiParameters,
-  toBytes,
-  toHex,
-  pad,
-} from "viem"
+import { concatHex, encodeAbiParameters, toBytes, toHex } from "viem"
 import {
   Card,
   CardContent,
@@ -71,18 +62,7 @@ export default function KYCFlow() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string>("")
   const [claimAdded, setClaimAdded] = useState(false)
-  const [isKeyAdded, setIsKeyAdded] = useState(false)
-  const [hasClaimKey, setHasClaimKey] = useState<boolean | null>(null)
   const issuerAddress = "0x3d3e0A0D7ee8af06630a041A2c0cEC9603d08720"
-  const userKey = address
-    ? keccak256(
-        encodeAbiParameters(
-          [{ type: "address", name: "user" }],
-          [address as `0x${string}`]
-        )
-      )
-    : undefined
-  console.log("Computed userKey:", userKey, "for address:", address)
 
   // Contract interactions
   const {
@@ -106,17 +86,6 @@ export default function KYCFlow() {
       hash: addClaimHash,
     })
 
-  // Add key to identity
-  const {
-    writeContract: writeAddKey,
-    data: addKeyHash,
-    isPending: isAddingKey,
-  } = useWriteContract()
-  const { isLoading: isConfirmingKey, isSuccess: isKeyAddSuccess } =
-    useWaitForTransactionReceipt({
-      hash: addKeyHash,
-    })
-
   // Read contract to get identity address from IdFactory
   const { data: identityAddress, isLoading: isCheckingIdentity } =
     useReadContract({
@@ -135,24 +104,6 @@ export default function KYCFlow() {
       typeof identityAddress === "string" &&
       identityAddress !== "0x0000000000000000000000000000000000000000"
   )
-
-  // Use the hook at the top level
-  const { data: keyHasPurposeData, isSuccess: keyHasPurposeSuccess } =
-    useReadContract({
-      address: onchainIDAddress as `0x${string}`,
-      abi: onchainidABI as any,
-      functionName: "keyHasPurpose",
-      args: userKey ? [userKey, 3] : undefined,
-      query: { enabled: !!onchainIDAddress && !!userKey },
-    })
-
-  // Log and update hasClaimKey when result changes
-  useEffect(() => {
-    if (keyHasPurposeSuccess) {
-      console.log("keyHasPurpose result:", keyHasPurposeData)
-      setHasClaimKey(Boolean(keyHasPurposeData))
-    }
-  }, [keyHasPurposeSuccess, keyHasPurposeData])
 
   const steps = [
     {
@@ -188,26 +139,10 @@ export default function KYCFlow() {
     },
     {
       id: 4,
-      title: "Add Issuer as Claim Signer",
-      description:
-        "Add the KYC issuer as a trusted claim signer to your identity",
-      icon: Shield,
-      status: isKeyAddSuccess
-        ? "completed"
-        : kycSignature
-          ? "current"
-          : "pending",
-    },
-    {
-      id: 5,
       title: "Add Claim to Identity",
       description: "Add KYC claim to your onchain identity",
       icon: Shield,
-      status: isClaimAdded
-        ? "completed"
-        : isKeyAddSuccess
-          ? "current"
-          : "pending",
+      status: isClaimAdded ? "completed" : kycSignature ? "current" : "pending",
     },
   ]
 
@@ -269,32 +204,6 @@ export default function KYCFlow() {
       setCurrentStep(3)
     } catch (err) {
       setError("Failed to get KYC signature")
-      console.error(err)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  // Handle adding key to identity
-  const handleAddKey = async () => {
-    if (!onchainIDAddress || !address || !userKey) return
-    try {
-      setIsLoading(true)
-      setError("")
-      console.log(
-        "Calling addKey with userKey:",
-        userKey,
-        "purpose: 3, type: 1"
-      )
-      writeAddKey({
-        address: onchainIDAddress as `0x${string}`,
-        abi: onchainidABI as any,
-        functionName: "addKey",
-        args: [userKey, 3, 1],
-      })
-      console.log("Add key transaction initiated")
-    } catch (err) {
-      setError("Failed to add user as claim signer")
       console.error(err)
     } finally {
       setIsLoading(false)
@@ -382,21 +291,12 @@ export default function KYCFlow() {
       setCurrentStep(2)
     } else if ((hasExistingIdentity || isDeployed) && !kycSignature) {
       setCurrentStep(3)
-    } else if (kycSignature && !isKeyAddSuccess) {
+    } else if (kycSignature && !isClaimAdded) {
       setCurrentStep(4)
-    } else if (isKeyAddSuccess && !isClaimAdded) {
-      setCurrentStep(5)
     } else if (isClaimAdded) {
-      setCurrentStep(5)
+      setCurrentStep(4)
     }
-  }, [
-    isConnected,
-    isDeployed,
-    kycSignature,
-    hasExistingIdentity,
-    isKeyAddSuccess,
-    isClaimAdded,
-  ])
+  }, [isConnected, isDeployed, kycSignature, hasExistingIdentity, isClaimAdded])
 
   // Update onchain ID address when identity is deployed or already exists
   useEffect(() => {
@@ -713,79 +613,9 @@ export default function KYCFlow() {
                 </div>
               )}
 
-              {/* Step 4: Add Issuer as Claim Signer */}
+              {/* Step 4: Add Claim to Identity */}
               {step.id === 4 && (
                 <div className="space-y-4">
-                  {!isKeyAddSuccess ? (
-                    <div className="space-y-4">
-                      <div className="p-4 bg-purple-50 rounded-lg">
-                        <h4 className="font-medium text-purple-800 mb-2">
-                          Add Issuer as Claim Signer
-                        </h4>
-                        <p className="text-sm text-purple-600">
-                          Add the KYC issuer as a trusted claim signer to your
-                          onchain identity before adding the claim.
-                        </p>
-                      </div>
-                      <Button
-                        onClick={handleAddKey}
-                        isDisabled={isAddingKey || isConfirmingKey}
-                        className="w-full"
-                      >
-                        {isAddingKey || isConfirmingKey ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            {isAddingKey
-                              ? "Adding Key..."
-                              : "Confirming Transaction..."}
-                          </>
-                        ) : (
-                          "Add Issuer as Claim Signer"
-                        )}
-                      </Button>
-                      {error && (
-                        <div className="flex items-center space-x-2 p-3 bg-red-50 rounded-lg">
-                          <AlertCircle className="h-4 w-4 text-red-600" />
-                          <span className="text-sm text-red-600">{error}</span>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="flex items-center space-x-3 p-4 bg-emerald-50 rounded-lg">
-                      <CheckCircle className="h-5 w-5 text-emerald-600" />
-                      <div>
-                        <p className="font-medium text-emerald-800">
-                          Issuer Added as Claim Signer
-                        </p>
-                        <p className="text-sm text-emerald-600">
-                          You can now add the KYC claim to your identity.
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Step 5: Add Claim to Identity */}
-              {step.id === 5 && (
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-2">
-                    {hasClaimKey === true && (
-                      <Badge className="bg-emerald-100 text-emerald-800">
-                        You have claim signer key
-                      </Badge>
-                    )}
-                    {hasClaimKey === false && (
-                      <Badge className="bg-red-100 text-red-800">
-                        You do NOT have claim signer key
-                      </Badge>
-                    )}
-                    {hasClaimKey === null && (
-                      <Badge className="bg-gray-100 text-gray-800">
-                        Checking claim signer key...
-                      </Badge>
-                    )}
-                  </div>
                   {!isClaimAdded ? (
                     <div className="space-y-4">
                       <div className="p-4 bg-purple-50 rounded-lg">
@@ -801,10 +631,7 @@ export default function KYCFlow() {
                       <Button
                         onClick={handleAddClaim}
                         isDisabled={
-                          isAddingClaim ||
-                          isConfirmingClaim ||
-                          !kycSignature ||
-                          !hasClaimKey
+                          isAddingClaim || isConfirmingClaim || !kycSignature
                         }
                         className="w-full"
                       >
