@@ -26,6 +26,7 @@ import { encryptValue } from "@/lib/inco-lite"
 import { useERC20Approve } from "@/hooks/useERC20Approve"
 import { useConfidentialOrdersContract } from "@/hooks/useConfidentialOrdersContract"
 import { waitForTransactionReceipt } from "wagmi/actions"
+import { useTokenBalance } from "@/hooks/view/useTokenBalance"
 
 const TOKENS = [
   { label: "LQD", value: "LQD" },
@@ -71,11 +72,15 @@ const Page = () => {
   )
   const [etfData, setEtfData] = useState<any>(null)
 
-  // Mock balances with state management
+  // Mock USDC balance only
   const [mockUsdcBalance, setMockUsdcBalance] = useState(4532)
-  const [mockTokenBalance, setMockTokenBalance] = useState(973)
 
   const { address: userAddress } = useAccount()
+  const {
+    balance: tokenBalance,
+    symbol: tokenSymbol,
+    isLoading: balanceLoading,
+  } = useTokenBalance(userAddress)
   const { approve, isPending: isApprovePending } = useERC20Approve(USDC_ADDRESS)
   const { buyAsset, isBuyAssetPending } = useConfidentialOrdersContract(
     CONFIDENTIAL_ORDERS_ADDRESS
@@ -407,7 +412,7 @@ const Page = () => {
         )
 
         // Update token balance immediately after minting
-        setMockTokenBalance((prev) => prev + estimatedTokenAmount)
+        setMockUsdcBalance((prev) => prev - usdcAmount)
 
         // Log the token addition
         setTimeout(() => {
@@ -624,16 +629,22 @@ const Page = () => {
                       : `${selectedToken} Balance`}
                   </div>
                   <div
-                    className={`font-bold text-base ${tradeType === "buy" ? "text-emerald-700" : "text-blue-700"}`}
+                    className={`font-bold text-base ${
+                      tradeType === "buy" ? "text-emerald-700" : "text-blue-700"
+                    }`}
                   >
                     {tradeType === "buy"
                       ? `${mockUsdcBalance.toLocaleString()} USDC`
-                      : `${mockTokenBalance.toLocaleString()} ${selectedToken}`}
+                      : balanceLoading
+                        ? "Loading..."
+                        : `${tokenBalance.toLocaleString()} ${selectedToken}`}
                   </div>
                   {/* Show secondary balance */}
                   <div className="text-xs text-slate-400 mt-1">
                     {tradeType === "buy"
-                      ? `${mockTokenBalance.toLocaleString()} ${selectedToken}`
+                      ? balanceLoading
+                        ? "Loading..."
+                        : `${tokenBalance.toLocaleString()} ${selectedToken}`
                       : `${mockUsdcBalance.toLocaleString()} USDC`}
                   </div>
                 </div>
