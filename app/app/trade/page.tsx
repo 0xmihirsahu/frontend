@@ -29,8 +29,8 @@ import { waitForTransactionReceipt } from "wagmi/actions"
 
 const TOKENS = [
   { label: "LQD", value: "LQD" },
-  { label: "MSFT", value: "MSFT" },
-  { label: "AAPL", value: "AAPL" },
+  // { label: "MSFT", value: "MSFT" },
+  // { label: "AAPL", value: "AAPL" },
 ]
 
 const CONFIDENTIAL_ORDERS_ADDRESS = "0x02A3bf058A4B74CeeA4A4cA141908Cef33990de0"

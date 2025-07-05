@@ -7,7 +7,16 @@ import {
   useReadContract,
   useWaitForTransactionReceipt,
 } from "wagmi"
-import { concatHex, encodeAbiParameters, toBytes, toHex } from "viem"
+import {
+  concatHex,
+  encodeAbiParameters,
+  toBytes,
+  toHex,
+  createPublicClient,
+  http,
+} from "viem"
+import { baseSepolia } from "viem/chains"
+import { ethers } from "ethers"
 import {
   Card,
   CardContent,
@@ -62,7 +71,9 @@ export default function KYCFlow() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string>("")
   const [claimAdded, setClaimAdded] = useState(false)
-  const issuerAddress = "0x3d3e0A0D7ee8af06630a041A2c0cEC9603d08720"
+  const [isVerifying, setIsVerifying] = useState(false)
+  const [claimEvents, setClaimEvents] = useState<any[]>([])
+  const issuerAddress = "0xfBbB54Ea804cC2570EeAba2fea09d0c66582498F"
 
   // Contract interactions
   const {
@@ -187,7 +198,7 @@ export default function KYCFlow() {
         body: JSON.stringify({
           userAddress: address,
           onchainIDAddress: onchainIDAddress,
-          claimData: "KYC",
+          claimData: "KYC passed",
           topic: 1,
           countryCode: selectedCountry,
         }),
@@ -210,7 +221,7 @@ export default function KYCFlow() {
     }
   }
 
-  // Handle adding claim to identity
+  // Handle adding claim to identity - EXACT MATCH with working Solidity script
   const handleAddClaim = async () => {
     if (!kycSignature || !onchainIDAddress) return
 
@@ -218,11 +229,22 @@ export default function KYCFlow() {
       setIsLoading(true)
       setError("")
 
-      console.log("Starting add claim process...")
-      console.log("KYC Signature data:", kycSignature)
-      console.log("OnchainID Address:", onchainIDAddress)
+      console.log("🔧 CORRECTED: Customer adds ClaimIssuer-signed claim")
+      console.log("🎯 Recipient address:", address)
+      console.log("🆔 OnchainID address:", onchainIDAddress)
+      console.log("🏢 ClaimIssuer:", kycSignature.issuerAddress)
 
-      // Prepare signature data
+      const topic = 1
+      // EXACT MATCH: Use ethers.toUtf8Bytes (v6 syntax)
+      const claimData = ethers.toUtf8Bytes("KYC")
+      // Hash the claim data like the script
+      const claimDataHash = ethers.keccak256(claimData)
+
+      console.log("✅ Claim data prepared:", ethers.hexlify(claimData))
+      console.log("🔒 Claim data hash:", claimDataHash)
+
+      // Use the signature from backend (already prepared correctly)
+      // Reconstruct signature the same way as working script expects
       const r = (
         kycSignature.signature.r.startsWith("0x")
           ? kycSignature.signature.r
@@ -237,35 +259,24 @@ export default function KYCFlow() {
         `0x${kycSignature.signature.v.toString(16).padStart(2, "0")}` as `0x${string}`
       const signature = concatHex([r, s, v])
 
-      console.log("Signature components:")
-      console.log("r:", r)
-      console.log("s:", s)
-      console.log("v:", v)
-      console.log("Final signature:", signature)
+      console.log("🔍 Signature components:")
+      console.log("   r:", r)
+      console.log("   s:", s)
+      console.log("   v:", v)
+      console.log("   Final signature:", signature)
 
-      // Prepare claim data
-      const claimDataBytes = toHex(toBytes("KYC"))
-      const claimData = encodeAbiParameters(
-        [
-          { type: "address", name: "onchainIDAddress" },
-          { type: "uint256", name: "topic" },
-          { type: "bytes", name: "claimData" },
-        ],
-        [onchainIDAddress as `0x${string}`, BigInt(1), claimDataBytes]
-      )
-
+      // EXACT MATCH: Contract arguments like working script
       const contractArgs = [
-        1, // topic (KYC)
+        topic, // topic (KYC)
         1, // scheme
         kycSignature.issuerAddress as `0x${string}`, // issuer address
         signature as `0x${string}`, // signature
-        claimData, // claim data
+        claimDataHash, // EXACT MATCH: Use hashed claim data
         "", // uri
       ]
 
-      console.log("Contract arguments:", contractArgs)
-      console.log("Contract address:", onchainIDAddress)
-      console.log("Contract ABI:", onchainidABI)
+      console.log("📋 Contract arguments:", contractArgs)
+      console.log("🔄 Customer adding ClaimIssuer-signed claim...")
 
       writeAddClaim({
         address: onchainIDAddress as `0x${string}`,
@@ -274,12 +285,96 @@ export default function KYCFlow() {
         args: contractArgs,
       })
 
-      console.log("Add claim transaction initiated")
+      console.log("📡 Add claim transaction initiated")
     } catch (err) {
-      console.error("Error in handleAddClaim:", err)
+      console.error("❌ Error in handleAddClaim:", err)
       setError("Failed to add claim to identity")
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  // Function to fetch claim events from the blockchain
+  const fetchClaimEvents = async () => {
+    if (!onchainIDAddress) return
+
+    try {
+      setIsVerifying(true)
+
+      const publicClient = createPublicClient({
+        chain: baseSepolia,
+        transport: http(process.env.NEXT_PUBLIC_RPC_URL),
+      })
+
+      // Get current block number and start from recent blocks
+      const currentBlock = await publicClient.getBlockNumber()
+      const fromBlock = currentBlock - BigInt(2000) // About ~1 hour worth of blocks on Base Sepolia (2 sec block time)
+
+      // Get ClaimAdded events
+      const claimAddedEvents = await publicClient.getLogs({
+        address: onchainIDAddress as `0x${string}`,
+        event: {
+          type: "event",
+          name: "ClaimAdded",
+          inputs: [
+            { name: "claimId", type: "bytes32", indexed: true },
+            { name: "topic", type: "uint256", indexed: true },
+            { name: "scheme", type: "uint256", indexed: false },
+            { name: "issuer", type: "address", indexed: true },
+            { name: "signature", type: "bytes", indexed: false },
+            { name: "data", type: "bytes", indexed: false },
+            { name: "uri", type: "string", indexed: false },
+          ],
+        },
+        fromBlock: fromBlock,
+      })
+
+      // Get ClaimChanged events
+      const claimChangedEvents = await publicClient.getLogs({
+        address: onchainIDAddress as `0x${string}`,
+        event: {
+          type: "event",
+          name: "ClaimChanged",
+          inputs: [
+            { name: "claimId", type: "bytes32", indexed: true },
+            { name: "topic", type: "uint256", indexed: true },
+            { name: "scheme", type: "uint256", indexed: false },
+            { name: "issuer", type: "address", indexed: true },
+            { name: "signature", type: "bytes", indexed: false },
+            { name: "data", type: "bytes", indexed: false },
+            { name: "uri", type: "string", indexed: false },
+          ],
+        },
+        fromBlock: fromBlock,
+      })
+
+      // Combine and sort events by block number
+      const allEvents = [...claimAddedEvents, ...claimChangedEvents].sort(
+        (a, b) => Number(b.blockNumber) - Number(a.blockNumber)
+      )
+
+      console.log(
+        `Found ${allEvents.length} claim events for identity ${onchainIDAddress} (searched blocks ${fromBlock} - ${currentBlock})`
+      )
+
+      const processedEvents = allEvents.map((event) => ({
+        ...event,
+        eventType:
+          event.eventName ||
+          (claimAddedEvents.includes(event) ? "ClaimAdded" : "ClaimChanged"),
+        blockNumber: Number(event.blockNumber),
+        isKYCClaim: event.args?.topic === BigInt(1),
+        isFromOurIssuer:
+          event.args?.issuer?.toLowerCase() === issuerAddress.toLowerCase(),
+      }))
+
+      setClaimEvents(processedEvents)
+      return processedEvents
+    } catch (error) {
+      console.error("Error fetching claim events:", error)
+      setError("Failed to fetch claim events")
+    } finally {
+      setIsVerifying(false)
     }
   }
 
@@ -709,6 +804,98 @@ export default function KYCFlow() {
                 been successfully added to your onchain identity.
               </p>
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Verification Section */}
+      {onchainIDAddress && (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-blue-600" />
+              Claim Verification
+            </CardTitle>
+            <CardDescription>
+              Check if KYC claims have been successfully added to your onchain
+              identity (searches recent ~2000 blocks)
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button
+              onClick={fetchClaimEvents}
+              isDisabled={isVerifying}
+              className="w-full"
+            >
+              {isVerifying ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Checking Events...
+                </>
+              ) : (
+                "Check Claim Events"
+              )}
+            </Button>
+
+            {claimEvents.length > 0 && (
+              <div className="space-y-3">
+                <h4 className="font-medium text-sm">
+                  Found {claimEvents.length} claim event(s):
+                </h4>
+                {claimEvents.map((event, index) => (
+                  <div key={index} className="border rounded-lg p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span
+                        className={`px-2 py-1 rounded text-xs font-medium ${
+                          event.eventType === "ClaimAdded"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-blue-100 text-blue-800"
+                        }`}
+                      >
+                        {event.eventType}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        Block #{event.blockNumber}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <span className="text-gray-500">Topic:</span>{" "}
+                        {Number(event.args?.topic)}
+                        {event.isKYCClaim && (
+                          <span className="ml-2 px-1 py-0.5 bg-green-100 text-green-700 rounded text-xs">
+                            KYC
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Scheme:</span>{" "}
+                        {Number(event.args?.scheme)}
+                      </div>
+                      <div className="col-span-2">
+                        <span className="text-gray-500">Issuer:</span>
+                        <span
+                          className={`ml-1 ${event.isFromOurIssuer ? "text-green-600 font-medium" : ""}`}
+                        >
+                          {event.args?.issuer}
+                        </span>
+                        {event.isFromOurIssuer && (
+                          <span className="ml-2 px-1 py-0.5 bg-green-100 text-green-700 rounded text-xs">
+                            Our Issuer
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {claimEvents.length === 0 && !isVerifying && (
+              <div className="text-center py-4 text-gray-500">
+                No claim events found for this identity
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
