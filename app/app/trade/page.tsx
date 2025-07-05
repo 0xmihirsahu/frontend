@@ -59,12 +59,17 @@ interface TradeLogEntry {
 const Page = () => {
   const [selectedToken, setSelectedToken] = useState("LQD")
   const [tokenData, setTokenData] = useState<any[]>([])
+  const [currentPrice, setCurrentPrice] = useState<number>(0)
   const [loading, setLoading] = useState(true)
   const [buyUsdc, setBuyUsdc] = useState("")
   const [sellToken, setSellToken] = useState("")
   const [tradeType, setTradeType] = useState<"buy" | "sell">("buy")
   const [tradeLogs, setTradeLogs] = useState<TradeLogEntry[]>([])
   const [logsLoading, setLogsLoading] = useState(false)
+  const [chartDataSource, setChartDataSource] = useState<"real" | "mock">(
+    "real"
+  )
+  const [etfData, setEtfData] = useState<any>(null)
 
   // Mock balances with state management
   const [mockUsdcBalance, setMockUsdcBalance] = useState(4532)
@@ -77,24 +82,120 @@ const Page = () => {
   )
   const config = useConfig()
 
+  // Test ETF data fetch
   useEffect(() => {
-    async function fetchTokenData() {
+    async function fetchETFData() {
+      try {
+        console.log("Fetching ETF data for:", selectedToken)
+        const response = await fetch(`/api/stocks/${selectedToken}`)
+        const data = await response.json()
+        console.log("ETF Response:", data)
+        setEtfData(data)
+      } catch (error) {
+        console.error("Error fetching ETF data:", error)
+      }
+    }
+    fetchETFData()
+  }, [selectedToken])
+
+  // Generate mock chart data if needed
+  function generateMockData(ticker: string) {
+    const basePrice =
+      {
+        LQD: 108.5, // iShares iBoxx $ Investment Grade Corporate Bond ETF
+      }[ticker] || 150.0
+
+    const data = []
+    const today = new Date()
+
+    for (let i = 99; i >= 0; i--) {
+      const date = new Date(today)
+      date.setDate(date.getDate() - i)
+
+      // Skip weekends
+      if (date.getDay() === 0 || date.getDay() === 6) continue
+
+      const randomFactor = 0.95 + Math.random() * 0.1 // ±5% variation
+      const price = basePrice * randomFactor
+      const variance = price * 0.02 // 2% intraday variance
+
+      const open = price + (Math.random() - 0.5) * variance
+      const close = price + (Math.random() - 0.5) * variance
+      const high = Math.max(open, close) + Math.random() * variance * 0.5
+      const low = Math.min(open, close) - Math.random() * variance * 0.5
+      const volume = Math.floor(50000000 + Math.random() * 100000000) // 50M-150M volume
+
+      data.push({
+        time: date.toISOString().split("T")[0],
+        open: Math.round(open * 100) / 100,
+        high: Math.round(high * 100) / 100,
+        low: Math.round(low * 100) / 100,
+        close: Math.round(close * 100) / 100,
+        volume,
+      })
+    }
+
+    return data
+  }
+
+  // Fetch historical data for chart
+  useEffect(() => {
+    async function fetchChartData() {
       setLoading(true)
       try {
+        // Try to fetch real data first
         const res = await fetch(`/api/stocks/${selectedToken}`)
         const json = await res.json()
+
+        if (json.error) {
+          throw new Error(json.error)
+        }
+
         setTokenData(json.data || [])
+        setChartDataSource(json.dataSource)
+        console.log(
+          `✅ ${json.dataSource} chart data loaded for ${selectedToken}`
+        )
       } catch (e) {
-        setTokenData([])
+        console.error("Error fetching chart data:", e)
+        // Fall back to mock data
+        console.log(
+          `❌ Chart data fetch failed, using mock data for ${selectedToken}`
+        )
+        const mockData = generateMockData(selectedToken)
+        setTokenData(mockData)
+        setChartDataSource("mock")
       }
       setLoading(false)
     }
-    fetchTokenData()
+    fetchChartData()
+  }, [selectedToken])
+
+  // Fetch real-time price data from Alpaca
+  useEffect(() => {
+    async function fetchPriceData() {
+      try {
+        const res = await fetch(`/api/marketdata?symbol=${selectedToken}`)
+        const json = await res.json()
+        const quoteData = json.quotes?.[selectedToken]
+        if (quoteData) {
+          setCurrentPrice(quoteData.ap || quoteData.bp || 0)
+        }
+      } catch (e) {
+        console.error("Error fetching price data:", e)
+      }
+    }
+
+    fetchPriceData() // Initial fetch
+    const interval = setInterval(fetchPriceData, 5000) // Update every 5 seconds
+
+    return () => clearInterval(interval)
   }, [selectedToken])
 
   // Get latest price and market data
   const latestPrice =
-    tokenData.length > 0 ? tokenData[tokenData.length - 1].close : 0
+    currentPrice ||
+    (tokenData.length > 0 ? tokenData[tokenData.length - 1].close : 0)
   const prevPrice =
     tokenData.length > 1 ? tokenData[tokenData.length - 2].close : latestPrice
   const priceChange = latestPrice - prevPrice
