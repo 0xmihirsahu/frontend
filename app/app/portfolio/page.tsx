@@ -141,15 +141,12 @@ export default function PortfolioPage() {
           </div>
           <div className="flex gap-4 mt-6">
             <Link href="/app/trade">
-              <Button className="bg-white text-blue-600 hover:bg-blue-50 font-semibold">
+              <Button variant="white" className="text-blue-600 font-semibold">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Position
               </Button>
             </Link>
-            <Button
-              variant="outline"
-              className="border-white/30 text-white hover:bg-white/10"
-            >
+            <Button variant="white-outline">
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
             </Button>
