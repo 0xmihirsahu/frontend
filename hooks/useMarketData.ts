@@ -7,6 +7,7 @@ interface MarketDataResponse {
   askPrice: number // Original ask price from Alpaca
   bidPrice: number // Original bid price from Alpaca
   timestamp: string
+  previousClose: number // Previous day's closing price
 }
 
 interface MarketDataError {
@@ -61,6 +62,12 @@ export function useMarketData(symbol: string) {
     }
   }, [symbol])
 
+  // Calculate daily change percentage
+  const dailyChangePercent =
+    data?.price && data?.previousClose
+      ? ((data.price - data.previousClose) / data.previousClose) * 100
+      : 0
+
   return {
     data,
     isLoading,
@@ -70,5 +77,7 @@ export function useMarketData(symbol: string) {
     askPrice: data?.askPrice ?? null, // Original ask price
     bidPrice: data?.bidPrice ?? null, // Original bid price
     timestamp: data?.timestamp ?? null,
+    previousClose: data?.previousClose ?? null,
+    dailyChangePercent,
   }
 }

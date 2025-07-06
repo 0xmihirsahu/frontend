@@ -131,7 +131,7 @@ export default function DashboardPage() {
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-4">
             <Badge
-              variant="secondary"
+              variant="static"
               className="bg-white/20 text-white border-white/30"
             >
               <Zap className="w-4 h-4 mr-2" />

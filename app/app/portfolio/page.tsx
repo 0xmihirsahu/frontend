@@ -45,33 +45,49 @@ export default function PortfolioPage() {
 
   const {
     price: currentPrice,
+    previousClose,
     isLoading: priceLoading,
     error: priceError,
   } = useMarketData("LQD") // Using LQD as price reference
 
+  // Format number to 3 decimal places
+  const formatNumber = (num: number) => {
+    return Number(num.toFixed(3)).toLocaleString()
+  }
+
+  // Format percentage to 2 decimal places for cleaner display
+  const formatPercent = (num: number) => {
+    return Number(num.toFixed(2))
+  }
+
   // Portfolio data using actual token balance and market price
-  const portfolioValue = tokenBalance
-    ? tokenBalance * (currentPrice ?? 108.78)
-    : 0
-  const dayChange = portfolioValue * 0.008 // 0.8% daily change
-  const dayChangePercent = 0.8
-  const initialPrice = 108.5
-  const totalReturn = tokenBalance
-    ? tokenBalance * ((currentPrice ?? initialPrice) - initialPrice)
-    : 0
-  const totalReturnPercent =
-    (((currentPrice ?? initialPrice) - initialPrice) / initialPrice) * 100
+  const portfolioValue =
+    tokenBalance && currentPrice ? tokenBalance * currentPrice : 0
+
+  // Calculate daily change based on previous close
+  const previousDayValue =
+    tokenBalance && previousClose ? tokenBalance * previousClose : 0
+
+  const dayChange = portfolioValue - previousDayValue
+  const dayChangePercent =
+    previousDayValue > 0
+      ? ((portfolioValue - previousDayValue) / previousDayValue) * 100
+      : 0
+
+  // Calculate total return based on current market price vs previous close
+  const totalReturn = dayChange // Use the same daily change value
+  const totalReturnPercent = dayChangePercent // Use the same percentage
 
   const holdings = [
     {
       symbol: tokenSymbol || "SUSC",
       name: "Spout US Corporate Bond Token",
       shares: tokenBalance || 0,
-      avgPrice: initialPrice,
-      currentPrice: currentPrice ?? initialPrice,
+      avgPrice: previousClose || 0,
+      currentPrice: currentPrice ?? 0,
       value: portfolioValue,
-      dayChange: dayChangePercent,
-      totalReturn: totalReturnPercent,
+      dayChange: formatPercent(dayChangePercent),
+      totalReturn: formatPercent(totalReturnPercent),
       allocation: 100,
     },
   ]
@@ -111,7 +127,7 @@ export default function PortfolioPage() {
             <div>
               <div className="flex items-center gap-3 mb-4">
                 <Badge
-                  variant="secondary"
+                  variant="static"
                   className="bg-white/20 text-white border-white/30"
                 >
                   <Activity className="w-4 h-4 mr-2" />
@@ -123,7 +139,7 @@ export default function PortfolioPage() {
             </div>
             <div className="mt-6 md:mt-0 text-right">
               <div className="text-3xl font-bold mb-2">
-                ${portfolioValue.toLocaleString()}
+                ${formatNumber(portfolioValue)}
               </div>
               <div
                 className={`flex items-center justify-end text-lg ${dayChange >= 0 ? "text-green-300" : "text-red-300"}`}
@@ -133,9 +149,9 @@ export default function PortfolioPage() {
                 ) : (
                   <TrendingDown className="h-5 w-5 mr-2" />
                 )}
-                ${Math.abs(dayChange).toLocaleString()} (
+                ${formatNumber(Math.abs(dayChange))} (
                 {dayChangePercent >= 0 ? "+" : ""}
-                {dayChangePercent}%)
+                {formatPercent(dayChangePercent)}%)
               </div>
             </div>
           </div>
@@ -163,7 +179,7 @@ export default function PortfolioPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${portfolioValue.toLocaleString()}
+              ${formatNumber(portfolioValue)}
             </div>
             <div
               className={`flex items-center text-xs ${dayChange >= 0 ? "text-green-600" : "text-red-600"}`}
@@ -173,9 +189,9 @@ export default function PortfolioPage() {
               ) : (
                 <TrendingDown className="h-3 w-3 mr-1" />
               )}
-              ${Math.abs(dayChange).toLocaleString()} (
+              ${formatNumber(Math.abs(dayChange))} (
               {dayChangePercent >= 0 ? "+" : ""}
-              {dayChangePercent}%) today
+              {formatPercent(dayChangePercent)}%) today
             </div>
           </CardContent>
         </Card>
@@ -186,12 +202,22 @@ export default function PortfolioPage() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              +${totalReturn.toLocaleString()}
+            <div
+              className={`text-2xl font-bold ${totalReturn >= 0 ? "text-green-600" : "text-red-600"}`}
+            >
+              {totalReturn >= 0 ? "+" : "-"}$
+              {formatNumber(Math.abs(totalReturn))}
             </div>
-            <div className="flex items-center text-xs text-green-600">
-              <TrendingUp className="h-3 w-3 mr-1" />+{totalReturnPercent}% all
-              time
+            <div
+              className={`flex items-center text-xs ${totalReturn >= 0 ? "text-green-600" : "text-red-600"}`}
+            >
+              {totalReturn >= 0 ? (
+                <TrendingUp className="h-3 w-3 mr-1" />
+              ) : (
+                <TrendingDown className="h-3 w-3 mr-1" />
+              )}
+              {totalReturnPercent >= 0 ? "+" : ""}
+              {formatPercent(totalReturnPercent)}% all time
             </div>
           </CardContent>
         </Card>
