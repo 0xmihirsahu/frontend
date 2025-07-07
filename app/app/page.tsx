@@ -23,8 +23,58 @@ import {
   Target,
   Clock,
 } from "lucide-react"
+import { useTokenBalance } from "@/hooks/view/useTokenBalance"
+import { useMarketData } from "@/hooks/useMarketData"
+import { useAccount } from "wagmi"
 
 export default function DashboardPage() {
+  const { address: userAddress } = useAccount()
+  const {
+    balance: tokenBalance,
+    symbol: tokenSymbol,
+    isLoading: balanceLoading,
+    isError: balanceError,
+  } = useTokenBalance(userAddress)
+  const {
+    price: currentPrice,
+    previousClose,
+    isLoading: priceLoading,
+    error: priceError,
+  } = useMarketData("LQD")
+
+  // Format number to 3 decimal places
+  const formatNumber = (num: number) => {
+    return Number(num.toFixed(3)).toLocaleString()
+  }
+  // Format percentage to 2 decimal places
+  const formatPercent = (num: number) => {
+    return Number(num.toFixed(2))
+  }
+
+  // Portfolio data using actual token balance and market price
+  const portfolioValue =
+    tokenBalance && currentPrice ? tokenBalance * currentPrice : 0
+  // Calculate daily change based on previous close
+  const previousDayValue =
+    tokenBalance && previousClose ? tokenBalance * previousClose : 0
+  const dayChange = portfolioValue - previousDayValue
+  const dayChangePercent =
+    previousDayValue > 0
+      ? ((portfolioValue - previousDayValue) / previousDayValue) * 100
+      : 0
+
+  // Holdings logic (single position if tokenBalance > 0)
+  const holdings =
+    tokenBalance && tokenBalance > 0
+      ? [
+          {
+            symbol: tokenSymbol || "SUSC",
+            shares: tokenBalance,
+            value: portfolioValue,
+          },
+        ]
+      : []
+
   const features = [
     {
       title: "Markets",
@@ -71,14 +121,14 @@ export default function DashboardPage() {
   const quickStats = [
     {
       title: "Portfolio Value",
-      value: "$125,847",
-      change: "+$2,847 (+2.31%)",
-      positive: true,
+      value: `$${formatNumber(portfolioValue)}`,
+      change: `${dayChange >= 0 ? "+" : "-"}$${formatNumber(Math.abs(dayChange))} (${dayChangePercent >= 0 ? "+" : "-"}${formatPercent(Math.abs(dayChangePercent))}%)`,
+      positive: dayChange >= 0,
       icon: DollarSign,
     },
     {
       title: "Active Positions",
-      value: "8",
+      value: holdings.length.toString(),
       change: "Stocks & Tokens",
       positive: null,
       icon: PieChart,
@@ -89,13 +139,6 @@ export default function DashboardPage() {
       change: "+1.28%",
       positive: true,
       icon: TrendingUp,
-    },
-    {
-      title: "Win Rate",
-      value: "73%",
-      change: "Last 30 days",
-      positive: true,
-      icon: Target,
     },
   ]
 
@@ -138,7 +181,7 @@ export default function DashboardPage() {
               Live Dashboard
             </Badge>
           </div>
-          <h1 className="text-4xl font-bold mb-3">Welcome back, Paul</h1>
+          <h1 className="text-4xl font-bold mb-3">Welcome back</h1>
           <p className="text-emerald-100 text-lg mb-6 max-w-2xl">
             Your portfolio is performing well today. Track your investments,
             execute trades, and stay ahead of the market.
