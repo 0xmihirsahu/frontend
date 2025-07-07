@@ -25,17 +25,17 @@ export async function POST(request: NextRequest) {
       "https://rwa-deploy-backend.onrender.com/user/kyc-signature",
       {
         method: "POST",
-        headers: {
+      headers: {
           "Content-Type": "application/json",
           "X-API-Key": process.env.BACKEND_API_KEY ?? "",
-        },
-        body: JSON.stringify({
-          userAddress,
-          onchainIDAddress,
-          claimData,
-          topic,
+      },
+      body: JSON.stringify({
+        userAddress,
+        onchainIDAddress,
+        claimData,
+        topic,
           countryCode,
-        }),
+      }),
       }
     )
 
@@ -57,4 +57,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
-}
+} 

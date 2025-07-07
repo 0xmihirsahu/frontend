@@ -152,55 +152,76 @@ const Page = () => {
         const res = await fetch(`/api/stocks/${selectedToken}`)
         const json = await res.json()
 
+        // Even if we get an error, we should still set some data
         if (json.error) {
-          throw new Error(json.error)
+          console.log(
+            `❌ Chart data fetch failed, using mock data for ${selectedToken}`
+          )
+          const mockData = generateMockData(selectedToken)
+          setTokenData(mockData)
+          setChartDataSource("mock")
+        } else {
+          setTokenData(json.data || [])
+          setChartDataSource(json.dataSource)
+          console.log(
+            `✅ ${json.dataSource} chart data loaded for ${selectedToken}`
+          )
         }
-
-        setTokenData(json.data || [])
-        setChartDataSource(json.dataSource)
-        console.log(
-          `✅ ${json.dataSource} chart data loaded for ${selectedToken}`
-        )
       } catch (e) {
         console.error("Error fetching chart data:", e)
-        // Fall back to mock data
+        // Fall back to mock data on any error
         console.log(
           `❌ Chart data fetch failed, using mock data for ${selectedToken}`
         )
         const mockData = generateMockData(selectedToken)
         setTokenData(mockData)
         setChartDataSource("mock")
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     }
     fetchChartData()
   }, [selectedToken])
 
   // Fetch real-time price data from Alpaca
   useEffect(() => {
+    let isMounted = true
+
     async function fetchPriceData() {
       try {
         const res = await fetch(`/api/marketdata?symbol=${selectedToken}`)
         const json = await res.json()
-        const quoteData = json.quotes?.[selectedToken]
-        if (quoteData) {
-          setCurrentPrice(quoteData.ap || quoteData.bp || 0)
+
+        if (!isMounted) return
+
+        if (json.price) {
+          setCurrentPrice(json.price)
+        } else {
+          // If no price data, use mock price
+          setCurrentPrice(108.5)
         }
       } catch (e) {
         console.error("Error fetching price data:", e)
+        if (isMounted) {
+          // Set fallback price on error
+          setCurrentPrice(108.5)
+        }
       }
     }
 
     fetchPriceData() // Initial fetch
     const interval = setInterval(fetchPriceData, 5000) // Update every 5 seconds
 
-    return () => clearInterval(interval)
+    return () => {
+      isMounted = false
+      clearInterval(interval)
+    }
   }, [selectedToken])
 
-  // Get latest price and market data
+  // Get latest price and market data with fallbacks
   const latestPrice =
     currentPrice ||
-    (tokenData.length > 0 ? tokenData[tokenData.length - 1].close : 0)
+    (tokenData.length > 0 ? tokenData[tokenData.length - 1].close : 108.5)
   const prevPrice =
     tokenData.length > 1 ? tokenData[tokenData.length - 2].close : latestPrice
   const priceChange = latestPrice - prevPrice
@@ -554,8 +575,8 @@ const Page = () => {
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-4">
             <Badge
-              variant="secondary"
-              className="bg-white/20 text-white border-white/30"
+              variant="outline"
+              className="bg-white/20 text-white border-white/30 hover:bg-white/20"
             >
               <ArrowUpDown className="w-4 h-4 mr-2" />
               Live Trading
@@ -595,7 +616,16 @@ const Page = () => {
 
       {/* Chart Section */}
       <div className="mb-8">
-        <StockChart data={tokenData} ticker={selectedToken} />
+        {loading ? (
+          <div className="h-[400px] flex items-center justify-center bg-slate-50 rounded-xl">
+            <div className="text-center">
+              <RefreshCcw className="w-8 h-8 animate-spin text-slate-400 mx-auto mb-2" />
+              <p className="text-slate-600">Loading chart data...</p>
+            </div>
+          </div>
+        ) : (
+          <StockChart data={tokenData} ticker={selectedToken} />
+        )}
       </div>
       {/* Trading Section */}
       <div className="grid grid-cols-1 lg:grid-cols-7 gap-8">
