@@ -107,30 +107,8 @@ export default function PortfolioPage() {
     },
   ]
 
-  if (balanceLoading || priceLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <RefreshCw className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading your portfolio...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (balanceError) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <Lock className="h-8 w-8 text-red-600 mx-auto mb-4" />
-          <p className="text-gray-600">
-            Error loading your portfolio. Please make sure you are connected to
-            your wallet.
-          </p>
-        </div>
-      </div>
-    )
-  }
+  // Show loading spinner overlay but keep the blue dashboard background
+  const isLoading = balanceLoading || priceLoading
 
   return (
     <div className="space-y-8">
@@ -144,14 +122,22 @@ export default function PortfolioPage() {
                 <Badge variant="outline" className="text-white border-white/20">
                   Live Portfolio
                 </Badge>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-white hover:text-white/80"
-                  onClick={() => window.location.reload()}
-                >
-                  <RefreshCw className="h-4 w-4" />
-                </Button>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-white hover:text-white/80"
+                        aria-label="Refresh"
+                        onClick={() => window.location.reload()}
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Refresh</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
               <h1 className="text-2xl font-bold mt-2">
                 {username
@@ -184,277 +170,303 @@ export default function PortfolioPage() {
                 Add Position
               </Button>
             </Link>
-            <Button variant="white-outline">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Refresh
-            </Button>
           </div>
         </div>
       </div>
 
-      {/* Portfolio Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Total Value Card */}
-        <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Value</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              ${formatNumber(portfolioValue)}
-            </div>
-            <div
-              className={`flex items-center text-xs ${dayChange >= 0 ? "text-green-600" : "text-red-600"}`}
-            >
-              {dayChange >= 0 ? (
-                <TrendingUp className="h-3 w-3 mr-1" />
-              ) : (
-                <TrendingDown className="h-3 w-3 mr-1" />
-              )}
-              ${formatNumber(Math.abs(dayChange))} (
-              {dayChangePercent >= 0 ? "+" : ""}
-              {formatPercent(dayChangePercent)}%) today
-            </div>
-          </CardContent>
-        </Card>
+      {/* Loading spinner/message below the blue dashboard header */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <RefreshCw className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
+            <p className="text-gray-600">Loading your portfolio...</p>
+          </div>
+        </div>
+      )}
 
-        {/* Total Return Card */}
-        <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Return</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div
-              className={`text-2xl font-bold ${totalReturn >= 0 ? "text-green-600" : "text-red-600"}`}
-            >
-              {totalReturn >= 0 ? "+" : "-"}$
-              {formatNumber(Math.abs(totalReturn))}
-            </div>
-            <div
-              className={`flex items-center text-xs ${totalReturn >= 0 ? "text-green-600" : "text-red-600"}`}
-            >
-              {totalReturn >= 0 ? (
-                <TrendingUp className="h-3 w-3 mr-1" />
-              ) : (
-                <TrendingDown className="h-3 w-3 mr-1" />
-              )}
-              {totalReturnPercent >= 0 ? "+" : ""}
-              {formatPercent(totalReturnPercent)}% all time
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Positions Card */}
-        <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Positions</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{holdings.length}</div>
-            <p className="text-xs text-muted-foreground">Active holdings</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Tabs defaultValue="holdings" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 bg-slate-100">
-          <TabsTrigger
-            value="holdings"
-            className="data-[state=active]:bg-white"
-          >
-            Holdings
-          </TabsTrigger>
-          <TabsTrigger
-            value="performance"
-            className="data-[state=active]:bg-white"
-          >
-            Performance
-          </TabsTrigger>
-          <TabsTrigger
-            value="activity"
-            className="data-[state=active]:bg-white"
-          >
-            Activity
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Holdings Tab */}
-        <TabsContent value="holdings" className="space-y-6">
-          <Card className="border-0 shadow-md">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Your Holdings</CardTitle>
-                  <CardDescription>
-                    Current positions in your portfolio
-                  </CardDescription>
-                </div>
-                <Badge
-                  variant="secondary"
-                  className="bg-emerald-50 text-emerald-700"
-                >
-                  <Zap className="w-3 h-3 mr-1" />
-                  Live Prices
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {holdings.map((holding) => (
-                  <div
-                    key={holding.symbol}
-                    className="flex items-center justify-between p-6 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-colors"
-                  >
-                    <div className="flex items-center space-x-4">
-                      <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center">
-                        <span className="font-bold text-white text-lg">
-                          {holding.symbol[0]}
-                        </span>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-lg">
-                          {holding.symbol}
-                        </h3>
-                        <p className="text-sm text-gray-600">{holding.name}</p>
-                        <p className="text-xs text-gray-500">
-                          {formatNumber(holding.shares)} shares @ $
-                          {holding.currentPrice}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-lg">
-                        ${holding.value.toLocaleString()}
-                      </p>
-                      <p
-                        className={`text-sm font-medium ${holding.dayChange >= 0 ? "text-green-600" : "text-red-600"}`}
-                      >
-                        {holding.dayChange >= 0 ? "+" : ""}
-                        {holding.dayChange}%
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {holding.allocation}% of portfolio
-                      </p>
-                    </div>
-                    <div className="flex gap-2 ml-4">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Link href="/app/trade">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="hover:bg-blue-50"
-                              >
-                                <Plus className="h-4 w-4" />
-                              </Button>
-                            </Link>
-                          </TooltipTrigger>
-                          <TooltipContent>Trade</TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Performance Tab */}
-        <TabsContent value="performance" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="border-0 shadow-md">
-              <CardHeader>
-                <CardTitle>Portfolio Allocation</CardTitle>
-                <CardDescription>Distribution by holdings</CardDescription>
+      {!isLoading && (
+        <>
+          {/* Portfolio Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Total Value Card */}
+            <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Total Value
+                </CardTitle>
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {holdings.map((holding, index) => (
-                    <div
-                      key={holding.symbol}
-                      className="flex items-center justify-between p-3 bg-slate-50 rounded-xl"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div
-                          className={`w-4 h-4 rounded-full ${
-                            index === 0
-                              ? "bg-blue-500"
-                              : index === 1
-                                ? "bg-emerald-500"
-                                : index === 2
-                                  ? "bg-purple-500"
-                                  : "bg-orange-500"
-                          }`}
-                        ></div>
-                        <span className="text-sm font-medium">
-                          {holding.symbol}
-                        </span>
-                      </div>
-                      <span className="text-sm text-gray-600 font-semibold">
-                        {holding.allocation}%
-                      </span>
-                    </div>
-                  ))}
+                <div className="text-2xl font-bold">
+                  ${formatNumber(portfolioValue)}
+                </div>
+                <div
+                  className={`flex items-center text-xs ${dayChange >= 0 ? "text-green-600" : "text-red-600"}`}
+                >
+                  {dayChange >= 0 ? (
+                    <TrendingUp className="h-3 w-3 mr-1" />
+                  ) : (
+                    <TrendingDown className="h-3 w-3 mr-1" />
+                  )}
+                  ${formatNumber(Math.abs(dayChange))} (
+                  {dayChangePercent >= 0 ? "+" : ""}
+                  {formatPercent(dayChangePercent)}%) today
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-md">
-              <CardHeader>
-                <CardTitle>Performance Metrics</CardTitle>
-                <CardDescription>Key portfolio statistics</CardDescription>
+            {/* Total Return Card */}
+            <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Total Return
+                </CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between p-3 bg-slate-50 rounded-xl">
-                    <span className="text-sm text-gray-600">30-Day Return</span>
-                    <span className="text-sm font-medium text-green-600">
-                      +5.2%
-                    </span>
-                  </div>
-                  <div className="flex justify-between p-3 bg-slate-50 rounded-xl">
-                    <span className="text-sm text-gray-600">90-Day Return</span>
-                    <span className="text-sm font-medium text-green-600">
-                      +12.8%
-                    </span>
-                  </div>
-                  <div className="flex justify-between p-3 bg-slate-50 rounded-xl">
-                    <span className="text-sm text-gray-600">1-Year Return</span>
-                    <span className="text-sm font-medium text-green-600">
-                      +{totalReturnPercent}%
-                    </span>
-                  </div>
-                  <div className="flex justify-between p-3 bg-slate-50 rounded-xl">
-                    <span className="text-sm text-gray-600">Volatility</span>
-                    <span className="text-sm font-medium">18.4%</span>
-                  </div>
-                  <div className="flex justify-between p-3 bg-slate-50 rounded-xl">
-                    <span className="text-sm text-gray-600">Sharpe Ratio</span>
-                    <span className="text-sm font-medium">1.24</span>
-                  </div>
+                <div
+                  className={`text-2xl font-bold ${totalReturn >= 0 ? "text-green-600" : "text-red-600"}`}
+                >
+                  {totalReturn >= 0 ? "+" : "-"}$
+                  {formatNumber(Math.abs(totalReturn))}
                 </div>
+                <div
+                  className={`flex items-center text-xs ${totalReturn >= 0 ? "text-green-600" : "text-red-600"}`}
+                >
+                  {totalReturn >= 0 ? (
+                    <TrendingUp className="h-3 w-3 mr-1" />
+                  ) : (
+                    <TrendingDown className="h-3 w-3 mr-1" />
+                  )}
+                  {totalReturnPercent >= 0 ? "+" : ""}
+                  {formatPercent(totalReturnPercent)}% all time
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Positions Card */}
+            <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Positions</CardTitle>
+                <Clock className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{holdings.length}</div>
+                <p className="text-xs text-muted-foreground">Active holdings</p>
               </CardContent>
             </Card>
           </div>
-        </TabsContent>
 
-        {/* Activity Tab */}
-        <TabsContent value="activity" className="space-y-6">
-          <Card className="border-0 shadow-md">
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>
-                Your latest transactions and portfolio changes
-              </CardDescription>
-            </CardHeader>
-          </Card>
-        </TabsContent>
-      </Tabs>
+          <Tabs defaultValue="holdings" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-3 bg-slate-100">
+              <TabsTrigger
+                value="holdings"
+                className="data-[state=active]:bg-white"
+              >
+                Holdings
+              </TabsTrigger>
+              <TabsTrigger
+                value="performance"
+                className="data-[state=active]:bg-white"
+              >
+                Performance
+              </TabsTrigger>
+              <TabsTrigger
+                value="activity"
+                className="data-[state=active]:bg-white"
+              >
+                Activity
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Holdings Tab */}
+            <TabsContent value="holdings" className="space-y-6">
+              <Card className="border-0 shadow-md">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Your Holdings</CardTitle>
+                      <CardDescription>
+                        Current positions in your portfolio
+                      </CardDescription>
+                    </div>
+                    <Badge
+                      variant="secondary"
+                      className="bg-emerald-50 text-emerald-700"
+                    >
+                      <Zap className="w-3 h-3 mr-1" />
+                      Live Prices
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {holdings.map((holding) => (
+                      <div
+                        key={holding.symbol}
+                        className="flex items-center justify-between p-6 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-colors"
+                      >
+                        <div className="flex items-center space-x-4">
+                          <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center">
+                            <span className="font-bold text-white text-lg">
+                              {holding.symbol[0]}
+                            </span>
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-lg">
+                              {holding.symbol}
+                            </h3>
+                            <p className="text-sm text-gray-600">
+                              {holding.name}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {formatNumber(holding.shares)} shares @ $
+                              {holding.currentPrice}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold text-lg">
+                            ${holding.value.toLocaleString()}
+                          </p>
+                          <p
+                            className={`text-sm font-medium ${holding.dayChange >= 0 ? "text-green-600" : "text-red-600"}`}
+                          >
+                            {holding.dayChange >= 0 ? "+" : ""}
+                            {holding.dayChange}%
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {holding.allocation}% of portfolio
+                          </p>
+                        </div>
+                        <div className="flex gap-2 ml-4">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Link href="/app/trade">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="hover:bg-blue-50"
+                                  >
+                                    <Plus className="h-4 w-4" />
+                                  </Button>
+                                </Link>
+                              </TooltipTrigger>
+                              <TooltipContent>Trade</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Performance Tab */}
+            <TabsContent value="performance" className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card className="border-0 shadow-md">
+                  <CardHeader>
+                    <CardTitle>Portfolio Allocation</CardTitle>
+                    <CardDescription>Distribution by holdings</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {holdings.map((holding, index) => (
+                        <div
+                          key={holding.symbol}
+                          className="flex items-center justify-between p-3 bg-slate-50 rounded-xl"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div
+                              className={`w-4 h-4 rounded-full ${
+                                index === 0
+                                  ? "bg-blue-500"
+                                  : index === 1
+                                    ? "bg-emerald-500"
+                                    : index === 2
+                                      ? "bg-purple-500"
+                                      : "bg-orange-500"
+                              }`}
+                            ></div>
+                            <span className="text-sm font-medium">
+                              {holding.symbol}
+                            </span>
+                          </div>
+                          <span className="text-sm text-gray-600 font-semibold">
+                            {holding.allocation}%
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-0 shadow-md">
+                  <CardHeader>
+                    <CardTitle>Performance Metrics</CardTitle>
+                    <CardDescription>Key portfolio statistics</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex justify-between p-3 bg-slate-50 rounded-xl">
+                        <span className="text-sm text-gray-600">
+                          30-Day Return
+                        </span>
+                        <span className="text-sm font-medium text-green-600">
+                          +5.2%
+                        </span>
+                      </div>
+                      <div className="flex justify-between p-3 bg-slate-50 rounded-xl">
+                        <span className="text-sm text-gray-600">
+                          90-Day Return
+                        </span>
+                        <span className="text-sm font-medium text-green-600">
+                          +12.8%
+                        </span>
+                      </div>
+                      <div className="flex justify-between p-3 bg-slate-50 rounded-xl">
+                        <span className="text-sm text-gray-600">
+                          1-Year Return
+                        </span>
+                        <span className="text-sm font-medium text-green-600">
+                          +{totalReturnPercent}%
+                        </span>
+                      </div>
+                      <div className="flex justify-between p-3 bg-slate-50 rounded-xl">
+                        <span className="text-sm text-gray-600">
+                          Volatility
+                        </span>
+                        <span className="text-sm font-medium">18.4%</span>
+                      </div>
+                      <div className="flex justify-between p-3 bg-slate-50 rounded-xl">
+                        <span className="text-sm text-gray-600">
+                          Sharpe Ratio
+                        </span>
+                        <span className="text-sm font-medium">1.24</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            {/* Activity Tab */}
+            <TabsContent value="activity" className="space-y-6">
+              <Card className="border-0 shadow-md">
+                <CardHeader>
+                  <CardTitle>Recent Activity</CardTitle>
+                  <CardDescription>
+                    Your latest transactions and portfolio changes
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </>
+      )}
     </div>
   )
 }
