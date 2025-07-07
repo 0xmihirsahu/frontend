@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useReserveContract } from "@/hooks/useReserveContract"
-import { useTotalSupply } from "@/hooks/useTotalSupply"
+import { useTotalSupply } from "@/hooks/view/useTotalSupply"
 import { useMarketData } from "@/hooks/useMarketData"
 import {
   TrendingUp,

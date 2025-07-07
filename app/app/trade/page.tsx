@@ -27,6 +27,7 @@ import { useERC20Approve } from "@/hooks/useERC20Approve"
 import { useConfidentialOrdersContract } from "@/hooks/useConfidentialOrdersContract"
 import { waitForTransactionReceipt } from "wagmi/actions"
 import { useTokenBalance } from "@/hooks/view/useTokenBalance"
+import { useUSDCTokenBalance } from "@/hooks/view/useUSDCTokenBalance"
 
 const TOKENS = [
   { label: "LQD", value: "LQD" },
@@ -86,6 +87,11 @@ const Page = () => {
     CONFIDENTIAL_ORDERS_ADDRESS
   )
   const config = useConfig()
+  const {
+    balance: usdcBalance,
+    isLoading: usdcLoading,
+    isError: usdcError,
+  } = useUSDCTokenBalance(userAddress)
 
   // Test ETF data fetch
   useEffect(() => {
@@ -664,7 +670,11 @@ const Page = () => {
                     }`}
                   >
                     {tradeType === "buy"
-                      ? `${mockUsdcBalance.toLocaleString()} USDC`
+                      ? usdcLoading
+                        ? "Loading..."
+                        : usdcError
+                          ? "-"
+                          : `${usdcBalance} USDC`
                       : balanceLoading
                         ? "Loading..."
                         : `${tokenBalance.toLocaleString()} ${selectedToken}`}
@@ -675,7 +685,11 @@ const Page = () => {
                       ? balanceLoading
                         ? "Loading..."
                         : `${tokenBalance.toLocaleString()} ${selectedToken}`
-                      : `${mockUsdcBalance.toLocaleString()} USDC`}
+                      : usdcLoading
+                        ? "Loading..."
+                        : usdcError
+                          ? "-"
+                          : `${usdcBalance} USDC`}
                   </div>
                 </div>
               </div>
