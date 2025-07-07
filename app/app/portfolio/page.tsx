@@ -81,6 +81,12 @@ export default function PortfolioPage() {
   const totalReturn = dayChange // Use the same daily change value
   const totalReturnPercent = dayChangePercent // Use the same percentage
 
+  console.log("Portfolio return information", {
+    tokenBalance,
+    currentPrice,
+    previousClose,
+  })
+
   const holdings = [
     {
       symbol: tokenSymbol || "SUSC",
@@ -308,7 +314,8 @@ export default function PortfolioPage() {
                         </h3>
                         <p className="text-sm text-gray-600">{holding.name}</p>
                         <p className="text-xs text-gray-500">
-                          {holding.shares} shares @ ${holding.currentPrice}
+                          {formatNumber(holding.shares)} shares @ $
+                          {holding.currentPrice}
                         </p>
                       </div>
                     </div>
