@@ -32,6 +32,12 @@ import { useTokenBalance } from "@/hooks/view/useTokenBalance"
 import { useMarketData } from "@/hooks/useMarketData"
 import { useAccount } from "wagmi"
 import { useCurrentUser } from "@/hooks/useCurrentUser"
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from "@/components/ui/tooltip"
 
 import { format } from "date-fns"
 
@@ -334,22 +340,22 @@ export default function PortfolioPage() {
                       </p>
                     </div>
                     <div className="flex gap-2 ml-4">
-                      <Link href={`/app/markets/${holding.symbol}`}>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="hover:bg-blue-50"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </Link>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="hover:bg-red-50"
-                      >
-                        <Minus className="h-4 w-4" />
-                      </Button>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Link href="/app/trade">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="hover:bg-blue-50"
+                              >
+                                <Plus className="h-4 w-4" />
+                              </Button>
+                            </Link>
+                          </TooltipTrigger>
+                          <TooltipContent>Trade</TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </div>
                   </div>
                 ))}
