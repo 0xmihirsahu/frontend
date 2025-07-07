@@ -85,6 +85,7 @@ export default function DashboardPage() {
       bgColor: "bg-emerald-50",
       borderColor: "border-emerald-200",
       stats: "500+ Stocks",
+      soon: true,
     },
     {
       title: "Portfolio",
@@ -95,6 +96,7 @@ export default function DashboardPage() {
       bgColor: "bg-blue-50",
       borderColor: "border-blue-200",
       stats: "$125K Value",
+      soon: false,
     },
     {
       title: "Trade",
@@ -105,6 +107,7 @@ export default function DashboardPage() {
       bgColor: "bg-purple-50",
       borderColor: "border-purple-200",
       stats: "0.1% Fees",
+      soon: false,
     },
     {
       title: "Settings",
@@ -115,6 +118,7 @@ export default function DashboardPage() {
       bgColor: "bg-slate-50",
       borderColor: "border-slate-200",
       stats: "Secure",
+      soon: true,
     },
   ]
 
@@ -135,9 +139,9 @@ export default function DashboardPage() {
     },
     {
       title: "Today's P&L",
-      value: "+$1,567",
-      change: "+1.28%",
-      positive: true,
+      value: `${dayChange >= 0 ? "+" : "-"}$${formatNumber(Math.abs(dayChange))}`,
+      change: `${dayChangePercent >= 0 ? "+" : "-"}${formatPercent(Math.abs(dayChangePercent))}%`,
+      positive: dayChange >= 0,
       icon: TrendingUp,
     },
   ]
@@ -204,7 +208,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {quickStats.map((stat, index) => {
           const IconComponent = stat.icon
           return (
@@ -255,38 +259,58 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {features.map((feature) => {
           const IconComponent = feature.icon
-          return (
-            <Link key={feature.title} href={feature.href}>
-              <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer group border-0 shadow-md">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between">
-                    <div
-                      className={`p-3 ${feature.bgColor} rounded-2xl group-hover:scale-110 transition-transform duration-300`}
-                    >
-                      <IconComponent className={`h-6 w-6 ${feature.color}`} />
-                    </div>
-                    <div className="text-right">
-                      <Badge variant="secondary" className="text-xs">
-                        {feature.stats}
+          const cardContent = (
+            <Card
+              className={`hover:shadow-xl transition-all duration-300 group border-0 shadow-md ${feature.soon ? "opacity-60 pointer-events-none" : "cursor-pointer"}`}
+            >
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <div
+                    className={`p-3 ${feature.bgColor} rounded-2xl group-hover:scale-110 transition-transform duration-300`}
+                  >
+                    <IconComponent className={`h-6 w-6 ${feature.color}`} />
+                  </div>
+                  <div className="text-right flex items-center gap-2">
+                    <Badge variant="secondary" className="text-xs">
+                      {feature.stats}
+                    </Badge>
+                    {feature.soon && (
+                      <Badge
+                        variant="outline"
+                        className="text-xs bg-yellow-100 text-yellow-800 border-yellow-300"
+                      >
+                        Soon
                       </Badge>
-                    </div>
+                    )}
                   </div>
-                  <div className="space-y-2">
-                    <CardTitle className="text-xl group-hover:text-emerald-600 transition-colors">
-                      {feature.title}
-                    </CardTitle>
-                    <CardDescription className="text-slate-600">
-                      {feature.description}
-                    </CardDescription>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="flex items-center text-emerald-600 font-medium text-sm group-hover:translate-x-1 transition-transform duration-300">
-                    Open {feature.title}
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </div>
-                </CardContent>
-              </Card>
+                </div>
+                <div className="space-y-2">
+                  <CardTitle className="text-xl group-hover:text-emerald-600 transition-colors">
+                    {feature.title}
+                  </CardTitle>
+                  <CardDescription className="text-slate-600">
+                    {feature.description}
+                  </CardDescription>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="flex items-center text-emerald-600 font-medium text-sm group-hover:translate-x-1 transition-transform duration-300">
+                  {feature.soon ? "Coming Soon" : `Open ${feature.title}`}
+                  {!feature.soon && <ArrowRight className="ml-2 h-4 w-4" />}
+                </div>
+              </CardContent>
+            </Card>
+          )
+          return feature.soon ? (
+            <div key={feature.title}>{cardContent}</div>
+          ) : (
+            <Link
+              key={feature.title}
+              href={feature.href}
+              tabIndex={0}
+              aria-disabled={false}
+            >
+              {cardContent}
             </Link>
           )
         })}
@@ -339,54 +363,6 @@ export default function DashboardPage() {
                 </div>
               </div>
             ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Quick Actions */}
-      <Card className="border-0 shadow-md bg-gradient-to-br from-slate-50 to-slate-100">
-        <CardHeader>
-          <CardTitle className="text-xl">Quick Actions</CardTitle>
-          <CardDescription>Common tasks and shortcuts</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Link href="/app/markets">
-              <Button
-                variant="outline"
-                className="w-full h-16 flex-col gap-2 hover:bg-emerald-50 hover:border-emerald-200"
-              >
-                <BarChart3 className="h-5 w-5" />
-                <span className="text-xs">Markets</span>
-              </Button>
-            </Link>
-            <Link href="/app/trade">
-              <Button
-                variant="outline"
-                className="w-full h-16 flex-col gap-2 hover:bg-purple-50 hover:border-purple-200"
-              >
-                <Wallet className="h-5 w-5" />
-                <span className="text-xs">Trade</span>
-              </Button>
-            </Link>
-            <Link href="/app/portfolio">
-              <Button
-                variant="outline"
-                className="w-full h-16 flex-col gap-2 hover:bg-blue-50 hover:border-blue-200"
-              >
-                <TrendingUp className="h-5 w-5" />
-                <span className="text-xs">Portfolio</span>
-              </Button>
-            </Link>
-            <Link href="/app/settings">
-              <Button
-                variant="outline"
-                className="w-full h-16 flex-col gap-2 hover:bg-slate-50 hover:border-slate-200"
-              >
-                <Settings className="h-5 w-5" />
-                <span className="text-xs">Settings</span>
-              </Button>
-            </Link>
           </div>
         </CardContent>
       </Card>
