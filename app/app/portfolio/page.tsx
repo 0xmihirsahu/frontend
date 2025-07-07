@@ -25,16 +25,17 @@ import {
   BarChart3,
   Zap,
   Lock,
+  Clock,
 } from "lucide-react"
 import Link from "next/link"
 import { useTokenBalance } from "@/hooks/view/useTokenBalance"
 import { useMarketData } from "@/hooks/useMarketData"
 import { useAccount } from "wagmi"
+import { useCurrentUser } from "@/hooks/useCurrentUser"
 
 import { format } from "date-fns"
 
 export default function PortfolioPage() {
-  const username = "Paul van Mierlo"
   const { address: userAddress } = useAccount()
   const {
     balance: tokenBalance,
@@ -49,6 +50,8 @@ export default function PortfolioPage() {
     isLoading: priceLoading,
     error: priceError,
   } = useMarketData("LQD") // Using LQD as price reference
+
+  const { username, loading } = useCurrentUser()
 
   // Format number to 3 decimal places
   const formatNumber = (num: number) => {
@@ -123,19 +126,26 @@ export default function PortfolioPage() {
       <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 rounded-3xl p-8 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(255,255,255,0.1),transparent_50%)]"></div>
         <div className="relative z-10">
-          <div className="flex flex-col md:flex-row md:items-center justify-between">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
             <div>
-              <div className="flex items-center gap-3 mb-4">
-                <Badge
-                  variant="static"
-                  className="bg-white/20 text-white border-white/30"
-                >
-                  <Activity className="w-4 h-4 mr-2" />
+              <div className="inline-flex items-center space-x-2">
+                <Badge variant="outline" className="text-white border-white/20">
                   Live Portfolio
                 </Badge>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-white hover:text-white/80"
+                  onClick={() => window.location.reload()}
+                >
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
               </div>
-              <h1 className="text-4xl font-bold mb-3">Portfolio Overview</h1>
-              <p className="text-blue-100 text-lg">Welcome back, {username}</p>
+              <h1 className="text-2xl font-bold mt-2">
+                {username
+                  ? `Welcome back${username ? ", " + username : ""}`
+                  : "Portfolio Overview"}
+              </h1>
             </div>
             <div className="mt-6 md:mt-0 text-right">
               <div className="text-3xl font-bold mb-2">
@@ -171,7 +181,8 @@ export default function PortfolioPage() {
       </div>
 
       {/* Portfolio Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Total Value Card */}
         <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Value</CardTitle>
@@ -196,6 +207,7 @@ export default function PortfolioPage() {
           </CardContent>
         </Card>
 
+        {/* Total Return Card */}
         <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Return</CardTitle>
@@ -222,29 +234,15 @@ export default function PortfolioPage() {
           </CardContent>
         </Card>
 
+        {/* Positions Card */}
         <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Positions</CardTitle>
-            <PieChart className="h-4 w-4 text-muted-foreground" />
+            <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{holdings.length}</div>
             <p className="text-xs text-muted-foreground">Active holdings</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Diversity Score
-            </CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">7.2</div>
-            <p className="text-xs text-muted-foreground">
-              Good diversification
-            </p>
           </CardContent>
         </Card>
       </div>
