@@ -36,6 +36,7 @@ const buttonVariants = cva(
         white: "bg-white data-[hovered]:bg-white/90",
         "white-outline":
           "border border-white/30 text-white data-[hovered]:bg-white/10",
+        success: "bg-emerald-500 text-white data-[hovered]:bg-emerald-600",
       },
       size: {
         default: "h-10 px-4 py-2",

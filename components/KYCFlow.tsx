@@ -109,6 +109,15 @@ export default function KYCFlow() {
       },
     })
 
+  console.log("identityAddress", identityAddress)
+
+  // Console log wallet address when it changes
+  useEffect(() => {
+    if (address) {
+      console.log("Wallet address:", address)
+    }
+  }, [address])
+
   // Check if identity exists (avoid unknown type in JSX)
   const hasExistingIdentity = Boolean(
     identityAddress &&
@@ -236,7 +245,7 @@ export default function KYCFlow() {
 
       const topic = 1
       // EXACT MATCH: Use ethers.toUtf8Bytes (v6 syntax)
-      const claimData = ethers.toUtf8Bytes("KYC")
+      const claimData = ethers.toUtf8Bytes("KYC passed")
       // Hash the claim data like the script
       const claimDataHash = ethers.keccak256(claimData)
 
@@ -283,6 +292,7 @@ export default function KYCFlow() {
         abi: onchainidABI as any,
         functionName: "addClaim",
         args: contractArgs,
+        account: address as `0x${string}`,
       })
 
       console.log("📡 Add claim transaction initiated")

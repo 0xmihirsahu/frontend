@@ -697,9 +697,9 @@ const Page = () => {
               {/* Toggle Buttons */}
               <div className="flex bg-slate-100 rounded-lg p-1">
                 <Button
-                  variant={tradeType === "buy" ? "default" : "ghost"}
+                  variant={tradeType === "buy" ? "success" : "ghost"}
                   onClick={() => setTradeType("buy")}
-                  className={`flex-1 ${tradeType === "buy" ? "bg-emerald-500 hover:bg-emerald-600 text-white" : "text-slate-600"}`}
+                  className="flex-1"
                 >
                   <ArrowDownCircle className="w-4 h-4 mr-2" />
                   Buy
@@ -833,7 +833,8 @@ const Page = () => {
                   )}
 
                   <Button
-                    className="w-full mt-4 font-semibold text-lg py-3 bg-emerald-500 hover:bg-emerald-600"
+                    className="w-full mt-4 font-semibold text-lg py-3"
+                    variant="success"
                     onClick={handleBuy}
                     isDisabled={
                       !buyUsdc || isApprovePending || isBuyAssetPending
