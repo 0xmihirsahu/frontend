@@ -1,255 +1,323 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from "next/server"
 
-// Alpha Vantage API configuration
-const ALPHA_VANTAGE_API_KEY = process.env.ALPHA_VANTAGE_API_KEY || ''
-
-interface AlphaVantageTimeSeries {
-  [date: string]: {
-    '1. open': string
-    '2. high': string
-    '3. low': string
-    '4. close': string
-    '5. volume': string
-  }
+// Check for required environment variables
+if (!process.env.APCA_API_KEY_ID || !process.env.APCA_API_SECRET_KEY) {
+  console.error("Missing required Alpaca API environment variables")
 }
 
-interface AlphaVantageResponse {
-  'Meta Data'?: {
-    '1. Information': string
-    '2. Symbol': string
-    '3. Last Refreshed': string
-    '4. Output Size': string
-    '5. Time Zone': string
-  }
-  'Time Series (Daily)'?: AlphaVantageTimeSeries
-  'Error Message'?: string
-  'Note'?: string
-  'Information'?: string
+const ALPACA_API_KEY = process.env.APCA_API_KEY_ID ?? ""
+const ALPACA_API_SECRET = process.env.APCA_API_SECRET_KEY ?? ""
+const DATA_URL = "https://data.alpaca.markets"
+
+// Log environment variable status on startup
+console.log("API Configuration Status:", {
+  hasApiKey: !!ALPACA_API_KEY,
+  hasApiSecret: !!ALPACA_API_SECRET,
+  dataUrl: DATA_URL,
+})
+
+interface AlpacaQuote {
+  ap: number // ask price
+  as: number // ask size
+  bp: number // bid price
+  bs: number // bid size
+  t: string // timestamp
+}
+
+interface AlpacaResponse {
+  [symbol: string]: AlpacaQuote[]
 }
 
 // Generate mock data for fallback
 function generateMockData(ticker: string) {
-  const basePrice = {
-    'AAPL': 189.84,
-    'TSLA': 248.42,
-    'MSFT': 424.58,
-    'GOOGL': 142.65,
-    'AMZN': 153.75,
-    'META': 487.25,
-    'NVDA': 875.30,
-    'NFLX': 485.50
-  }[ticker] || 150.00
+  const basePrice =
+    {
+      SUSC: 108.5, // Spout US Corporate Bond Token
+      LQD: 107.25, // iShares iBoxx $ Investment Grade Corporate Bond ETF
+    }[ticker] || 100.0
 
   const data = []
-  const today = new Date()
-  
-  for (let i = 99; i >= 0; i--) {
-    const date = new Date(today)
-    date.setDate(date.getDate() - i)
-    
+  const end = new Date()
+  const start = new Date()
+  start.setDate(end.getDate() - 90) // Get last 90 days
+
+  // Generate data for each day in the range
+  for (
+    let date = new Date(start);
+    date <= end;
+    date.setDate(date.getDate() + 1)
+  ) {
     // Skip weekends
     if (date.getDay() === 0 || date.getDay() === 6) continue
-    
-    const randomFactor = 0.95 + Math.random() * 0.1 // ±5% variation
-    const price = basePrice * randomFactor
-    const variance = price * 0.02 // 2% intraday variance
-    
+
+    // Calculate days from start for trend
+    const daysSinceStart = Math.floor(
+      (date.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
+    )
+
+    // Create a slight upward trend with some random variation
+    const dayFactor = 1 + daysSinceStart * 0.0002 // Small daily increase
+    const randomFactor = 0.997 + Math.random() * 0.006 // ±0.3% random variation
+    const price = basePrice * dayFactor * randomFactor
+
+    // Add small intraday variation
+    const variance = price * 0.001 // 0.1% intraday variance
     const open = price + (Math.random() - 0.5) * variance
     const close = price + (Math.random() - 0.5) * variance
     const high = Math.max(open, close) + Math.random() * variance * 0.5
     const low = Math.min(open, close) - Math.random() * variance * 0.5
-    const volume = Math.floor(50000000 + Math.random() * 100000000) // 50M-150M volume
-    
+
+    // Volume between 100K-300K for bonds
+    const volume = Math.floor(100000 + Math.random() * 200000)
+
+    // Format the date as YYYY-MM-DD
+    const formattedDate = date.toISOString().split("T")[0]
+
     data.push({
-      time: date.toISOString().split('T')[0],
+      time: formattedDate,
       open: Math.round(open * 100) / 100,
       high: Math.round(high * 100) / 100,
       low: Math.round(low * 100) / 100,
       close: Math.round(close * 100) / 100,
-      volume
+      volume,
+      quote: {
+        t: new Date(date).toISOString(),
+        ap: Math.round((close + variance * 0.5) * 100) / 100,
+        bp: Math.round((close - variance * 0.5) * 100) / 100,
+        as: Math.floor(volume / 2),
+        bs: Math.floor(volume / 2),
+      },
     })
   }
-  
+
   return data
 }
 
-async function fetchRealStockData(ticker: string, retryCount = 0): Promise<any[]> {
+async function fetchHistoricalData(
+  ticker: string,
+  retryCount = 0
+): Promise<any[]> {
   try {
-    const apiurl = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${ticker}&outputsize=compact&apikey=${ALPHA_VANTAGE_API_KEY}`
-    
-    console.log(`Fetching data for ${ticker}, attempt ${retryCount + 1}`)
-    
-    const response = await fetch(apiurl, {
-      headers: {
-        'User-Agent': 'SpoutDashboard/1.0'
-      }
+    // Use fixed dates from the UI
+    const startStr = "2025-04-05"
+    const endStr = "2025-07-04"
+
+    console.log("Date range:", {
+      start: startStr,
+      end: endStr,
+      now: new Date().toISOString(),
     })
-    
-    if (!response.ok) {
-      throw new Error(`Alpha Vantage API error: ${response.status}`)
-    }
-    
-    const data: AlphaVantageResponse = await response.json()
-    
-    console.log('API Response keys:', Object.keys(data))
-    
-    // Check for various error conditions
-    if (data['Error Message']) {
-      console.error('API Error Message:', data['Error Message'])
-      throw new Error('Invalid ticker symbol or API error')
-    }
-    
-    if (data['Note']) {
-      console.error('API Rate Limit:', data['Note'])
-      throw new Error('API_RATE_LIMIT')
-    }
-    
-    if (data['Information']) {
-      console.error('API Information:', data['Information'])
-      // This typically means rate limit or premium feature needed
-      throw new Error('API_RATE_LIMIT')
-    }
-    
-    if (!data['Time Series (Daily)']) {
-      console.error('Missing Time Series data. Available keys:', Object.keys(data))
-      
-      // If we have meta data but no time series, it might be a partial response
-      if (data['Meta Data']) {
-        console.log('Meta Data found:', data['Meta Data'])
+
+    let allAuctions: any[] = []
+    let nextPageToken: string | null = null
+    let seenTokens = new Set<string>()
+    let pageCount = 0
+    const MAX_PAGES = 10
+
+    while (pageCount < MAX_PAGES) {
+      let url = `${DATA_URL}/v2/stocks/${ticker}/auctions?start=${startStr}&end=${endStr}&limit=10000`
+      if (nextPageToken) {
+        url += `&page_token=${nextPageToken}`
       }
-      
-      throw new Error('NO_TIME_SERIES_DATA')
+
+      console.log("Fetching auctions page:", {
+        pageCount,
+        url,
+        nextPageToken,
+      })
+
+      const response = await fetch(url, {
+        headers: {
+          "APCA-API-KEY-ID": ALPACA_API_KEY,
+          "APCA-API-SECRET-KEY": ALPACA_API_SECRET,
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error(
+          `API request failed with status ${response.status}: ${await response.text()}`
+        )
+      }
+
+      const data = await response.json()
+
+      // Check if we have valid auctions data
+      if (
+        !data.auctions ||
+        !Array.isArray(data.auctions) ||
+        data.auctions.length === 0
+      ) {
+        console.log("No more auctions available, stopping pagination")
+        break
+      }
+
+      allAuctions = allAuctions.concat(data.auctions)
+
+      if (!data.next_page_token) {
+        console.log("No next page token, finished fetching")
+        break
+      }
+
+      if (seenTokens.has(data.next_page_token)) {
+        console.log("Duplicate page token detected, stopping pagination")
+        break
+      }
+
+      nextPageToken = data.next_page_token
+      if (nextPageToken) {
+        seenTokens.add(nextPageToken)
+      }
+      pageCount++
     }
-    
-    // Convert Alpha Vantage data to our format
-    const timeSeries = data['Time Series (Daily)']
-    
-    const stockData = Object.entries(timeSeries)
-      .map(([date, values]: [string, any]) => ({
-        time: date,
-        open: parseFloat(values['1. open']),
-        high: parseFloat(values['2. high']),
-        low: parseFloat(values['3. low']),
-        close: parseFloat(values['4. close']),
-        volume: parseInt(values['5. volume'])
-      }))
-      .sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime())
-      .slice(-100) // Get last 100 days
-    
-    console.log(`Successfully fetched ${stockData.length} data points for ${ticker}`)
-    return stockData
-    
-  } catch (error) {
-    console.error(`Error fetching real stock data for ${ticker}:`, error)
-    
-    // If it's a rate limit error and we haven't retried, wait and try once more
-    if (error instanceof Error && error.message === 'API_RATE_LIMIT' && retryCount === 0) {
-      console.log('Rate limited, waiting 2 seconds before retry...')
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      return fetchRealStockData(ticker, retryCount + 1)
+
+    console.log("Finished fetching auctions:", {
+      totalAuctions: allAuctions.length,
+      totalPages: pageCount,
+    })
+
+    if (allAuctions.length === 0) {
+      console.log("No auctions found for the specified date range")
+      return []
     }
-    
-    throw error
+
+    // Process auctions into daily OHLC data
+    const dailyData = new Map()
+
+    for (const auction of allAuctions) {
+      const date = auction.d // Use the date field directly
+
+      // Initialize the daily data if not exists
+      if (!dailyData.has(date)) {
+        dailyData.set(date, {
+          t: date,
+          o: null, // Will be set by opening auction
+          h: -Infinity,
+          l: Infinity,
+          c: null, // Will be set by closing auction
+          v: 0,
+        })
+      }
+
+      const dayData = dailyData.get(date)
+
+      // Process opening auctions
+      if (auction.o && Array.isArray(auction.o)) {
+        for (const trade of auction.o) {
+          if (dayData.o === null) {
+            dayData.o = trade.p // Set opening price from first opening auction
+          }
+          dayData.h = Math.max(dayData.h, trade.p)
+          dayData.l = Math.min(dayData.l, trade.p)
+          dayData.v += trade.s
+        }
+      }
+
+      // Process closing auctions
+      if (auction.c && Array.isArray(auction.c)) {
+        for (const trade of auction.c) {
+          dayData.h = Math.max(dayData.h, trade.p)
+          dayData.l = Math.min(dayData.l, trade.p)
+          dayData.c = trade.p // Last closing auction price becomes the close
+          dayData.v += trade.s
+        }
+      }
+
+      // If we somehow don't have an opening price, use the first price we saw
+      if (dayData.o === null && dayData.c !== null) {
+        dayData.o = dayData.c
+      }
+
+      // Reset infinity values if no trades
+      if (dayData.h === -Infinity) dayData.h = dayData.o || 0
+      if (dayData.l === Infinity) dayData.l = dayData.o || 0
+    }
+
+    // Convert to array and sort by date
+    const result = Array.from(dailyData.values())
+      .filter((day) => day.o !== null && day.c !== null) // Only include days with valid data
+      .sort((a, b) => a.t.localeCompare(b.t))
+
+    console.log("Processed daily data:", {
+      days: result.length,
+      firstDay: result[0]?.t,
+      lastDay: result[result.length - 1]?.t,
+      sampleData: result[0],
+    })
+
+    return result
+  } catch (error: any) {
+    console.error("Error fetching historical data for " + ticker + ":", error)
+
+    if (retryCount < 3) {
+      console.log("Waiting 2 seconds before retry...")
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+      return fetchHistoricalData(ticker, retryCount + 1)
+    }
+
+    throw new Error(`Error fetching historical data: ${error.message}`)
   }
 }
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ ticker: string }> }
+  { params }: { params: { ticker: string } }
 ) {
   try {
-    const { ticker } = await params
-    
-    if (!ticker) {
-      return NextResponse.json(
-        { error: 'Ticker symbol is required' },
+    console.log("API Configuration Status:", {
+      hasApiKey: !!ALPACA_API_KEY,
+      hasApiSecret: !!ALPACA_API_SECRET,
+      dataUrl: DATA_URL,
+    })
+
+    // Get the ticker from the URL params
+    const { ticker } = params
+
+    // Validate ticker
+    if (!ticker || typeof ticker !== "string") {
+      return new Response(
+        JSON.stringify({
+          error: "Invalid ticker symbol",
+        }),
         { status: 400 }
       )
     }
-    
-    const upperTicker = ticker.toUpperCase()
-    let stockData: any[] = []
-    let dataSource = 'real'
-    let errorMessage = ''
-    
-    try {
-      // Try to fetch real data first
-      stockData = await fetchRealStockData(upperTicker)
-      console.log(`✅ Real data fetched successfully for ${upperTicker}`)
-    } catch (error) {
-      console.log(`❌ Real data fetch failed for ${upperTicker}, using mock data`)
-      
-      if (error instanceof Error) {
-        errorMessage = error.message
-        console.log('Error details:', errorMessage)
-      }
-      
-      // Fall back to mock data
-      stockData = generateMockData(upperTicker)
-      dataSource = 'mock'
-    }
-    
-    if (!stockData || stockData.length === 0) {
-      console.error('No stock data available (real or mock)')
-      return NextResponse.json(
-        { error: 'No data available for this ticker' },
+
+    const historicalData = await fetchHistoricalData(ticker)
+
+    if (!historicalData || historicalData.length === 0) {
+      return new Response(
+        JSON.stringify({
+          error: "No historical data available",
+        }),
         { status: 404 }
       )
     }
-    
-    // Get current price info
-    const latestData = stockData[stockData.length - 1]
-    const previousData = stockData[stockData.length - 2]
-    
-    if (!latestData || !previousData) {
-      console.error('Insufficient data points')
-      return NextResponse.json(
-        { error: 'Insufficient data points' },
-        { status: 400 }
-      )
-    }
-    
-    const priceChange = latestData.close - previousData.close
-    const priceChangePercent = (priceChange / previousData.close) * 100
-    
-    // Calculate market cap (simplified estimation)
-    const estimatedShares = {
-      'AAPL': 15500000000,
-      'TSLA': 3170000000,
-      'MSFT': 7440000000,
-      'GOOGL': 12600000000,
-      'AMZN': 10700000000,
-      'META': 2540000000,
-      'NVDA': 2470000000,
-      'NFLX': 440000000
-    }[upperTicker] || 1000000000
-    
-    const marketCap = latestData.close * estimatedShares
-    
-    const responseData = {
-      ticker: upperTicker,
-      data: stockData,
-      currentPrice: Math.round(latestData.close * 100) / 100,
-      priceChange: Math.round(priceChange * 100) / 100,
-      priceChangePercent: Math.round(priceChangePercent * 100) / 100,
-      volume: latestData.volume,
-      marketCap: marketCap,
-      dataSource,
-      lastUpdated: latestData.time,
-      ...(dataSource === 'mock' && { mockDataReason: errorMessage || 'API unavailable' })
-    }
-    
-    console.log(`📊 Returning ${dataSource} data for ${upperTicker}`)
-    return NextResponse.json(responseData)
-    
+
+    // Get the latest and previous quotes
+    const latestQuote = historicalData[historicalData.length - 1]
+    const prevQuote = historicalData[historicalData.length - 2] || latestQuote
+
+    // Calculate price changes
+    const currentPrice = latestQuote.c
+    const priceChange = currentPrice - prevQuote.c
+    const priceChangePercent = (priceChange / prevQuote.c) * 100
+
+    return new Response(
+      JSON.stringify({
+        symbol: ticker,
+        currentPrice,
+        priceChange,
+        priceChangePercent,
+        historicalData,
+      })
+    )
   } catch (error) {
-    console.error('Critical error in stock API:', error)
-    return NextResponse.json(
-      { 
-        error: 'Failed to fetch stock data',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      },
+    console.error(error)
+    return new Response(
+      JSON.stringify({
+        error: "Failed to fetch stock data",
+      }),
       { status: 500 }
     )
   }
-} 
+}

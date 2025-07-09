@@ -1,19 +1,30 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState, useEffect } from "react"
+import { getUser } from "@/lib/getUser"
 
 export function useCurrentUser() {
-  const [user, setUser] = useState("Paul van Mierlo")
-  const [username, setUsername] = useState("Paul van Mierlo")
+  const [username, setUsername] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
 
-  //   useEffect(() => {
-  //     fetch("/api/user")
-  //       .then((res) => res.json())
-  //       .then((data) => {
-  //         setUser(data.user)
-  //         setUsername(data.username)
-  //       })
-  //   }, [])
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const user = await getUser()
+        setUsername(user.username)
+      } catch (error) {
+        console.error("Failed to load user:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
 
-  return { user, username }
+    loadUser()
+  }, [])
+
+  return {
+    username,
+    loading,
+    isAuthenticated: !!username,
+  }
 }
