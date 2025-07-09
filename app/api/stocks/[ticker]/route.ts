@@ -260,7 +260,7 @@ async function fetchHistoricalData(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { ticker: string } }
+  { params }: { params: Promise<{ ticker: string }> }
 ) {
   try {
     console.log("API Configuration Status:", {
@@ -270,7 +270,7 @@ export async function GET(
     })
 
     // Get the ticker from the URL params
-    const { ticker } = params
+    const { ticker } = await params
 
     // Validate ticker
     if (!ticker || typeof ticker !== "string") {
