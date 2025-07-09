@@ -4,20 +4,11 @@ import { Button } from "@/components/ui/button"
 import {
   ArrowRight,
   BarChart3,
-  TrendingUp,
-  Wallet,
-  Settings,
-  Eye,
-  RefreshCw,
-  PieChart,
-  Activity,
-  Shield,
+
   Zap,
-  Users,
 } from "lucide-react"
 import { PixelTrail } from "@/components/ui/pixel-trail"
 import { useScreenSize } from "@/hooks/use-screen-size"
-import { GradientBars } from "@/components/gradient-bar"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Features } from "@/components/features"
