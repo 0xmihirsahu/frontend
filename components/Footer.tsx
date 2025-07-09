@@ -1,88 +1,87 @@
 "use client"
-import React, { useEffect, useRef, useState } from "react";
-import Link from 'next/link';
-import { Heart, ArrowUp } from 'lucide-react';
-import Image from 'next/image';
+import React, { useEffect, useRef, useState } from "react"
+import Link from "next/link"
+import { Heart, ArrowUp } from "lucide-react"
+import Image from "next/image"
 interface LinkItem {
-  href: string;
-  label: string;
+  href: string
+  label: string
 }
 
 interface FooterProps {
-  leftLinks: LinkItem[];
-  rightLinks: LinkItem[];
-  copyrightText: string;
-  barCount?: number; 
+  leftLinks: LinkItem[]
+  rightLinks: LinkItem[]
+  copyrightText: string
+  barCount?: number
 }
 
 export const Footer: React.FC<FooterProps> = ({
   leftLinks,
   rightLinks,
   copyrightText,
-  barCount = 23, 
 }) => {
-  const waveRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const footerRef = useRef<HTMLDivElement | null>(null);
-  const [isVisible, setIsVisible] = useState(false);
-  const animationFrameRef = useRef<number | null>(null);
+  const waveRefs = useRef<(HTMLDivElement | null)[]>([])
+  const footerRef = useRef<HTMLDivElement | null>(null)
+  const [isVisible, setIsVisible] = useState(false)
+  const animationFrameRef = useRef<number | null>(null)
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        const [entry] = entries;
-        setIsVisible(entry.isIntersecting);
+        const [entry] = entries
+        setIsVisible(entry.isIntersecting)
       },
-      { threshold: 0.2 } 
-    );
+      { threshold: 0.2 }
+    )
 
-    const currentFooterRef = footerRef.current;
+    const currentFooterRef = footerRef.current
     if (currentFooterRef) {
-      observer.observe(currentFooterRef);
+      observer.observe(currentFooterRef)
     }
 
     return () => {
       if (currentFooterRef) {
-        observer.unobserve(currentFooterRef);
+        observer.unobserve(currentFooterRef)
       }
-    };
-  }, []);
+    }
+  }, [])
 
   useEffect(() => {
-    let t = 0; 
+    let t = 0
 
     const animateWave = () => {
-      const waveElements = waveRefs.current;
-      let offset = 0;
+      const waveElements = waveRefs.current
+      let offset = 0
 
       waveElements.forEach((element, index) => {
         if (element) {
-          offset += Math.max(0, 20 * Math.sin((t + index) * 0.3)); 
-          element.style.transform = `translateY(${index + offset}px)`;
+          offset += Math.max(0, 20 * Math.sin((t + index) * 0.3))
+          element.style.transform = `translateY(${index + offset}px)`
         }
-      });
+      })
 
-      t += 0.1;
-      animationFrameRef.current = requestAnimationFrame(animateWave);
-    };
+      t += 0.1
+      animationFrameRef.current = requestAnimationFrame(animateWave)
+    }
 
     if (isVisible) {
-      animateWave();
+      animateWave()
     } else if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = null;
+      cancelAnimationFrame(animationFrameRef.current)
+      animationFrameRef.current = null
     }
 
     return () => {
       if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-        animationFrameRef.current = null;
+        cancelAnimationFrame(animationFrameRef.current)
+        animationFrameRef.current = null
       }
-    };
-  }, [isVisible]);
+    }
+  }, [isVisible])
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
 
   return (
     <footer
@@ -93,26 +92,34 @@ export const Footer: React.FC<FooterProps> = ({
         <div className="space-y-6">
           <div className="flex items-center space-x-3 mb-6">
             <div className="w-10 h-10 bg-emerald-600 rounded-2xl flex items-center justify-center">
-              <Image src="/Whale.png" alt="spout finance logo" width={32} height={32} />
+              <Image
+                src="/Whale.png"
+                alt="spout finance logo"
+                width={32}
+                height={32}
+              />
             </div>
-            <span className="font-bold text-2xl text-white">Spout Finance</span>
+            <span className="font-bold text-2xl text-white">Spout</span>
           </div>
-          
+
           <p className="text-slate-300 text-lg max-w-md leading-relaxed">
-            Professional trading platform with real-time market data, portfolio analytics, 
-            and seamless token swapping for serious investors.
+            Professional trading platform with real-time market data, portfolio
+            analytics, and seamless token swapping for serious investors.
           </p>
-          
+
           <ul className="flex flex-wrap gap-6">
             {leftLinks.map((link, index) => (
               <li key={index}>
-                <Link href={link.href} className="text-slate-300 hover:text-emerald-400 transition-colors duration-300 font-medium">
+                <Link
+                  href={link.href}
+                  className="text-slate-300 hover:text-emerald-400 transition-colors duration-300 font-medium"
+                >
                   {link.label}
                 </Link>
               </li>
             ))}
           </ul>
-          
+
           <div className="pt-6">
             <p className="text-sm text-slate-400 flex items-center gap-2">
               <svg className="size-4" viewBox="0 0 80 80">
@@ -127,45 +134,51 @@ export const Footer: React.FC<FooterProps> = ({
             </p>
           </div>
         </div>
-        
+
         <div className="space-y-6">
           <div className="grid grid-cols-2 gap-8">
             <div>
-              <h4 className="font-semibold text-white mb-4 text-lg">Platform</h4>
+              <h4 className="font-semibold text-white mb-4 text-lg">
+                Platform
+              </h4>
               <ul className="space-y-3">
-                {rightLinks.slice(0, Math.ceil(rightLinks.length / 2)).map((link, index) => (
-                  <li key={index}>
-                    <Link href={link.href} className="text-slate-300 hover:text-emerald-400 transition-colors duration-300">
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
+                {rightLinks
+                  .slice(0, Math.ceil(rightLinks.length / 2))
+                  .map((link, index) => (
+                    <li key={index}>
+                      <Link
+                        href={link.href}
+                        className="text-slate-300 hover:text-emerald-400 transition-colors duration-300"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
               </ul>
             </div>
-            
+
             <div>
               <h4 className="font-semibold text-white mb-4 text-lg">Support</h4>
               <ul className="space-y-3">
-                {rightLinks.slice(Math.ceil(rightLinks.length / 2)).map((link, index) => (
-                  <li key={index}>
-                    <Link href={link.href} className="text-slate-300 hover:text-emerald-400 transition-colors duration-300">
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
+                {rightLinks
+                  .slice(Math.ceil(rightLinks.length / 2))
+                  .map((link, index) => (
+                    <li key={index}>
+                      <Link
+                        href={link.href}
+                        className="text-slate-300 hover:text-emerald-400 transition-colors duration-300"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
               </ul>
             </div>
           </div>
-          
+
           <div className="pt-6 border-t border-slate-700">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-6">
-                <div className="text-sm text-slate-400">
-                  Made with <Heart className="h-4 w-4 text-emerald-500 mx-1 inline" fill="currentColor" /> for better investing
-                </div>
-              </div>
-              
-              <button 
+            <div className="flex items-center justify-end">
+              <button
                 onClick={scrollToTop}
                 className="flex items-center gap-2 text-sm text-slate-300 hover:text-emerald-400 transition-colors duration-300 group"
               >
@@ -177,28 +190,28 @@ export const Footer: React.FC<FooterProps> = ({
         </div>
       </div>
     </footer>
-  );
-};
+  )
+}
 
 // Default footer component with Spout Finance links
 const DefaultFooter = () => {
   const leftLinks = [
-    { href: '/app/markets', label: 'Markets' },
-    { href: '/app/portfolio', label: 'Portfolio' },
-    { href: '/app/trade', label: 'Trading' },
-    { href: '/app/earn', label: 'Earn' },
-  ];
+    { href: "/app/markets", label: "Markets" },
+    { href: "/app/portfolio", label: "Portfolio" },
+    { href: "/app/trade", label: "Trading" },
+    { href: "/app/earn", label: "Earn" },
+  ]
 
   const rightLinks = [
-    { href: '/help', label: 'Help Center' },
-    { href: '/contact', label: 'Contact Us' },
-    { href: '/privacy', label: 'Privacy Policy' },
-    { href: '/terms', label: 'Terms of Service' },
-    { href: '/about', label: 'About Us' },
-    { href: '/careers', label: 'Careers' },
-    { href: '/blog', label: 'Blog' },
-    { href: '/security', label: 'Security' },
-  ];
+    { href: "/help", label: "Help Center" },
+    { href: "/contact", label: "Contact Us" },
+    { href: "/privacy", label: "Privacy Policy" },
+    { href: "/terms", label: "Terms of Service" },
+    { href: "/about", label: "About Us" },
+    { href: "/careers", label: "Careers" },
+    { href: "/blog", label: "Blog" },
+    { href: "/security", label: "Security" },
+  ]
 
   return (
     <Footer
@@ -207,7 +220,7 @@ const DefaultFooter = () => {
       copyrightText={`© ${new Date().getFullYear()} Spout Finance. All rights reserved.`}
       barCount={25}
     />
-  );
-};
+  )
+}
 
-export default DefaultFooter;
+export default DefaultFooter

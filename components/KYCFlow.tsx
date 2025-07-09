@@ -7,8 +7,7 @@ import {
   useReadContract,
   useWaitForTransactionReceipt,
 } from "wagmi"
-import { concatHex, createPublicClient, http } from "viem"
-import { baseSepolia } from "viem/chains"
+import { concatHex } from "viem"
 import { ethers } from "ethers"
 import {
   Card,
@@ -64,8 +63,6 @@ export default function KYCFlow() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string>("")
   const [claimAdded, setClaimAdded] = useState(false)
-  const [isVerifying, setIsVerifying] = useState(false)
-  const [claimEvents, setClaimEvents] = useState<any[]>([])
   const issuerAddress = "0xfBbB54Ea804cC2570EeAba2fea09d0c66582498F"
 
   // Contract interactions
@@ -299,89 +296,6 @@ export default function KYCFlow() {
 
   console.log("kycsignature address", kycSignature?.issuerAddress)
   console.log("issuerAddress", issuerAddress)
-  // Function to fetch claim events from the blockchain
-  const fetchClaimEvents = async () => {
-    if (!onchainIDAddress) return
-
-    try {
-      setIsVerifying(true)
-
-      const publicClient = createPublicClient({
-        chain: baseSepolia,
-        transport: http(process.env.NEXT_PUBLIC_RPC_URL),
-      })
-
-      // Get current block number and start from recent blocks
-      const currentBlock = await publicClient.getBlockNumber()
-      const fromBlock = currentBlock - BigInt(2000) // About ~1 hour worth of blocks on Base Sepolia (2 sec block time)
-
-      // Get ClaimAdded events
-      const claimAddedEvents = await publicClient.getLogs({
-        address: onchainIDAddress as `0x${string}`,
-        event: {
-          type: "event",
-          name: "ClaimAdded",
-          inputs: [
-            { name: "claimId", type: "bytes32", indexed: true },
-            { name: "topic", type: "uint256", indexed: true },
-            { name: "scheme", type: "uint256", indexed: false },
-            { name: "issuer", type: "address", indexed: true },
-            { name: "signature", type: "bytes", indexed: false },
-            { name: "data", type: "bytes", indexed: false },
-            { name: "uri", type: "string", indexed: false },
-          ],
-        },
-        fromBlock: fromBlock,
-      })
-
-      // Get ClaimChanged events
-      const claimChangedEvents = await publicClient.getLogs({
-        address: onchainIDAddress as `0x${string}`,
-        event: {
-          type: "event",
-          name: "ClaimChanged",
-          inputs: [
-            { name: "claimId", type: "bytes32", indexed: true },
-            { name: "topic", type: "uint256", indexed: true },
-            { name: "scheme", type: "uint256", indexed: false },
-            { name: "issuer", type: "address", indexed: true },
-            { name: "signature", type: "bytes", indexed: false },
-            { name: "data", type: "bytes", indexed: false },
-            { name: "uri", type: "string", indexed: false },
-          ],
-        },
-        fromBlock: fromBlock,
-      })
-
-      // Combine and sort events by block number
-      const allEvents = [...claimAddedEvents, ...claimChangedEvents].sort(
-        (a, b) => Number(b.blockNumber) - Number(a.blockNumber)
-      )
-
-      console.log(
-        `Found ${allEvents.length} claim events for identity ${onchainIDAddress} (searched blocks ${fromBlock} - ${currentBlock})`
-      )
-
-      const processedEvents = allEvents.map((event) => ({
-        ...event,
-        eventType:
-          event.eventName ||
-          (claimAddedEvents.includes(event) ? "ClaimAdded" : "ClaimChanged"),
-        blockNumber: Number(event.blockNumber),
-        isKYCClaim: event.args?.topic === BigInt(1),
-        isFromOurIssuer:
-          event.args?.issuer?.toLowerCase() === issuerAddress.toLowerCase(),
-      }))
-
-      setClaimEvents(processedEvents)
-      return processedEvents
-    } catch (error) {
-      console.error("Error fetching claim events:", error)
-      setError("Failed to fetch claim events")
-    } finally {
-      setIsVerifying(false)
-    }
-  }
 
   // Update current step based on state
   useEffect(() => {
@@ -689,23 +603,35 @@ export default function KYCFlow() {
                         </div>
                       </div>
 
-                      <div className="p-4 bg-gray-50 rounded-lg space-y-2">
-                        <h5 className="font-medium text-gray-800">
+                      <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <h5 className="font-semibold text-gray-800 mb-3">
                           Verification Details
                         </h5>
-                        <div className="text-sm space-y-1">
-                          <p>
-                            <span className="font-medium">Issuer:</span>{" "}
-                            {kycSignature.issuerAddress}
-                          </p>
-                          <p>
-                            <span className="font-medium">Topic:</span>{" "}
-                            {kycSignature.topic}
-                          </p>
-                          <p>
-                            <span className="font-medium">Data Hash:</span>{" "}
-                            {kycSignature.dataHash}
-                          </p>
+                        <div className="space-y-3">
+                          <div>
+                            <span className="text-sm font-medium text-gray-600">
+                              Issuer:
+                            </span>
+                            <p className="font-mono text-xs text-gray-800 mt-1 break-all leading-relaxed">
+                              {kycSignature.issuerAddress}
+                            </p>
+                          </div>
+                          <div>
+                            <span className="text-sm font-medium text-gray-600">
+                              Topic:
+                            </span>
+                            <p className="text-sm text-gray-800 mt-1 font-medium">
+                              {kycSignature.topic}
+                            </p>
+                          </div>
+                          <div>
+                            <span className="text-sm font-medium text-gray-600">
+                              Data Hash:
+                            </span>
+                            <p className="font-mono text-xs text-gray-800 mt-1 break-all leading-relaxed">
+                              {kycSignature.dataHash}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -784,123 +710,48 @@ export default function KYCFlow() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-600 mb-4">
+            <p className="text-gray-600 mb-6 leading-relaxed">
               Congratulations! You have successfully completed the KYC
               verification process. Your onchain identity is now verified and
               you can access advanced trading features.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-              <div className="p-3 bg-white rounded-lg">
-                <p className="font-medium text-gray-800">Wallet Address</p>
-                <p className="text-gray-600 font-mono">{address}</p>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="p-4 bg-white rounded-lg border border-gray-100 shadow-sm">
+                <p className="font-semibold text-gray-800 mb-2">
+                  Wallet Address
+                </p>
+                <p className="text-gray-600 font-mono text-xs break-all leading-relaxed">
+                  {address}
+                </p>
               </div>
-              <div className="p-3 bg-white rounded-lg">
-                <p className="font-medium text-gray-800">OnchainID</p>
-                <p className="text-gray-600 font-mono">{onchainIDAddress}</p>
+              <div className="p-4 bg-white rounded-lg border border-gray-100 shadow-sm">
+                <p className="font-semibold text-gray-800 mb-2">OnchainID</p>
+                <p className="text-gray-600 font-mono text-xs break-all leading-relaxed">
+                  {onchainIDAddress}
+                </p>
               </div>
-              <div className="p-3 bg-white rounded-lg">
-                <p className="font-medium text-gray-800">Country Code</p>
-                <p className="text-gray-600">+{selectedCountry}</p>
+              <div className="p-4 bg-white rounded-lg border border-gray-100 shadow-sm">
+                <p className="font-semibold text-gray-800 mb-2">Country Code</p>
+                <p className="text-gray-600 text-lg font-medium">
+                  +{selectedCountry}
+                </p>
               </div>
             </div>
-            <div className="mt-4 p-3 bg-emerald-100 rounded-lg">
-              <p className="text-sm text-emerald-800">
-                <strong>✓ KYC Claim Added:</strong> Your KYC verification has
-                been successfully added to your onchain identity.
-              </p>
+            <div className="mt-6 p-4 bg-emerald-100 rounded-lg border border-emerald-200">
+              <div className="flex items-start gap-3">
+                <CheckCircle className="h-5 w-5 text-emerald-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-semibold text-emerald-800 mb-1">
+                    KYC Claim Added Successfully
+                  </p>
+                  <p className="text-sm text-emerald-700 leading-relaxed">
+                    Your KYC verification has been successfully added to your
+                    onchain identity. You can now access advanced trading
+                    features.
+                  </p>
+                </div>
+              </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Verification Section */}
-      {onchainIDAddress && (
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-blue-600" />
-              Claim Verification
-            </CardTitle>
-            <CardDescription>
-              Check if KYC claims have been successfully added to your onchain
-              identity (searches recent ~2000 blocks)
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Button
-              onClick={fetchClaimEvents}
-              isDisabled={isVerifying}
-              className="w-full"
-            >
-              {isVerifying ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Checking Events...
-                </>
-              ) : (
-                "Check Claim Events"
-              )}
-            </Button>
-
-            {claimEvents.length > 0 && (
-              <div className="space-y-3">
-                <h4 className="font-medium text-sm">
-                  Found {claimEvents.length} claim event(s):
-                </h4>
-                {claimEvents.map((event, index) => (
-                  <div key={index} className="border rounded-lg p-3 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span
-                        className={`px-2 py-1 rounded text-xs font-medium ${
-                          event.eventType === "ClaimAdded"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-blue-100 text-blue-800"
-                        }`}
-                      >
-                        {event.eventType}
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        Block #{event.blockNumber}
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div>
-                        <span className="text-gray-500">Topic:</span>{" "}
-                        {Number(event.args?.topic)}
-                        {event.isKYCClaim && (
-                          <span className="ml-2 px-1 py-0.5 bg-green-100 text-green-700 rounded text-xs">
-                            KYC
-                          </span>
-                        )}
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Scheme:</span>{" "}
-                        {Number(event.args?.scheme)}
-                      </div>
-                      <div className="col-span-2">
-                        <span className="text-gray-500">Issuer:</span>
-                        <span
-                          className={`ml-1 ${event.isFromOurIssuer ? "text-green-600 font-medium" : ""}`}
-                        >
-                          {event.args?.issuer}
-                        </span>
-                        {event.isFromOurIssuer && (
-                          <span className="ml-2 px-1 py-0.5 bg-green-100 text-green-700 rounded text-xs">
-                            Our Issuer
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {claimEvents.length === 0 && !isVerifying && (
-              <div className="text-center py-4 text-gray-500">
-                No claim events found for this identity
-              </div>
-            )}
           </CardContent>
         </Card>
       )}

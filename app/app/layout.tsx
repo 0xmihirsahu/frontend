@@ -50,7 +50,7 @@ function SidebarNavContent() {
               className="cursor-pointer"
               onClick={() => router.push("/")}
               src="/Whale.png"
-              alt="spout finance logo"
+              alt="Spout Finance logo"
               width={32}
               height={32}
             />
@@ -60,7 +60,7 @@ function SidebarNavContent() {
               onClick={() => router.push("/")}
               className="text-lg font-semibold text-gray-900 cursor-pointer"
             >
-              spout finance
+              Spout Finance
             </h1>
           )}
         </div>
