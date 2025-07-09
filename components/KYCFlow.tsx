@@ -7,14 +7,7 @@ import {
   useReadContract,
   useWaitForTransactionReceipt,
 } from "wagmi"
-import {
-  concatHex,
-  encodeAbiParameters,
-  toBytes,
-  toHex,
-  createPublicClient,
-  http,
-} from "viem"
+import { concatHex, createPublicClient, http } from "viem"
 import { baseSepolia } from "viem/chains"
 import { ethers } from "ethers"
 import {

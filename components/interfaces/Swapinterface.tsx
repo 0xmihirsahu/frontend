@@ -13,14 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import {
-  ArrowUpDown,
-  ChevronDown,
-  User,
-  Flame,
-  Plus,
-  TrendingUp,
-} from "lucide-react"
+import { ArrowUpDown } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
