@@ -278,7 +278,7 @@ export default function KYCFlow() {
       const contractArgs = [
         topic, // topic (KYC)
         1, // scheme
-        kycSignature.issuerAddress as `0x${string}`, // issuer address
+        issuerAddress as `0x${string}`, // issuer address
         signature as `0x${string}`, // signature
         claimDataHash, // EXACT MATCH: Use hashed claim data
         "", // uri
@@ -304,6 +304,8 @@ export default function KYCFlow() {
     }
   }
 
+  console.log("kycsignature address", kycSignature?.issuerAddress)
+  console.log("issuerAddress", issuerAddress)
   // Function to fetch claim events from the blockchain
   const fetchClaimEvents = async () => {
     if (!onchainIDAddress) return
