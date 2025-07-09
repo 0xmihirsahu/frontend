@@ -736,7 +736,7 @@ export default function KYCFlow() {
                       </div>
 
                       <Button
-                        onClick={handleAddClaim}
+                        onClick={() => handleAddClaim()}
                         isDisabled={
                           isAddingClaim || isConfirmingClaim || !kycSignature
                         }
