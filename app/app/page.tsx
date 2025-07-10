@@ -26,6 +26,7 @@ import {
 import { useTokenBalance } from "@/hooks/view/useTokenBalance"
 import { useMarketData } from "@/hooks/useMarketData"
 import { useAccount } from "wagmi"
+import { useRecentActivity } from "@/hooks/useRecentActivity"
 
 export default function DashboardPage() {
   const { address: userAddress } = useAccount()
@@ -41,6 +42,12 @@ export default function DashboardPage() {
     isLoading: priceLoading,
     error: priceError,
   } = useMarketData("LQD")
+  const {
+    activities,
+    isLoading: activitiesLoading,
+    hasMore,
+    loadMore,
+  } = useRecentActivity(userAddress)
 
   // Format number to 3 decimal places
   const formatNumber = (num: number) => {
@@ -143,30 +150,6 @@ export default function DashboardPage() {
       change: `${dayChangePercent >= 0 ? "+" : "-"}${formatPercent(Math.abs(dayChangePercent))}%`,
       positive: dayChange >= 0,
       icon: TrendingUp,
-    },
-  ]
-
-  const recentActivity = [
-    {
-      action: "Bought",
-      symbol: "AAPL",
-      amount: "10 shares",
-      time: "2 hours ago",
-      value: "+$1,895",
-    },
-    {
-      action: "Sold",
-      symbol: "TSLA",
-      amount: "5 shares",
-      time: "4 hours ago",
-      value: "+$1,226",
-    },
-    {
-      action: "Swapped",
-      symbol: "USDC → RWA",
-      amount: "1,000 tokens",
-      time: "6 hours ago",
-      value: "+$1,000",
     },
   ]
 
@@ -317,53 +300,167 @@ export default function DashboardPage() {
       </div>
 
       {/* Recent Activity */}
-      <Card className="border-0 shadow-md">
-        <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-xl">Recent Activity</CardTitle>
-              <CardDescription>
-                Your latest trades and transactions
-              </CardDescription>
-            </div>
-            <Button variant="outline" size="sm">
-              <Activity className="h-4 w-4 mr-2" />
-              View All
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {recentActivity.map((activity, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors"
-              >
-                <div className="flex items-center space-x-4">
-                  <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
-                    <span className="font-bold text-emerald-600 text-sm">
-                      {activity.symbol[0]}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="font-medium text-slate-900">
-                      {activity.action} {activity.symbol}
-                    </p>
-                    <p className="text-sm text-slate-600">{activity.amount}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold text-emerald-600">
-                    {activity.value}
-                  </p>
-                  <div className="flex items-center text-xs text-slate-500">
-                    <Clock className="h-3 w-3 mr-1" />
-                    {activity.time}
-                  </div>
+      <Card className="border border-slate-200/60 shadow-sm bg-white">
+        <CardHeader className="pb-0 border-b border-slate-100/80">
+          <div className="flex items-center justify-between py-4">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-2 h-8 bg-gradient-to-b from-slate-900 to-slate-700 rounded-full"></div>
+                <div>
+                  <CardTitle className="text-lg font-medium text-slate-900 tracking-tight">
+                    TRANSACTION HISTORY
+                  </CardTitle>
                 </div>
               </div>
-            ))}
+            </div>
+            <div className="flex items-center space-x-2">
+              <Badge
+                variant="outline"
+                className="text-xs text-slate-600 border-slate-300"
+              >
+                LIVE
+              </Badge>
+            </div>
           </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          {activitiesLoading ? (
+            <div className="flex items-center justify-center py-16">
+              <div className="flex flex-col items-center space-y-3">
+                <div className="flex space-x-1">
+                  <div className="w-2 h-2 bg-slate-400 rounded-full animate-pulse"></div>
+                  <div
+                    className="w-2 h-2 bg-slate-400 rounded-full animate-pulse"
+                    style={{ animationDelay: "0.1s" }}
+                  ></div>
+                  <div
+                    className="w-2 h-2 bg-slate-400 rounded-full animate-pulse"
+                    style={{ animationDelay: "0.2s" }}
+                  ></div>
+                </div>
+                <span className="text-xs text-slate-500 uppercase tracking-wide">
+                  LOADING TRANSACTION DATA
+                </span>
+              </div>
+            </div>
+          ) : activities.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16">
+              <div className="w-12 h-12 border-2 border-slate-200 rounded-lg flex items-center justify-center mb-4">
+                <Activity className="h-5 w-5 text-slate-400" />
+              </div>
+              <p className="text-sm text-slate-600 font-medium mb-1">
+                NO TRANSACTION DATA
+              </p>
+              <p className="text-xs text-slate-400 uppercase tracking-wide">
+                HISTORY WILL POPULATE AFTER FIRST TRANSACTION
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* Table Header */}
+              <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-slate-50/50 border-b border-slate-100 text-xs uppercase tracking-wider text-slate-500">
+                <div className="col-span-1">TYPE</div>
+                <div className="col-span-3">TRANSACTION</div>
+                <div className="col-span-2">AMOUNT</div>
+                <div className="col-span-2">VALUE (USD)</div>
+                <div className="col-span-2">TIME</div>
+                <div className="col-span-2">STATUS</div>
+              </div>
+
+              {/* Transaction Rows */}
+              <div className="divide-y divide-slate-100/60">
+                {activities.map((activity, index) => (
+                  <div
+                    key={activity.id}
+                    className="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-slate-50/30 transition-colors duration-150 group"
+                  >
+                    {/* Type Indicator */}
+                    <div className="col-span-1 flex items-center">
+                      <div
+                        className={`w-3 h-3 rounded-sm ${
+                          activity.action === "Burned"
+                            ? "bg-red-500 shadow-red-500/30"
+                            : "bg-emerald-500 shadow-emerald-500/30"
+                        } shadow-lg`}
+                      ></div>
+                    </div>
+
+                    {/* Transaction Details */}
+                    <div className="col-span-3 flex flex-col justify-center">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm font-medium text-slate-900">
+                          {activity.action === "Burned" ? "SOLD" : "PURCHASED"}
+                        </span>
+                        <Badge
+                          variant="outline"
+                          className="text-xs px-1.5 py-0.5 h-auto"
+                        >
+                          SLQD
+                        </Badge>
+                      </div>
+                      <span className="text-xs text-slate-500 mt-0.5">
+                        {activity.action === "Burned"
+                          ? "TOKEN_SELL"
+                          : "TOKEN_BUY"}
+                      </span>
+                    </div>
+
+                    {/* Amount */}
+                    <div className="col-span-2 flex flex-col justify-center">
+                      <span className="text-sm text-slate-900">
+                        {activity.amount}
+                      </span>
+                      <span className="text-xs text-slate-500">TOKENS</span>
+                    </div>
+
+                    {/* USD Value */}
+                    <div className="col-span-2 flex flex-col justify-center">
+                      <span
+                        className={`text-sm font-medium ${
+                          activity.action === "Burned"
+                            ? "text-red-600"
+                            : "text-emerald-600"
+                        }`}
+                      >
+                        {activity.value}
+                      </span>
+                      <span className="text-xs text-slate-500">USD</span>
+                    </div>
+
+                    {/* Time */}
+                    <div className="col-span-2 flex flex-col justify-center">
+                      <span className="text-sm text-slate-900">
+                        {activity.time}
+                      </span>
+                      <span className="text-xs text-slate-500">AGO</span>
+                    </div>
+
+                    {/* Status */}
+                    <div className="col-span-2 flex items-center">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                        <span className="text-xs text-slate-600 uppercase tracking-wide">
+                          CONFIRMED
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {hasMore && (
+                <div className="border-t border-slate-100 bg-slate-50/30">
+                  <Button
+                    variant="ghost"
+                    onClick={loadMore}
+                    className="w-full h-12 text-xs uppercase tracking-wider text-slate-600 hover:text-slate-900 hover:bg-slate-100/50 transition-all duration-200"
+                  >
+                    LOAD MORE TRANSACTIONS
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
         </CardContent>
       </Card>
     </div>

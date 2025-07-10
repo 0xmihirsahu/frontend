@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
-import { useWatchContractEvent, usePublicClient } from "wagmi"
+import { useWatchContractEvent, usePublicClient, useReadContract } from "wagmi"
+import { useMarketData } from "@/hooks/useMarketData"
 import erc3643ABI from "@/abi/erc3643.json"
 
 export interface ActivityEvent {
@@ -9,110 +10,387 @@ export interface ActivityEvent {
   amount: string
   time: string
   value: string
-  user?: string
+  blockNumber?: number
 }
 
 const RWA_TOKEN_ADDRESS =
   "0xB5F83286a6F8590B4d01eC67c885252Ec5d0bdDB" as `0x${string}`
 
-export function useRecentActivity() {
+export function useRecentActivity(userAddress?: string) {
   const [activities, setActivities] = useState<ActivityEvent[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [hasMore, setHasMore] = useState(false)
+  const [allTransactions, setAllTransactions] = useState<any[]>([])
+  const [showCount, setShowCount] = useState(5)
   const publicClient = usePublicClient()
+  const { price: currentPrice } = useMarketData("LQD")
 
-  // Helper functions
-  const formatAddress = (address: string) =>
-    `${address.slice(0, 6)}...${address.slice(-4)}`
-  const formatAmount = (amount: bigint) => (Number(amount) / 1e6).toFixed(2)
+  // Add a constant for fallback price
+  const FALLBACK_PRICE = 108.71
 
-  // Watch for new mint events (Transfer from zero address)
+  // Helper functions - we'll get decimals dynamically
+  const formatAmount = (amount: bigint, decimals: number = 6) => {
+    try {
+      // Convert to string and handle decimals
+      const value = Number(amount) / Math.pow(10, decimals)
+      if (isNaN(value)) {
+        console.error("Invalid amount value:", amount.toString())
+        return "0"
+      }
+      return value.toLocaleString()
+    } catch (error) {
+      console.error("Error formatting amount:", error)
+      return "0"
+    }
+  }
+
+  // Add a function to calculate value for large numbers
+  const calculateValue = (amount: bigint, price: number, decimals: number) => {
+    try {
+      // Convert to number with decimals
+      const value = Number(amount) / Math.pow(10, decimals)
+      if (isNaN(value)) {
+        console.error(
+          "Invalid value calculation:",
+          amount.toString(),
+          price,
+          decimals
+        )
+        return 0
+      }
+      return value * price
+    } catch (error) {
+      console.error("Error calculating value:", error)
+      return 0
+    }
+  }
+
+  // Add a function to get a valid price
+  const getValidPrice = (price: number | null) => {
+    if (typeof price === "number" && !isNaN(price) && price > 0) {
+      return price
+    }
+    console.log("Using fallback price:", FALLBACK_PRICE)
+    return FALLBACK_PRICE
+  }
+
+  // Add a function to format currency values
+  const formatCurrencyValue = (value: number) => {
+    try {
+      if (isNaN(value) || !isFinite(value)) {
+        console.error("Invalid currency value:", value)
+        return "$0"
+      }
+      return `$${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
+    } catch (error) {
+      console.error("Error formatting currency:", error)
+      return "$0"
+    }
+  }
+
+  // Get the actual decimals from the contract
+  const { data: contractDecimals } = useReadContract({
+    address: RWA_TOKEN_ADDRESS,
+    abi: erc3643ABI.abi,
+    functionName: "decimals",
+  })
+
+  console.log("Contract decimals:", contractDecimals)
+  const decimals = contractDecimals ? Number(contractDecimals) : 18 // Change default to 18 which is more common
+
+  // Helper functions - we'll get decimals dynamically
+  const getTimeAgo = (timestamp: number) => {
+    const now = Date.now()
+    const diff = now - timestamp
+    const hours = Math.floor(diff / (1000 * 60 * 60))
+    const minutes = Math.floor(diff / (1000 * 60))
+
+    if (hours > 0) return `${hours}h ago`
+    if (minutes > 0) return `${minutes}m ago`
+    return "Just now"
+  }
+
+  // Watch for new mint/burn events (Transfer from/to zero address involving user's address)
   useWatchContractEvent({
     address: RWA_TOKEN_ADDRESS,
     abi: erc3643ABI.abi as any,
     eventName: "Transfer",
     onLogs(logs) {
-      const newMints = logs
-        .filter(
-          (log: any) =>
-            log.args.from === "0x0000000000000000000000000000000000000000"
-        )
-        .map((log: any) => ({
-          id: `${log.transactionHash}-${log.logIndex}`,
-          action: "Minted",
-          symbol: "RWA",
-          amount: `${formatAmount(log.args.value)} tokens`,
-          time: new Date().toLocaleTimeString(),
-          value: `+$${(Number(formatAmount(log.args.value)) * 125).toFixed(0)}`,
-          user: formatAddress(log.args.to),
-        }))
+      if (!userAddress) return // Skip if no user address provided
 
-      if (newMints.length > 0) {
-        setActivities((prev) => [...newMints, ...prev].slice(0, 20))
+      const newTransactions = logs
+        .filter((log: any) => {
+          const isMint =
+            log.args.from === "0x0000000000000000000000000000000000000000" &&
+            log.args.to?.toLowerCase() === userAddress.toLowerCase()
+          const isBurn =
+            log.args.to === "0x0000000000000000000000000000000000000000" &&
+            log.args.from?.toLowerCase() === userAddress.toLowerCase()
+          return isMint || isBurn
+        })
+        .map((log: any) => {
+          const amount = Number(formatAmount(log.args.value, decimals))
+          const value = currentPrice ? amount * currentPrice : 0
+          const isMint =
+            log.args.from === "0x0000000000000000000000000000000000000000"
+          const action = isMint ? "Purchased" : "Burned"
+          return {
+            id: `${log.transactionHash}-${log.logIndex}`,
+            action,
+            symbol: "RWA",
+            amount: `${amount} tokens`,
+            time: getTimeAgo(Date.now()),
+            value: `$${value.toFixed(0)}`,
+            blockNumber: Number(log.blockNumber),
+          }
+        })
+
+      if (newTransactions.length > 0) {
+        setActivities((prev) => [...newTransactions, ...prev].slice(0, 10))
       }
     },
   })
 
   // Fetch recent mint events on mount
   useEffect(() => {
+    console.log("Current state:", {
+      decimals,
+      currentPrice,
+      hasUserAddress: !!userAddress,
+    })
     const fetchRecentMints = async () => {
-      if (!publicClient) return
+      if (!publicClient || !userAddress) {
+        setIsLoading(false)
+        return
+      }
 
       try {
         const currentBlock = await publicClient.getBlockNumber()
-        const fromBlock = currentBlock - BigInt(1000)
+
+        console.log(`🔍 Debugging Recent Activity:`)
+        console.log(`Current block: ${currentBlock}`)
+        console.log(`Contract address: ${RWA_TOKEN_ADDRESS}`)
+        console.log(`Filtering for user address: ${userAddress}`)
+        console.log(`Token decimals: ${decimals}`)
+
+        // Verify contract exists
+        try {
+          const contractCode = await publicClient.getBytecode({
+            address: RWA_TOKEN_ADDRESS,
+          })
+          console.log(`📋 Contract exists: ${contractCode ? "YES" : "NO"}`)
+          console.log(`📋 Contract code length: ${contractCode?.length || 0}`)
+        } catch (error) {
+          console.error("❌ Error checking contract:", error)
+        }
 
         // Find Transfer event from the ABI
         const transferEvent = erc3643ABI.abi.find(
           (item: any) => item.type === "event" && item.name === "Transfer"
         ) as any
 
-        const logs = await publicClient.getLogs({
-          address: RWA_TOKEN_ADDRESS,
-          event: transferEvent,
-          fromBlock,
-          toBlock: currentBlock,
-        })
+        console.log("📋 Transfer event definition:", transferEvent)
 
-        const mints = logs
-          .filter(
-            (log: any) =>
-              log.args.from === "0x0000000000000000000000000000000000000000"
+        if (!transferEvent) {
+          console.error("❌ Transfer event not found in ABI!")
+          setActivities([])
+          return
+        }
+
+        // Try a simple recent block first to test
+        console.log("🧪 Testing with recent 1000 blocks first...")
+        const testFromBlock = currentBlock - BigInt(1000)
+
+        try {
+          const testLogs = await publicClient.getLogs({
+            address: RWA_TOKEN_ADDRESS,
+            event: transferEvent,
+            fromBlock: testFromBlock,
+            toBlock: currentBlock,
+          })
+          console.log(
+            `🧪 Test search found ${testLogs.length} Transfer events in last 1000 blocks`
           )
-          .map((log: any) => ({
-            id: `${log.transactionHash}-${log.logIndex}`,
-            action: "Minted",
-            symbol: "RWA",
-            amount: `${formatAmount(log.args.value)} tokens`,
-            time: new Date(
-              Date.now() - Math.random() * 86400000
-            ).toLocaleTimeString(),
-            value: `+$${(Number(formatAmount(log.args.value)) * 125).toFixed(0)}`,
-            user: formatAddress(log.args.to),
-          }))
-          .slice(0, 10)
+        } catch (testError) {
+          console.error("❌ Test search failed:", testError)
+        }
 
-        setActivities(mints)
+        // Use chunked approach to avoid RPC limits
+        const chunkSize = BigInt(50000) // 50K blocks at a time (~28 hours)
+        const maxChunks = 20 // Up to 1M blocks total (~23 days)
+        let allTransactions: any[] = []
+
+        for (let i = 0; i < maxChunks; i++) {
+          const fromBlock = currentBlock - BigInt(i + 1) * chunkSize
+          const toBlock = currentBlock - BigInt(i) * chunkSize
+
+          console.log(
+            `🔍 Chunk ${i + 1}: Searching blocks ${fromBlock} to ${toBlock}`
+          )
+
+          try {
+            const logs = await publicClient.getLogs({
+              address: RWA_TOKEN_ADDRESS,
+              event: transferEvent,
+              fromBlock,
+              toBlock,
+            })
+
+            console.log(
+              `📋 Chunk ${i + 1}: Found ${logs.length} Transfer events`
+            )
+
+            // Debug ALL transfers in first chunk to see what's happening
+            if (i === 0 && logs.length > 0) {
+              console.log("🔍 Detailed Transfer analysis:")
+              logs.forEach((log: any, index: number) => {
+                const isMint =
+                  log.args.from === "0x0000000000000000000000000000000000000000"
+                const isBurn =
+                  log.args.to === "0x0000000000000000000000000000000000000000"
+                const isToUser =
+                  log.args.to?.toLowerCase() === userAddress.toLowerCase()
+                const isFromUser =
+                  log.args.from?.toLowerCase() === userAddress.toLowerCase()
+                const isUserMint = isMint && isToUser
+                const isUserBurn = isBurn && isFromUser
+
+                let label = "🔄 REGULAR"
+                if (isUserMint) label = "🎯 YOUR MINT"
+                else if (isUserBurn) label = "🔥 YOUR BURN"
+                else if (isMint) label = "🟢 OTHER MINT"
+                else if (isBurn) label = "🔴 OTHER BURN"
+
+                console.log(`Transfer ${index + 1} ${label}:`, {
+                  from: log.args.from,
+                  to: log.args.to,
+                  value: log.args.value?.toString(),
+                  amount: `${(Number(log.args.value) / Math.pow(10, decimals)).toFixed(2)} tokens`,
+                  txHash: log.transactionHash,
+                  block: log.blockNumber?.toString(),
+                })
+              })
+            } else if (i === 0 && logs.length === 0) {
+              console.log("⚠️ No Transfer events found in most recent chunk")
+            }
+
+            // Get both mints (from zero) and burns (to zero) for this user
+            const chunkTransactions = logs
+              .filter((log: any) => {
+                const isMint =
+                  log.args.from ===
+                    "0x0000000000000000000000000000000000000000" &&
+                  log.args.to?.toLowerCase() === userAddress.toLowerCase()
+                const isBurn =
+                  log.args.to ===
+                    "0x0000000000000000000000000000000000000000" &&
+                  log.args.from?.toLowerCase() === userAddress.toLowerCase()
+                return isMint || isBurn
+              })
+              .map((log: any) => {
+                try {
+                  console.log("Processing transaction:", {
+                    value: log.args.value.toString(),
+                    decimals,
+                    from: log.args.from,
+                    to: log.args.to,
+                  })
+
+                  const price = getValidPrice(currentPrice)
+                  const value = calculateValue(log.args.value, price, decimals)
+
+                  console.log("Calculated values:", {
+                    price,
+                    value,
+                    formattedValue: formatCurrencyValue(value),
+                  })
+
+                  // Use block time estimation instead of random
+                  const blocksAgo = Number(currentBlock - log.blockNumber)
+                  const hoursAgo = Math.floor((blocksAgo * 2) / 3600) // 2 sec per block
+                  const timestamp = Date.now() - hoursAgo * 3600000
+
+                  // Determine if this is a mint or burn
+                  const isMint =
+                    log.args.from ===
+                    "0x0000000000000000000000000000000000000000"
+                  const action = isMint ? "Purchased" : "Burned"
+
+                  const formattedAmount = formatAmount(log.args.value, decimals)
+                  console.log("Final amount:", formattedAmount)
+
+                  return {
+                    id: `${log.transactionHash}-${log.logIndex}`,
+                    action,
+                    symbol: "RWA",
+                    amount: `${formattedAmount} tokens`,
+                    time: getTimeAgo(timestamp),
+                    value: formatCurrencyValue(value),
+                    blockNumber: Number(log.blockNumber),
+                  }
+                } catch (error) {
+                  console.error("Error processing transaction:", error)
+                  return {
+                    id: `${log.transactionHash}-${log.logIndex}`,
+                    action:
+                      log.args.from ===
+                      "0x0000000000000000000000000000000000000000"
+                        ? "Purchased"
+                        : "Burned",
+                    symbol: "RWA",
+                    amount: "0 tokens",
+                    time: getTimeAgo(Date.now()),
+                    value: "$0",
+                    blockNumber: Number(log.blockNumber),
+                  }
+                }
+              })
+
+            allTransactions.push(...chunkTransactions)
+            console.log(
+              `🔥 Chunk ${i + 1}: Found ${chunkTransactions.length} YOUR transactions (mints/burns) (total: ${allTransactions.length})`
+            )
+
+            // Continue collecting all transactions (no early exit)
+          } catch (chunkError) {
+            console.error(`❌ Chunk ${i + 1} failed:`, chunkError)
+            // Continue with next chunk
+          }
+        }
+
+        // Sort transactions by block number (most recent first)
+        allTransactions.sort((a, b) => b.blockNumber - a.blockNumber)
+
+        console.log(
+          `🎯 Total YOUR transactions (mints/burns) found: ${allTransactions.length}`
+        )
+
+        // Store all transactions and show subset
+        setAllTransactions(allTransactions)
+        setHasMore(allTransactions.length > showCount)
+        setActivities(allTransactions.slice(0, showCount))
       } catch (error) {
         console.error("Error fetching mint events:", error)
-        // Fallback mock data
-        setActivities([
-          {
-            id: "mock-1",
-            action: "Minted",
-            symbol: "RWA",
-            amount: "100.00 tokens",
-            time: "2:30:45 PM",
-            value: "+$12,500",
-            user: "0x1234...5678",
-          },
-        ])
+        setActivities([])
       } finally {
         setIsLoading(false)
       }
     }
 
     fetchRecentMints()
-  }, [publicClient])
+  }, [publicClient, currentPrice, userAddress, decimals])
 
-  return { activities, isLoading }
+  // Update displayed activities when showCount changes
+  useEffect(() => {
+    if (allTransactions.length > 0) {
+      setActivities(allTransactions.slice(0, showCount))
+      setHasMore(allTransactions.length > showCount)
+    }
+  }, [showCount, allTransactions])
+
+  const loadMore = () => {
+    setShowCount((prev) => prev + 5)
+  }
+
+  return { activities, isLoading, hasMore, loadMore }
 }

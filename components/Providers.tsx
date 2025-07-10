@@ -1,19 +1,23 @@
-"use client";
+"use client"
 
-import { ReactNode } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { WagmiProvider } from "wagmi";
-import { getDefaultConfig, RainbowKitProvider } from "@rainbow-me/rainbowkit";
-import { baseSepolia } from "wagmi/chains";
+import { ReactNode } from "react"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { WagmiProvider, http } from "wagmi"
+import { RainbowKitProvider, getDefaultConfig } from "@rainbow-me/rainbowkit"
+import { baseSepolia } from "wagmi/chains"
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient()
 
+// Custom config with more reliable RPC endpoints
 const config = getDefaultConfig({
   appName: "Spout Finance",
   projectId: process.env.NEXT_PUBLIC_RAINBOWKIT_PROJECT_ID ?? "",
   chains: [baseSepolia],
+  transports: {
+    [baseSepolia.id]: http("https://base-sepolia-rpc.publicnode.com"), // More reliable RPC
+  },
   ssr: true,
-});
+})
 
 const Providers = ({ children }: { children: ReactNode }) => (
   <WagmiProvider config={config}>
@@ -21,6 +25,6 @@ const Providers = ({ children }: { children: ReactNode }) => (
       <RainbowKitProvider>{children}</RainbowKitProvider>
     </QueryClientProvider>
   </WagmiProvider>
-);
+)
 
-export { Providers };
+export { Providers }
