@@ -6,7 +6,7 @@ const TOKEN_ADDRESS = "0xB5F83286a6F8590B4d01eC67c885252Ec5d0bdDB" // RWA token 
 export function useTotalSupply() {
   const { data: totalSupply, isLoading } = useReadContract({
     address: TOKEN_ADDRESS,
-    abi: erc3643ABI,
+    abi: erc3643ABI.abi,
     functionName: "totalSupply",
   })
 

@@ -7,7 +7,7 @@ export function useTokenBalance(address: string | undefined) {
   // Get decimals
   const { data: decimals } = useReadContract({
     address: TOKEN_ADDRESS,
-    abi: erc3643ABI,
+    abi: erc3643ABI.abi,
     functionName: "decimals",
   })
 
@@ -19,7 +19,7 @@ export function useTokenBalance(address: string | undefined) {
     refetch,
   } = useReadContract({
     address: TOKEN_ADDRESS,
-    abi: erc3643ABI,
+    abi: erc3643ABI.abi,
     functionName: "balanceOf",
     args: [address],
   })
@@ -27,7 +27,7 @@ export function useTokenBalance(address: string | undefined) {
   // Get token symbol
   const { data: symbol } = useReadContract({
     address: TOKEN_ADDRESS,
-    abi: erc3643ABI,
+    abi: erc3643ABI.abi,
     functionName: "symbol",
   })
 
