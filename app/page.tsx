@@ -22,14 +22,16 @@ export default function HomePage() {
   const RESERVE_CONTRACT_ADDRESS = "0xf26c960Abf98875f87764502f64e8F5ef9134C20"
   const { totalReserves } = useReserveContract(RESERVE_CONTRACT_ADDRESS)
 
-  // Calculate total volume using proof-of-reserve logic
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount)
+  const formatLargeNumber = (amount: number) => {
+    if (amount >= 1e9) {
+      return `$${(amount / 1e9).toFixed(1)}B`
+    } else if (amount >= 1e6) {
+      return `$${(amount / 1e6).toFixed(1)}M`
+    } else if (amount >= 1e3) {
+      return `$${(amount / 1e3).toFixed(1)}K`
+    } else {
+      return `$${amount.toFixed(0)}`
+    }
   }
 
   const getTotalVolume = () => {
@@ -39,10 +41,12 @@ export default function HomePage() {
 
     if (totalReserves) {
       // Use total reserves from contract (convert from wei) * price
-      return formatCurrency((Number(totalReserves) / 1e6) * (currentPrice || 0))
+      return formatLargeNumber(
+        (Number(totalReserves) / 1e6) * (currentPrice || 0)
+      )
     } else {
       // Fallback to total supply * price
-      return formatCurrency(totalSupply * (currentPrice || 0))
+      return formatLargeNumber(totalSupply * (currentPrice || 0))
     }
   }
 

@@ -1,34 +1,38 @@
-import { useAccount, useReadContract, useWriteContract } from 'wagmi';
-import reserveABI from '@/abi/proof-of-reserve.json';
+import { useAccount, useReadContract, useWriteContract } from "wagmi"
+import reserveABI from "@/abi/proof-of-reserve.json"
 
 export function useReserveContract(reserveAddress: `0x${string}`) {
-  const { address } = useAccount();
+  const { address } = useAccount()
 
   // Write functions
-  const { writeContract: requestReserves, isPending: isRequestPending, error: requestError } = useWriteContract();
+  const {
+    writeContract: requestReserves,
+    isPending: isRequestPending,
+    error: requestError,
+  } = useWriteContract()
 
   // Read functions
   const { data: totalReserves, refetch: refetchReserves } = useReadContract({
     address: reserveAddress,
     abi: reserveABI as any,
-    functionName: 'getReserves',
-  });
+    functionName: "getReserves",
+  })
 
   const { data: totalReservesFromContract } = useReadContract({
     address: reserveAddress,
     abi: reserveABI as any,
-    functionName: 'totalReserves',
-  });
+    functionName: "totalReserves",
+  })
 
   // Function calls
   const executeRequestReserves = (subscriptionId: bigint) => {
     requestReserves({
       address: reserveAddress,
       abi: reserveABI as any,
-      functionName: 'requestReserves',
+      functionName: "requestReserves",
       args: [subscriptionId],
-    });
-  };
+    })
+  }
 
   return {
     address,
@@ -40,5 +44,5 @@ export function useReserveContract(reserveAddress: `0x${string}`) {
     totalReserves,
     totalReservesFromContract,
     refetchReserves,
-  };
-} 
+  }
+}
