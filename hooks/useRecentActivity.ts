@@ -11,6 +11,7 @@ export interface ActivityEvent {
   time: string
   value: string
   blockNumber?: number
+  transactionType: string
 }
 
 const RWA_TOKEN_ADDRESS =
@@ -26,7 +27,7 @@ export function useRecentActivity(userAddress?: string) {
   const { price: currentPrice } = useMarketData("LQD")
 
   // Add a constant for fallback price
-  const FALLBACK_PRICE = 108.71
+  const FALLBACK_PRICE = 108.725
 
   // Helper functions - we'll get decimals dynamically
   const formatAmount = (amount: bigint, decimals: number = 6) => {
@@ -48,17 +49,23 @@ export function useRecentActivity(userAddress?: string) {
   const calculateValue = (amount: bigint, price: number, decimals: number) => {
     try {
       // Convert to number with decimals
-      const value = Number(amount) / Math.pow(10, decimals)
-      if (isNaN(value)) {
-        console.error(
-          "Invalid value calculation:",
-          amount.toString(),
-          price,
-          decimals
-        )
-        return 0
-      }
-      return value * price
+      const valueStr = amount.toString()
+      const decimalPoint = valueStr.length - decimals
+      const wholePartStr = valueStr.slice(0, decimalPoint) || "0"
+      const fractionalPartStr = valueStr.slice(decimalPoint)
+
+      // Calculate the whole number part
+      const wholePart = BigInt(wholePartStr)
+      // Calculate the fractional part if it exists
+      const fractionalPart = fractionalPartStr
+        ? Number(`0.${fractionalPartStr}`)
+        : 0
+
+      // Convert whole part to number safely
+      const wholeValue = Number(wholePart)
+
+      // Calculate final value
+      return (wholeValue + fractionalPart) * price
     } catch (error) {
       console.error("Error calculating value:", error)
       return 0
@@ -70,7 +77,6 @@ export function useRecentActivity(userAddress?: string) {
     if (typeof price === "number" && !isNaN(price) && price > 0) {
       return price
     }
-    console.log("Using fallback price:", FALLBACK_PRICE)
     return FALLBACK_PRICE
   }
 
@@ -142,11 +148,19 @@ export function useRecentActivity(userAddress?: string) {
             time: getTimeAgo(Date.now()),
             value: `$${value.toFixed(0)}`,
             blockNumber: Number(log.blockNumber),
+            transactionType: action === "Burned" ? "SLQD Sold" : "SLQD Bought",
           }
         })
 
       if (newTransactions.length > 0) {
-        setActivities((prev) => [...newTransactions, ...prev].slice(0, 10))
+        setActivities((prev) => {
+          const updatedTransactions = newTransactions.map((tx) => ({
+            ...tx,
+            transactionType:
+              tx.action === "Burned" ? "SLQD Sold" : "SLQD Bought",
+          }))
+          return [...updatedTransactions, ...prev].slice(0, 10)
+        })
       }
     },
   })
@@ -289,21 +303,8 @@ export function useRecentActivity(userAddress?: string) {
               })
               .map((log: any) => {
                 try {
-                  console.log("Processing transaction:", {
-                    value: log.args.value.toString(),
-                    decimals,
-                    from: log.args.from,
-                    to: log.args.to,
-                  })
-
                   const price = getValidPrice(currentPrice)
                   const value = calculateValue(log.args.value, price, decimals)
-
-                  console.log("Calculated values:", {
-                    price,
-                    value,
-                    formattedValue: formatCurrencyValue(value),
-                  })
 
                   // Use block time estimation instead of random
                   const blocksAgo = Number(currentBlock - log.blockNumber)
@@ -317,16 +318,17 @@ export function useRecentActivity(userAddress?: string) {
                   const action = isMint ? "Purchased" : "Burned"
 
                   const formattedAmount = formatAmount(log.args.value, decimals)
-                  console.log("Final amount:", formattedAmount)
 
                   return {
                     id: `${log.transactionHash}-${log.logIndex}`,
                     action,
-                    symbol: "RWA",
-                    amount: `${formattedAmount} tokens`,
+                    symbol: "SLQD",
+                    amount: formattedAmount,
                     time: getTimeAgo(timestamp),
                     value: formatCurrencyValue(value),
                     blockNumber: Number(log.blockNumber),
+                    transactionType:
+                      action === "Burned" ? "SLQD Sold" : "SLQD Bought",
                   }
                 } catch (error) {
                   console.error("Error processing transaction:", error)
@@ -337,11 +339,16 @@ export function useRecentActivity(userAddress?: string) {
                       "0x0000000000000000000000000000000000000000"
                         ? "Purchased"
                         : "Burned",
-                    symbol: "RWA",
-                    amount: "0 tokens",
+                    symbol: "SLQD",
+                    amount: "0",
                     time: getTimeAgo(Date.now()),
                     value: "$0",
                     blockNumber: Number(log.blockNumber),
+                    transactionType:
+                      log.args.from ===
+                      "0x0000000000000000000000000000000000000000"
+                        ? "SLQD Bought"
+                        : "SLQD Sold",
                   }
                 }
               })

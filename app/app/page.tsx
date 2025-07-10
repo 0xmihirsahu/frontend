@@ -399,9 +399,7 @@ export default function DashboardPage() {
                         </Badge>
                       </div>
                       <span className="text-xs text-slate-500 mt-0.5">
-                        {activity.action === "Burned"
-                          ? "TOKEN_SELL"
-                          : "TOKEN_BUY"}
+                        {activity.transactionType}
                       </span>
                     </div>
 
@@ -410,7 +408,6 @@ export default function DashboardPage() {
                       <span className="text-sm text-slate-900">
                         {activity.amount}
                       </span>
-                      <span className="text-xs text-slate-500">TOKENS</span>
                     </div>
 
                     {/* USD Value */}
