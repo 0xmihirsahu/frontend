@@ -95,7 +95,7 @@ export default function DashboardPage() {
       color: "text-blue-600",
       bgColor: "bg-blue-50",
       borderColor: "border-blue-200",
-      stats: "$125K Value",
+      stats: `$${formatNumber(portfolioValue)}`,
       soon: false,
     },
     {

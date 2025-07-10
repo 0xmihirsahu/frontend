@@ -1,12 +1,7 @@
 "use client"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import {
-  ArrowRight,
-  BarChart3,
-
-  Zap,
-} from "lucide-react"
+import { ArrowRight, BarChart3, Zap } from "lucide-react"
 import { PixelTrail } from "@/components/ui/pixel-trail"
 import { useScreenSize } from "@/hooks/use-screen-size"
 import { Card, CardContent } from "@/components/ui/card"
@@ -14,12 +9,45 @@ import { Badge } from "@/components/ui/badge"
 import { Features } from "@/components/features"
 import DefaultFooter from "@/components/Footer"
 import { Waves } from "@/components/wave-background"
+import { useReserveContract } from "@/hooks/useReserveContract"
+import { useTotalSupply } from "@/hooks/view/useTotalSupply"
+import { useMarketData } from "@/hooks/useMarketData"
 
 export default function HomePage() {
   const screenSize = useScreenSize()
 
+  // Hooks for proof-of-reserve calculation
+  const { totalSupply, isLoading: totalSupplyLoading } = useTotalSupply()
+  const { price: currentPrice, isLoading: priceLoading } = useMarketData("LQD")
+  const RESERVE_CONTRACT_ADDRESS = "0xf26c960Abf98875f87764502f64e8F5ef9134C20"
+  const { totalReserves } = useReserveContract(RESERVE_CONTRACT_ADDRESS)
+
+  // Calculate total volume using proof-of-reserve logic
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount)
+  }
+
+  const getTotalVolume = () => {
+    if (totalSupplyLoading || priceLoading) {
+      return "Loading..."
+    }
+
+    if (totalReserves) {
+      // Use total reserves from contract (convert from wei) * price
+      return formatCurrency((Number(totalReserves) / 1e6) * (currentPrice || 0))
+    } else {
+      // Fallback to total supply * price
+      return formatCurrency(totalSupply * (currentPrice || 0))
+    }
+  }
+
   const platformStats = [
-    { value: "$2.4M", label: "Total Volume", change: "+12.5%" },
+    { value: getTotalVolume(), label: "Total Volume", change: "+12.5%" },
     { value: "1,247", label: "Active Users", change: "+8.2%" },
     { value: "99.9%", label: "Uptime", change: "Stable" },
     { value: "0.1%", label: "Trading Fees", change: "Low Cost" },
