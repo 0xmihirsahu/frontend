@@ -119,13 +119,20 @@ const ProofOfReservePage = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {totalReserves
-                ? formatCurrency(Number(totalReserves) / 1e6)
-                : formatCurrency(totalSupply)}
+              {totalSupplyLoading || priceLoading ? (
+                <RefreshCw className="h-5 w-5 animate-spin text-gray-400" />
+              ) : totalReserves ? (
+                formatCurrency(
+                  (Number(totalReserves) / 1e6) * (currentPrice || 0)
+                )
+              ) : (
+                formatCurrency(totalSupply * (currentPrice || 0))
+              )}
             </div>
             <div className="flex items-center text-xs text-emerald-600">
               <CheckCircle className="h-3 w-3 mr-1" />
-              Fully Backed
+              {formatNumber(totalSupply)} LQD @ $
+              {currentPrice?.toFixed(2) || "0.00"}
             </div>
           </CardContent>
         </Card>
@@ -150,16 +157,17 @@ const ProofOfReservePage = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {totalSupplyLoading ? (
+              {totalSupplyLoading || priceLoading ? (
                 <RefreshCw className="h-5 w-5 animate-spin text-gray-400" />
               ) : (
-                formatCurrency(totalSupply)
+                formatCurrency(totalSupply * (currentPrice || 0))
               )}
             </div>
             <div className="flex items-center text-xs text-purple-600">
               <Badge variant="secondary" className="text-xs">
                 AAA-Rated
               </Badge>
+              <span className="ml-2">{formatNumber(totalSupply)} LQD</span>
             </div>
           </CardContent>
         </Card>
@@ -264,10 +272,10 @@ const ProofOfReservePage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="text-center p-4 bg-purple-50 rounded-lg">
                     <div className="text-2xl font-bold text-purple-600">
-                      {totalSupplyLoading ? (
+                      {totalSupplyLoading || priceLoading ? (
                         <RefreshCw className="h-5 w-5 animate-spin text-gray-400 mx-auto" />
                       ) : (
-                        formatCurrency(totalSupply)
+                        formatCurrency(totalSupply * (currentPrice || 0))
                       )}
                     </div>
                     <div className="text-sm text-gray-600">Total Value</div>

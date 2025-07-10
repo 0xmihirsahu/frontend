@@ -37,7 +37,18 @@ export default function Swapinterface() {
   useEffect(() => {
     setLoading(true)
     fetch("/api/marketdata?symbol=LQD")
-      .then((res) => res.json())
+      .then(async (res) => {
+        if (!res.ok) {
+          throw new Error(`Server error: ${res.status}`)
+        }
+
+        const contentType = res.headers.get("content-type")
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("Invalid response format")
+        }
+
+        return res.json()
+      })
       .then((data) => {
         const ap = data?.quotes?.LQD?.ap
         if (typeof ap === "number") {
@@ -47,8 +58,9 @@ export default function Swapinterface() {
         }
         setLoading(false)
       })
-      .catch(() => {
-        setError("Failed to fetch")
+      .catch((err) => {
+        console.error("Error fetching market data:", err)
+        setError("Failed to fetch market data")
         setLoading(false)
       })
   }, [])

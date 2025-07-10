@@ -204,11 +204,31 @@ export default function KYCFlow() {
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || "Failed to get KYC signature")
+        let errorMessage = "Failed to get KYC signature"
+        try {
+          const contentType = response.headers.get("content-type")
+          if (contentType && contentType.includes("application/json")) {
+            const errorData = await response.json()
+            errorMessage = errorData.error || errorMessage
+          } else {
+            const errorText = await response.text()
+            console.error("Non-JSON error response:", errorText)
+            errorMessage = `Server error (${response.status}): ${response.statusText}`
+          }
+        } catch (parseError) {
+          console.error("Error parsing error response:", parseError)
+          errorMessage = `Server error (${response.status}): ${response.statusText}`
+        }
+        throw new Error(errorMessage)
       }
 
-      const data: KYCSignatureResponse = await response.json()
+      let data: KYCSignatureResponse
+      try {
+        data = await response.json()
+      } catch (parseError) {
+        console.error("Error parsing success response:", parseError)
+        throw new Error("Invalid response format from server")
+      }
       console.log("KYC signature response:", data)
       setKycSignature(data)
       setCurrentStep(3)
