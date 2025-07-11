@@ -308,7 +308,7 @@ export default function DashboardPage() {
                 <div className="w-2 h-8 bg-gradient-to-b from-slate-900 to-slate-700 rounded-full"></div>
                 <div>
                   <CardTitle className="text-lg font-medium text-slate-900 tracking-tight">
-                    TRANSACTION HISTORY
+                    Transaction history{" "}
                   </CardTitle>
                 </div>
               </div>
