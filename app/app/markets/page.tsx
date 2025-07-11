@@ -102,9 +102,9 @@ const popularStocks = [
 interface StockData {
   ticker: string
   name: string
-  price: number
-  change: number
-  changePercent: number
+  price: number | null
+  change: number | null
+  changePercent: number | null
   volume: string
   marketCap: string
   dataSource?: string
@@ -117,40 +117,55 @@ export default function MarketsPage() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
 
-  const formatMarketCap = (value: number) => {
+  const formatMarketCap = (value: number | undefined | null) => {
+    if (!value) return "$0"
     if (value >= 1e12) return `$${(value / 1e12).toFixed(2)}T`
     if (value >= 1e9) return `$${(value / 1e9).toFixed(2)}B`
     if (value >= 1e6) return `$${(value / 1e6).toFixed(2)}M`
     return `$${value.toLocaleString()}`
   }
 
-  const formatVolume = (volume: number) => {
+  const formatVolume = (volume: number | undefined | null) => {
+    if (!volume) return "0"
     if (volume >= 1e9) return `${(volume / 1e9).toFixed(1)}B`
     if (volume >= 1e6) return `${(volume / 1e6).toFixed(1)}M`
     if (volume >= 1e3) return `${(volume / 1e3).toFixed(1)}K`
-    return volume.toString()
+    return volume.toLocaleString()
   }
 
   const fetchStockData = async (ticker: string) => {
     try {
       const response = await fetch(`/api/stocks/${ticker}`)
-      if (response.ok) {
-        const data = await response.json()
-        return {
-          ticker: data.ticker,
-          name: popularStocks.find((s) => s.ticker === ticker)?.name || ticker,
-          price: data.currentPrice,
-          change: data.priceChange,
-          changePercent: data.priceChangePercent,
-          volume: formatVolume(data.volume),
-          marketCap: formatMarketCap(data.marketCap),
-          dataSource: data.dataSource,
-        }
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      const data = await response.json()
+
+      // Return a properly formatted StockData object with fallbacks
+      return {
+        ticker: data.ticker || ticker,
+        name: popularStocks.find((s) => s.ticker === ticker)?.name || ticker,
+        price: data.currentPrice ?? null,
+        change: data.priceChange ?? null,
+        changePercent: data.priceChangePercent ?? null,
+        volume: formatVolume(data.volume),
+        marketCap: formatMarketCap(data.marketCap),
+        dataSource: data.dataSource || "mock",
       }
     } catch (error) {
       console.error(`Error fetching ${ticker}:`, error)
+      // Return a StockData object with null/empty values on error
+      return {
+        ticker,
+        name: popularStocks.find((s) => s.ticker === ticker)?.name || ticker,
+        price: null,
+        change: null,
+        changePercent: null,
+        volume: "0",
+        marketCap: "$0",
+        dataSource: "mock",
+      }
     }
-    return null
   }
 
   const fetchAllStocks = useCallback(async () => {
@@ -338,20 +353,26 @@ export default function MarketsPage() {
                       </CardDescription>
                     </div>
                     <Badge
-                      variant={stock.change >= 0 ? "default" : "destructive"}
+                      variant={
+                        stock.change && stock.change >= 0
+                          ? "default"
+                          : "destructive"
+                      }
                       className={`text-xs ${
-                        stock.change >= 0
+                        stock.change && stock.change >= 0
                           ? "bg-green-100 text-green-700"
                           : "bg-red-100 text-red-700"
                       }`}
                     >
-                      {stock.change >= 0 ? (
+                      {stock.change && stock.change >= 0 ? (
                         <TrendingUp className="w-3 h-3 mr-1" />
                       ) : (
                         <TrendingDown className="w-3 h-3 mr-1" />
                       )}
-                      {stock.changePercent >= 0 ? "+" : ""}
-                      {stock.changePercent.toFixed(2)}%
+                      {stock.changePercent && stock.changePercent >= 0
+                        ? "+"
+                        : ""}
+                      {stock.changePercent?.toFixed(2)}%
                     </Badge>
                   </div>
                 </CardHeader>
@@ -359,14 +380,19 @@ export default function MarketsPage() {
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
                       <span className="text-2xl font-bold">
-                        ${stock.price.toLocaleString()}
+                        {stock.price !== null
+                          ? `$${stock.price.toLocaleString()}`
+                          : "N/A"}
                       </span>
                       <span
                         className={`text-sm font-medium ${
-                          stock.change >= 0 ? "text-green-600" : "text-red-600"
+                          stock.change && stock.change >= 0
+                            ? "text-green-600"
+                            : "text-red-600"
                         }`}
                       >
-                        {stock.change >= 0 ? "+" : ""}${stock.change.toFixed(2)}
+                        {stock.change && stock.change >= 0 ? "+" : ""}$
+                        {stock.change?.toFixed(2) ?? "0.00"}
                       </span>
                     </div>
                     <div className="grid grid-cols-2 gap-3">

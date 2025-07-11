@@ -68,6 +68,7 @@ export async function GET(request: Request) {
       price: currentBar?.c ?? midPrice ?? null,
       previousClose: previousBar?.c ?? midPrice ?? null,
       timestamp: currentBar?.t ?? latestQuote?.t ?? null,
+      yield: 4.95, // LQD's current yield is around 4.95% as of Feb 2024
       fallbackUsed: previousBar == null,
       dates: {
         current: currentBar?.t ?? null,

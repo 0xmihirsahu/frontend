@@ -29,17 +29,13 @@ import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import CustomConnectWallet from "@/components/custom-connect-wallet"
 
-function SidebarNavContent() {
-  const pathname = usePathname()
+function SidebarNavContent({
+  isActive,
+}: {
+  isActive: (path: string) => boolean
+}) {
   const { open } = useSidebar()
   const router = useRouter()
-
-  const isActive = (path: string) => {
-    if (path === "/app") {
-      return pathname === "/app"
-    }
-    return pathname.startsWith(path)
-  }
 
   return (
     <>
@@ -48,7 +44,7 @@ function SidebarNavContent() {
           <div className="flex h-8 w-8 items-center justify-center">
             <Image
               className="cursor-pointer"
-              onClick={() => router.push("/")}
+              onClick={() => router.push("/app")}
               src="/Whale.png"
               alt="Spout Finance logo"
               width={32}
@@ -57,7 +53,7 @@ function SidebarNavContent() {
           </div>
           {open && (
             <h1
-              onClick={() => router.push("/")}
+              onClick={() => router.push("/app")}
               className="text-lg font-semibold text-gray-900 cursor-pointer"
             >
               Spout Finance
@@ -155,16 +151,34 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
+  const pathname = usePathname()
+
+  const isActive = (path: string) => {
+    if (path === "/app") {
+      return pathname === "/app"
+    }
+    return pathname.startsWith(path)
+  }
+
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="flex min-h-screen w-full bg-gray-50">
         <Sidebar collapsible="none" className="border-r bg-white">
-          <SidebarNavContent />
+          <SidebarNavContent isActive={isActive} />
         </Sidebar>
 
         <SidebarInset className="flex-1">
           <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b bg-white px-4">
-            <div className="ml-4 text-sm text-gray-600">Dashboard</div>
+            <Link
+              href="/app"
+              className={`ml-4 text-sm cursor-pointer ${
+                isActive("/app")
+                  ? "text-gray-900 font-medium"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              Dashboard
+            </Link>
             <CustomConnectWallet />
           </header>
           <main className="flex-1 p-6 bg-gray-50">{children}</main>

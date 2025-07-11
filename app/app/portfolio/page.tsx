@@ -87,7 +87,7 @@ export default function PortfolioPage() {
 
   const holdings = [
     {
-      symbol: tokenSymbol || "SUSC",
+      symbol: tokenSymbol || "SLQD",
       name: "Spout US Corporate Bond Token",
       shares: tokenBalance || 0,
       avgPrice: previousClose || 0,

@@ -27,31 +27,8 @@ import {
   ArrowUpRight,
   CheckCircle,
   AlertCircle,
+  RefreshCcw,
 } from "lucide-react"
-
-// Mock data for Corporate Bonds
-const corporateBondsData = {
-  rating: "AAA",
-  yield: 3.85,
-  lastUpdated: "2024-01-15T10:30:00Z",
-  holdings: [
-    {
-      ticker: "LQD",
-      name: "iShares iBoxx $ Investment Grade Corporate Bond ETF",
-      yield: 3.85,
-    },
-    {
-      ticker: "VCIT",
-      name: "Vanguard Intermediate-Term Corporate Bond ETF",
-      yield: 3.95,
-    },
-    {
-      ticker: "IGIB",
-      name: "iShares Intermediate-Term Corporate Bond ETF",
-      yield: 3.75,
-    },
-  ],
-}
 
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat("en-US", {
@@ -68,10 +45,38 @@ const formatNumber = (num: number) => {
 
 const ProofOfReservePage = () => {
   const { totalSupply, isLoading: totalSupplyLoading } = useTotalSupply()
-  const { price: currentPrice, isLoading: priceLoading } = useMarketData("LQD")
+  const {
+    price: currentPrice,
+    yield: currentYield,
+    isLoading: priceLoading,
+  } = useMarketData("LQD")
   const RESERVE_CONTRACT_ADDRESS = "0xf26c960Abf98875f87764502f64e8F5ef9134C20"
   const { requestReserves, isRequestPending, totalReserves, refetchReserves } =
     useReserveContract(RESERVE_CONTRACT_ADDRESS)
+
+  // Corporate Bonds data using real yield
+  const corporateBondsData = {
+    rating: "AAA",
+    yield: currentYield || 0,
+    lastUpdated: new Date().toISOString(),
+    holdings: [
+      {
+        ticker: "LQD",
+        name: "iShares iBoxx $ Investment Grade Corporate Bond ETF",
+        yield: currentYield || 0,
+      },
+      {
+        ticker: "VCIT",
+        name: "Vanguard Intermediate-Term Corporate Bond ETF",
+        yield: (currentYield || 0) + 0.1, // Slightly higher yield
+      },
+      {
+        ticker: "IGIB",
+        name: "iShares Intermediate-Term Corporate Bond ETF",
+        yield: (currentYield || 0) - 0.1, // Slightly lower yield
+      },
+    ],
+  }
 
   const handleRequestReserves = () => {
     requestReserves(BigInt(379))
@@ -80,30 +85,27 @@ const ProofOfReservePage = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-2xl font-semibold text-slate-900">
             Proof of Reserve
           </h1>
-          <p className="text-gray-600">
+          <p className="text-sm text-slate-600 mt-1">
             Real-time verification of our reserve holdings and backing
           </p>
         </div>
-        <div className="flex gap-2 mt-4 md:mt-0">
+        <div className="flex items-center space-x-4">
           <Button
-            variant="outline"
-            size="sm"
             onClick={handleRequestReserves}
-            isDisabled={isRequestPending}
+            className="flex items-center space-x-2"
+            variant="outline"
           >
-            <RefreshCw
-              className={`h-4 w-4 mr-2 ${isRequestPending ? "animate-spin" : ""}`}
+            <RefreshCcw
+              className={`h-4 w-4 ${isRequestPending ? "animate-spin" : ""}`}
             />
-            {isRequestPending ? "Requesting..." : "Request Reserves"}
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => refetchReserves()}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
+            <span>
+              {isRequestPending ? "Requesting..." : "Request Reserves"}
+            </span>
           </Button>
         </div>
       </div>

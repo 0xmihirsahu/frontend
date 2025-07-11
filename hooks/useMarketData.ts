@@ -8,6 +8,7 @@ interface MarketDataResponse {
   bidPrice: number // Original bid price from Alpaca
   timestamp: string
   previousClose: number // Previous day's closing price
+  yield: number // Current yield percentage
 }
 
 interface MarketDataError {
@@ -78,6 +79,7 @@ export function useMarketData(symbol: string) {
     bidPrice: data?.bidPrice ?? null, // Original bid price
     timestamp: data?.timestamp ?? null,
     previousClose: data?.previousClose ?? null,
+    yield: data?.yield ?? null,
     dailyChangePercent,
   }
 }
