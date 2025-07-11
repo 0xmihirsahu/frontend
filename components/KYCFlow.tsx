@@ -156,7 +156,11 @@ export default function KYCFlow() {
     },
   ]
 
-  const progress = ((currentStep - 1) / (steps.length - 1)) * 100
+  // Modify progress calculation to show 80% when KYC is verified but claim not added
+  const progress =
+    kycSignature && !isClaimAdded
+      ? 80
+      : ((currentStep - 1) / (steps.length - 1)) * 100
 
   // Handle identity deployment
   const handleDeployIdentity = async () => {
