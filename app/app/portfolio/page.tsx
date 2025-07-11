@@ -63,9 +63,9 @@ export default function PortfolioPage() {
     loadMore,
   } = useRecentActivity(userAddress)
 
-  // Format number to 3 decimal places
+  // Format number to whole numbers without decimals
   const formatNumber = (num: number) => {
-    return Number(num.toFixed(3)).toLocaleString()
+    return Math.round(num).toLocaleString()
   }
 
   // Format percentage to 2 decimal places for cleaner display
