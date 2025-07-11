@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/tooltip"
 import { useRecentActivity } from "@/hooks/useRecentActivity"
 import { Activity } from "lucide-react"
+import { useReturns } from "@/hooks/useReturns"
 
 import { format } from "date-fns"
 
@@ -50,6 +51,8 @@ export default function PortfolioPage() {
     isLoading: priceLoading,
     error: priceError,
   } = useMarketData("LQD") // Using LQD as price reference
+
+  const { returns, isLoading: returnsLoading } = useReturns("LQD")
 
   const { username, loading } = useCurrentUser()
 
@@ -109,7 +112,7 @@ export default function PortfolioPage() {
   ]
 
   // Show loading spinner overlay but keep the blue dashboard background
-  const isLoading = balanceLoading || priceLoading
+  const isLoading = balanceLoading || priceLoading || returnsLoading
 
   return (
     <div className="space-y-8">
@@ -416,24 +419,33 @@ export default function PortfolioPage() {
                         <span className="text-sm text-gray-600">
                           30-Day Return
                         </span>
-                        <span className="text-sm font-medium text-green-600">
-                          +5.2%
+                        <span
+                          className={`text-sm font-medium ${returns.thirtyDayReturn >= 0 ? "text-green-600" : "text-red-600"}`}
+                        >
+                          {returns.thirtyDayReturn >= 0 ? "+" : ""}
+                          {formatPercent(returns.thirtyDayReturn)}%
                         </span>
                       </div>
                       <div className="flex justify-between p-3 bg-slate-50 rounded-xl">
                         <span className="text-sm text-gray-600">
                           90-Day Return
                         </span>
-                        <span className="text-sm font-medium text-green-600">
-                          +12.8%
+                        <span
+                          className={`text-sm font-medium ${returns.ninetyDayReturn >= 0 ? "text-green-600" : "text-red-600"}`}
+                        >
+                          {returns.ninetyDayReturn >= 0 ? "+" : ""}
+                          {formatPercent(returns.ninetyDayReturn)}%
                         </span>
                       </div>
                       <div className="flex justify-between p-3 bg-slate-50 rounded-xl">
                         <span className="text-sm text-gray-600">
                           1-Year Return
                         </span>
-                        <span className="text-sm font-medium text-green-600">
-                          +{totalReturnPercent}%
+                        <span
+                          className={`text-sm font-medium ${returns.yearReturn >= 0 ? "text-green-600" : "text-red-600"}`}
+                        >
+                          {returns.yearReturn >= 0 ? "+" : ""}
+                          {formatPercent(returns.yearReturn)}%
                         </span>
                       </div>
                       <div className="flex justify-between p-3 bg-slate-50 rounded-xl">
