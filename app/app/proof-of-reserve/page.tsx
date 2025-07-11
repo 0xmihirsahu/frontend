@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useReserveContract } from "@/hooks/useReserveContract"
 import { useTotalSupply } from "@/hooks/view/useTotalSupply"
 import { useMarketData } from "@/hooks/useMarketData"
+import { useYieldData } from "@/hooks/useYieldData"
 import {
   TrendingUp,
   Shield,
@@ -45,35 +46,26 @@ const formatNumber = (num: number) => {
 
 const ProofOfReservePage = () => {
   const { totalSupply, isLoading: totalSupplyLoading } = useTotalSupply()
-  const {
-    price: currentPrice,
-    yield: currentYield,
-    isLoading: priceLoading,
-  } = useMarketData("LQD")
+  const { price: currentPrice, isLoading: priceLoading } = useMarketData("LQD")
+  const { data: lqdYield, isLoading: lqdYieldLoading } = useYieldData("LQD")
+
   const RESERVE_CONTRACT_ADDRESS = "0xf26c960Abf98875f87764502f64e8F5ef9134C20"
   const { requestReserves, isRequestPending, totalReserves, refetchReserves } =
     useReserveContract(RESERVE_CONTRACT_ADDRESS)
 
+  // Use LQD yield directly
+  const yieldRate = lqdYield?.yield || 0
+
   // Corporate Bonds data using real yield
   const corporateBondsData = {
     rating: "AAA",
-    yield: currentYield || 0,
-    lastUpdated: new Date().toISOString(),
+    yieldRate: yieldRate,
+    lastUpdated: lqdYield?.timestamp || new Date().toISOString(),
     holdings: [
       {
         ticker: "LQD",
         name: "iShares iBoxx $ Investment Grade Corporate Bond ETF",
-        yield: currentYield || 0,
-      },
-      {
-        ticker: "VCIT",
-        name: "Vanguard Intermediate-Term Corporate Bond ETF",
-        yield: (currentYield || 0) + 0.1, // Slightly higher yield
-      },
-      {
-        ticker: "IGIB",
-        name: "iShares Intermediate-Term Corporate Bond ETF",
-        yield: (currentYield || 0) - 0.1, // Slightly lower yield
+        yieldRate: yieldRate,
       },
     ],
   }
@@ -294,9 +286,13 @@ const ProofOfReservePage = () => {
                   </div>
                   <div className="text-center p-4 bg-green-50 rounded-lg">
                     <div className="text-2xl font-bold text-green-600">
-                      {corporateBondsData.yield}%
+                      {lqdYieldLoading ? (
+                        <RefreshCw className="h-5 w-5 animate-spin text-gray-400 mx-auto" />
+                      ) : (
+                        `${yieldRate.toFixed(2)}%`
+                      )}
                     </div>
-                    <div className="text-sm text-gray-600">Average Yield</div>
+                    <div className="text-sm text-gray-600">Current Yield</div>
                   </div>
                 </div>
 
@@ -334,7 +330,11 @@ const ProofOfReservePage = () => {
                             )}
                           </td>
                           <td className="py-3 px-4 text-right">
-                            {holding.yield}%
+                            {lqdYieldLoading ? (
+                              <RefreshCw className="h-4 w-4 animate-spin text-gray-400 ml-auto" />
+                            ) : (
+                              `${holding.yieldRate.toFixed(2)}%`
+                            )}
                           </td>
                         </tr>
                       ))}

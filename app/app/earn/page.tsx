@@ -110,15 +110,10 @@ export default function EarnPage() {
         {comingSoonFeatures.map((feature, index) => {
           const IconComponent = feature.icon
           return (
-            <Card
-              key={index}
-              className="border-0 shadow-md hover:shadow-lg transition-all duration-300 group"
-            >
+            <Card key={index} className="border-0 shadow-md group">
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
-                  <div
-                    className={`p-3 ${feature.bgColor} rounded-2xl group-hover:scale-110 transition-transform duration-300`}
-                  >
+                  <div className={`p-3 ${feature.bgColor} rounded-2xl`}>
                     <IconComponent className={`h-6 w-6 ${feature.color}`} />
                   </div>
                   <Badge
@@ -136,7 +131,11 @@ export default function EarnPage() {
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
-                <Button variant="outline" className="w-full" isDisabled>
+                <Button
+                  isDisabled
+                  variant="ghost"
+                  className="w-full opacity-60 !bg-transparent hover:!bg-transparent active:!bg-transparent focus:!bg-transparent [&_*]:!bg-transparent cursor-default select-none"
+                >
                   Coming Soon
                 </Button>
               </CardContent>

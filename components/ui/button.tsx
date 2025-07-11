@@ -37,6 +37,8 @@ const buttonVariants = cva(
         "white-outline":
           "border border-white/30 text-white data-[hovered]:bg-white/10",
         success: "bg-emerald-500 text-white data-[hovered]:bg-emerald-600",
+        static:
+          "border border-input bg-transparent text-current pointer-events-none select-none hover:bg-transparent active:bg-transparent data-[hovered]:bg-transparent cursor-default",
       },
       size: {
         default: "h-10 px-4 py-2",
