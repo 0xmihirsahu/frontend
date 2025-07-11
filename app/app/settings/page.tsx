@@ -114,7 +114,6 @@ export default function SettingsPage() {
                   <Label htmlFor="firstName">First Name</Label>
                   <Input
                     id="firstName"
-                    defaultValue="Paul"
                     className="bg-slate-50 border-slate-200"
                   />
                 </div>
@@ -122,7 +121,6 @@ export default function SettingsPage() {
                   <Label htmlFor="lastName">Last Name</Label>
                   <Input
                     id="lastName"
-                    defaultValue="van Mierlo"
                     className="bg-slate-50 border-slate-200"
                   />
                 </div>
