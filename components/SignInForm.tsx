@@ -1,44 +1,37 @@
 "use client"
 
 import { useForm } from "react-hook-form"
-import { signUpWithProfile } from "@/lib/supabase/auth"
+import { signInWithProfile } from "@/lib/supabase/auth"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 
-interface SignUpFormData {
+interface SignInFormData {
   email: string
   password: string
-  firstName: string
-  lastName: string
 }
 
-export default function SignupForm() {
+export default function SignInForm() {
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<SignUpFormData>()
+  } = useForm<SignInFormData>()
   const [serverError, setServerError] = useState("")
-  const [success, setSuccess] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
-  const onSubmit = async (data: SignUpFormData) => {
+  const onSubmit = async (data: SignInFormData) => {
     setServerError("")
-    setSuccess(false)
     setIsLoading(true)
     
     try {
-      const result = await signUpWithProfile(data)
+      const result = await signInWithProfile(data)
       if (result.error) {
         setServerError(result.error)
       } else {
-        setSuccess(true)
-        // Redirect to login page after successful signup
-        setTimeout(() => {
-          router.push("/auth/login")
-        }, 2000)
+        // Redirect to dashboard or home page after successful login
+        router.push("/")
       }
     } catch (error) {
       setServerError("An unexpected error occurred")
@@ -50,45 +43,11 @@ export default function SignupForm() {
   return (
     <div className="bg-white rounded-lg shadow-lg p-8">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Create Account</h1>
-        <p className="text-gray-600 mt-2">Join us today</p>
+        <h1 className="text-3xl font-bold text-gray-900">Welcome Back</h1>
+        <p className="text-gray-600 mt-2">Sign in to your account</p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
-              First Name
-            </label>
-            <input
-              id="firstName"
-              type="text"
-              {...register("firstName", { required: "First name is required" })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="First Name"
-            />
-            {errors.firstName && (
-              <p className="mt-1 text-sm text-red-600">{errors.firstName.message}</p>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
-              Last Name
-            </label>
-            <input
-              id="lastName"
-              type="text"
-              {...register("lastName", { required: "Last name is required" })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Last Name"
-            />
-            {errors.lastName && (
-              <p className="mt-1 text-sm text-red-600">{errors.lastName.message}</p>
-            )}
-          </div>
-        </div>
-
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
             Email Address
@@ -111,8 +70,6 @@ export default function SignupForm() {
           )}
         </div>
 
-
-
         <div>
           <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
             Password
@@ -128,7 +85,7 @@ export default function SignupForm() {
               }
             })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="Create a password"
+            placeholder="Enter your password"
           />
           {errors.password && (
             <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
@@ -140,7 +97,7 @@ export default function SignupForm() {
           disabled={isSubmitting || isLoading}
           className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {isSubmitting || isLoading ? "Creating Account..." : "Create Account"}
+          {isSubmitting || isLoading ? "Signing In..." : "Sign In"}
         </button>
 
         {serverError && (
@@ -148,22 +105,16 @@ export default function SignupForm() {
             <p className="text-sm text-red-600">{serverError}</p>
           </div>
         )}
-
-        {success && (
-          <div className="bg-green-50 border border-green-200 rounded-md p-3">
-            <p className="text-sm text-green-600">Account created successfully! Redirecting to login...</p>
-          </div>
-        )}
       </form>
 
       <div className="mt-6 text-center">
         <p className="text-sm text-gray-600">
-          Already have an account?{" "}
-          <Link href="/auth/login" className="font-medium text-blue-600 hover:text-blue-500">
-            Sign in here
+          Don't have an account?{" "}
+          <Link href="/auth/register" className="font-medium text-blue-600 hover:text-blue-500">
+            Sign up here
           </Link>
         </p>
       </div>
     </div>
   )
-}
+} 

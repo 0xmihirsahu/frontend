@@ -19,11 +19,15 @@ import {
   Users,
   Shield,
   TrendingUp,
+  LogOut,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useSidebar, SidebarProvider } from "@/components/ui/sidebar"
 import Image from "next/image"
+import ProtectedRoute from "@/components/ProtectedRoute"
+import { useAuthContext } from "@/context/AuthContext"
+import SignOutButton from "@/components/SignOutButton"
 
 import CustomConnectWallet from "@/components/custom-connect-wallet"
 
@@ -136,8 +140,18 @@ function SidebarNavContent({
       </SidebarContent>
 
       <SidebarFooter className="p-4 border-t">
-        <div className="text-xs text-gray-500 text-center">
-          © 2024 Spout Finance
+        <div className="space-y-3">
+          <div className="flex items-center gap-3 px-2 py-1">
+            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+            <span className="text-sm text-gray-600">Signed in</span>
+          </div>
+          <SignOutButton className="w-full flex items-center gap-3 px-2 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors">
+            <LogOut className="h-4 w-4" />
+            <span>Sign Out</span>
+          </SignOutButton>
+          <div className="text-xs text-gray-500 text-center pt-2 border-t">
+            © 2024 Spout Finance
+          </div>
         </div>
       </SidebarFooter>
     </>
@@ -159,29 +173,31 @@ export default function DashboardLayout({
   }
 
   return (
-    <SidebarProvider defaultOpen={true}>
-      <div className="flex min-h-screen w-full bg-gray-50">
-        <Sidebar collapsible="none" className="border-r bg-white">
-          <SidebarNavContent isActive={isActive} />
-        </Sidebar>
+    <ProtectedRoute>
+      <SidebarProvider defaultOpen={true}>
+        <div className="flex min-h-screen w-full bg-gray-50">
+          <Sidebar collapsible="none" className="border-r bg-white">
+            <SidebarNavContent isActive={isActive} />
+          </Sidebar>
 
-        <SidebarInset className="flex-1">
-          <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b bg-white px-4">
-            <Link
-              href="/app"
-              className={`ml-4 text-sm cursor-pointer ${
-                isActive("/app")
-                  ? "text-gray-900 font-medium"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              Dashboard
-            </Link>
-            <CustomConnectWallet />
-          </header>
-          <main className="flex-1 p-6 bg-gray-50">{children}</main>
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
+          <SidebarInset className="flex-1">
+            <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b bg-white px-4">
+              <Link
+                href="/app"
+                className={`ml-4 text-sm cursor-pointer ${
+                  isActive("/app")
+                    ? "text-gray-900 font-medium"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                Dashboard
+              </Link>
+              <CustomConnectWallet />
+            </header>
+            <main className="flex-1 p-6 bg-gray-50">{children}</main>
+          </SidebarInset>
+        </div>
+      </SidebarProvider>
+    </ProtectedRoute>
   )
 }
