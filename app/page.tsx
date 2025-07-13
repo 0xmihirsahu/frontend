@@ -12,6 +12,7 @@ import { Waves } from "@/components/wave-background"
 import { useReserveContract } from "@/hooks/useReserveContract"
 import { useTotalSupply } from "@/hooks/view/useTotalSupply"
 import { useMarketData } from "@/hooks/useMarketData"
+import { useState } from "react"
 
 export default function HomePage() {
   const screenSize = useScreenSize()
@@ -62,6 +63,28 @@ export default function HomePage() {
     { symbol: "TSLA", price: "$248.42", change: "-1.3%", volume: "32.1M" },
     { symbol: "MSFT", price: "$424.58", change: "+0.8%", volume: "28.7M" },
   ]
+
+  const [mail, setMail] = useState("")
+  const [mailMsg, setMailMsg] = useState("")
+  const [mailLoading, setMailLoading] = useState(false)
+  const handleMailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setMailMsg("")
+    setMailLoading(true)
+    try {
+      const res = await fetch("/api/mailing-list", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: mail })
+      })
+      const data = await res.json()
+      setMailMsg(data.message || data.error || "Unknown error")
+      if (res.ok) setMail("")
+    } catch {
+      setMailMsg("Something went wrong. Please try again later.")
+    }
+    setMailLoading(false)
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -139,6 +162,32 @@ export default function HomePage() {
             ))}
           </div>
         </div>
+      </section>
+
+      {/* Mailing List Section */}
+      <section className="relative z-20 max-w-2xl mx-auto px-4 -mt-16 mb-16">
+        <form onSubmit={handleMailSubmit} className="flex flex-col sm:flex-row items-center gap-4 bg-white/90 border border-emerald-100 shadow-xl rounded-2xl px-6 py-8">
+          <div className="flex-1 w-full">
+            <label htmlFor="mailing-list-email" className="block text-lg font-semibold text-slate-900 mb-2">Join our mailing list</label>
+            <input
+              id="mailing-list-email"
+              type="email"
+              value={mail}
+              onChange={e => setMail(e.target.value)}
+              required
+              placeholder="Enter your email"
+              className="w-full px-4 py-3 border border-slate-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-emerald-50 text-slate-900 text-base"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={mailLoading}
+            className="w-full sm:w-auto bg-emerald-600 text-white py-3 px-8 rounded-2xl hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-lg shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {mailLoading ? "Joining..." : "Join"}
+          </button>
+        </form>
+        {mailMsg && <div className="text-green-600 text-center mt-4 font-medium">{mailMsg}</div>}
       </section>
 
       {/* Proof of Reserve Section */}
