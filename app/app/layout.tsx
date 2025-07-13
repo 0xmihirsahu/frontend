@@ -131,7 +131,7 @@ function SidebarNavContent({
             <SidebarMenuButton className="flex items-center gap-3 ">
               <Link href="/app/profile" className="flex items-center gap-3">
                 <Users className="h-4 w-4" />
-                <span>Profule</span>
+                <span>Profile</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
