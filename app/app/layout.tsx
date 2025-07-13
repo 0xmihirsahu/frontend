@@ -128,12 +128,11 @@ function SidebarNavContent({
           </SidebarMenuItem>
 
           <SidebarMenuItem>
-            <SidebarMenuButton className="flex items-center gap-3 opacity-75 cursor-not-allowed">
-              <Users className="h-4 w-4" />
-              <span>Settings</span>
-              <Badge variant="secondary" className="ml-auto">
-                Soon
-              </Badge>
+            <SidebarMenuButton className="flex items-center gap-3 ">
+              <Link href="/app/profile" className="flex items-center gap-3">
+                <Users className="h-4 w-4" />
+                <span>Profule</span>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
