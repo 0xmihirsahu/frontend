@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Waves } from "@/components/wave-background"
 import Image from "next/image"
+import { Eye, EyeOff } from "lucide-react"
 
 interface SignUpFormData {
   email: string
@@ -25,6 +26,7 @@ export default function SignupForm() {
   const [success, setSuccess] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const [showPassword, setShowPassword] = useState(false)
 
   const onSubmit = async (data: SignUpFormData) => {
     setServerError("")
@@ -115,19 +117,30 @@ export default function SignupForm() {
             <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
               Password
             </label>
-            <input
-              id="password"
-              type="password"
-              {...register("password", {
-                required: "Password is required",
-                minLength: {
-                  value: 6,
-                  message: "Password must be at least 6 characters"
-                }
-              })}
-              className="w-full px-4 py-3 border border-slate-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-emerald-50 text-slate-900 text-base"
-              placeholder="Create a password"
-            />
+            <div className="relative">
+              <input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                {...register("password", {
+                  required: "Password is required",
+                  minLength: {
+                    value: 6,
+                    message: "Password must be at least 6 characters"
+                  }
+                })}
+                className="w-full px-4 py-3 border border-slate-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-emerald-50 text-slate-900 text-base pr-12"
+                placeholder="Create a password"
+              />
+              <button
+                type="button"
+                tabIndex={-1}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 focus:outline-none"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+              </button>
+            </div>
             {errors.password && (
               <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
             )}
