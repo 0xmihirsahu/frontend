@@ -94,4 +94,14 @@ async function loginAndFetchProfile(args: SignInArgs) {
   return signInWithProfile(args)
 }
 
-export { signUpWithProfile, signInWithProfile, signOut, loginAndFetchProfile }
+async function sendPasswordResetEmail(email: string) {
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/auth/reset-password`,
+  })
+  if (error) {
+    return { error: error.message }
+  }
+  return { success: true }
+}
+
+export { signUpWithProfile, signInWithProfile, signOut, loginAndFetchProfile, sendPasswordResetEmail }
