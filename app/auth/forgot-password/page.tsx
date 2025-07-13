@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { sendPasswordResetEmail } from "@/lib/supabase/auth"
+import { Waves } from "@/components/wave-background"
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("")
@@ -21,33 +22,39 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="max-w-md mx-auto mt-20 bg-white p-8 rounded-lg shadow">
-      <h1 className="text-2xl font-bold mb-4">Forgot Password</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-            Email Address
-          </label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter your email"
-          />
+    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-white to-emerald-50">
+      <Waves className="absolute top-0 left-0 w-full h-full" />
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-emerald-100 p-10 relative z-10">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-slate-900 mb-2">Forgot Password</h1>
+          <p className="text-slate-600 text-lg">Enter your email to receive a password reset link.</p>
         </div>
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
-        >
-          {loading ? "Sending..." : "Send Reset Email"}
-        </button>
-        {message && <div className="text-green-600 text-sm mt-2">{message}</div>}
-        {error && <div className="text-red-600 text-sm mt-2">{error}</div>}
-      </form>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
+              Email Address
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+              className="w-full px-4 py-3 border border-slate-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-emerald-50 text-slate-900 text-base"
+              placeholder="Enter your email"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-emerald-600 text-white py-3 px-4 rounded-2xl hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-semibold text-lg shadow-lg"
+          >
+            {loading ? "Sending..." : "Send Reset Email"}
+          </button>
+          {message && <div className="text-green-600 text-sm mt-2">{message}</div>}
+          {error && <div className="text-red-600 text-sm mt-2">{error}</div>}
+        </form>
+      </div>
     </div>
   )
 } 
