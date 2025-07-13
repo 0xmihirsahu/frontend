@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { sendPasswordResetEmail } from "@/lib/supabase/auth"
 import { Waves } from "@/components/wave-background"
+import Image from "next/image"
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("")
@@ -25,9 +26,9 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-white to-emerald-50">
       <Waves className="absolute top-0 left-0 w-full h-full" />
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-emerald-100 p-10 relative z-10">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">Forgot Password</h1>
-          <p className="text-slate-600 text-lg">Enter your email to receive a password reset link.</p>
+        <div className="text-center flex flex-col items-center mb-8">
+            <Image src="/Spout_complete.png" alt="Spout Logo" width={250} height={250} />
+          <p className="text-slate-600 mt-4 text-lg">Enter your email to receive a password reset link.</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>

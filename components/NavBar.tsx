@@ -13,6 +13,9 @@ import {
 import React, { useState } from "react";
 import Link from "next/link";
 import { useAuthContext } from "@/context/AuthContext";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { LogOut } from "lucide-react";
+import { signOut } from "@/lib/supabase/auth";
 const navItems = [
   { name: "Markets", link: "/app/markets" },
   { name: "Trade", link: "/app/trade" },
@@ -21,18 +24,23 @@ const navItems = [
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  let showLogin = false;
-  try {
-    // Only call hook in client
-    showLogin = typeof window !== "undefined" && !useAuthContext().user;
-  } catch {}
+  const { user, profile } = useAuthContext();
+
+  const handleSignOut = async () => {
+    await signOut();
+    window.location.reload();
+  };
+
+  const displayName = profile?.first_name
+    ? `${profile.first_name} ${profile.last_name ?? ""}`
+    : user?.email;
 
   return (
     <ResizableNavbar>
       <NavBody>
         <NavbarLogo />
         <NavItems items={navItems} />
-        {showLogin && (
+        {!user && (
           <Link
             href="/auth/login"
             style={{ position: "relative", zIndex: 50 }}
@@ -40,6 +48,20 @@ export default function Navbar() {
           >
             Login
           </Link>
+        )}
+        {user && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="px-4 py-2 z-50 rounded-2xl bg-emerald-50 text-emerald-700 font-semibold hover:bg-emerald-100 transition-colors focus:outline-none">
+                {displayName}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuItem onClick={handleSignOut} className="text-red-600 cursor-pointer">
+                <LogOut className="mr-2 h-4 w-4" /> Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </NavBody>
       <MobileNav>
@@ -49,14 +71,28 @@ export default function Navbar() {
         </MobileNavHeader>
         <MobileNavMenu isOpen={mobileOpen} onClose={() => setMobileOpen(false)}>
           <NavItems items={navItems} onItemClick={() => setMobileOpen(false)} />
-          {showLogin && (
+          {!user && (
             <Link
               href="/auth/login"
               style={{ position: "relative", zIndex: 50 }}
-              className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+              className="px-4 py-2 rounded-2xl bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
             >
               Login
             </Link>
+          )}
+          {user && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="block w-full px-4 py-2 rounded-2xl bg-emerald-50 text-emerald-700 font-semibold mt-2 text-left hover:bg-emerald-100 transition-colors focus:outline-none">
+                  {displayName}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40">
+                <DropdownMenuItem onClick={handleSignOut} className="text-red-600 cursor-pointer">
+                  <LogOut className="mr-2 h-4 w-4" /> Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </MobileNavMenu>
       </MobileNav>

@@ -6,6 +6,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Waves } from "@/components/wave-background"
+import Image from "next/image"
 
 interface SignInFormData {
   email: string
@@ -43,9 +44,9 @@ export default function SignInForm() {
     <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-white to-emerald-50">
         <Waves className="absolute top-0 left-0 w-full h-full" />
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-emerald-100 p-10 relative z-10">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">Sign in to Spout</h1>
-          <p className="text-slate-600 text-lg">Welcome back! Please enter your details.</p>
+        <div className="text-center flex flex-col items-center mb-8">
+        <Image src="/Spout_complete.png" alt="Spout Logo" width={250} height={250} />
+          <p className="text-slate-600 mt-4 text-lg">Welcome back! Please enter your details and Sign In.</p>
         </div>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
