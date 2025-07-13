@@ -145,6 +145,7 @@ function SidebarNavContent({
             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
             <span className="text-sm text-gray-600">Signed in</span>
           </div>
+          <CustomConnectWallet />
           <SignOutButton className="w-full flex items-center gap-3 px-2 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors">
             <LogOut className="h-4 w-4" />
             <span>Sign Out</span>
@@ -192,7 +193,6 @@ export default function DashboardLayout({
               >
                 Dashboard
               </Link>
-              <CustomConnectWallet />
             </header>
             <main className="flex-1 p-6 bg-gray-50">{children}</main>
           </SidebarInset>

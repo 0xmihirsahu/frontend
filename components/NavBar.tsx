@@ -11,7 +11,8 @@ import {
   MobileNavToggle,
 } from "./ui/resizable-navbar";
 import React, { useState } from "react";
-import CustomConnectButton from "@/components/custom-connect-wallet";
+import Link from "next/link";
+import { useAuthContext } from "@/context/AuthContext";
 const navItems = [
   { name: "Markets", link: "/app/markets" },
   { name: "Trade", link: "/app/trade" },
@@ -20,15 +21,26 @@ const navItems = [
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  let showLogin = false;
+  try {
+    // Only call hook in client
+    showLogin = typeof window !== "undefined" && !useAuthContext().user;
+  } catch {}
 
   return (
     <ResizableNavbar>
       <NavBody>
         <NavbarLogo />
         <NavItems items={navItems} />
-        <NavbarButton className="p-0">
-          <CustomConnectButton />
-        </NavbarButton>
+        {showLogin && (
+          <Link
+            href="/auth/login"
+            style={{ position: "relative", zIndex: 50 }}
+            className="px-4 py-2 rounded-2xl bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
+          >
+            Login
+          </Link>
+        )}
       </NavBody>
       <MobileNav>
         <MobileNavHeader>
@@ -37,9 +49,15 @@ export default function Navbar() {
         </MobileNavHeader>
         <MobileNavMenu isOpen={mobileOpen} onClose={() => setMobileOpen(false)}>
           <NavItems items={navItems} onItemClick={() => setMobileOpen(false)} />
-          <NavbarButton className="p-0">
-            <CustomConnectButton />
-          </NavbarButton>
+          {showLogin && (
+            <Link
+              href="/auth/login"
+              style={{ position: "relative", zIndex: 50 }}
+              className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+            >
+              Login
+            </Link>
+          )}
         </MobileNavMenu>
       </MobileNav>
     </ResizableNavbar>
