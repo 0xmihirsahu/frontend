@@ -4,7 +4,6 @@ import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
-  SidebarTrigger,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
@@ -25,8 +24,7 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useSidebar, SidebarProvider } from "@/components/ui/sidebar"
 import Image from "next/image"
-import { useEffect, useState } from "react"
-import { toast } from "sonner"
+
 import CustomConnectWallet from "@/components/custom-connect-wallet"
 
 function SidebarNavContent({
