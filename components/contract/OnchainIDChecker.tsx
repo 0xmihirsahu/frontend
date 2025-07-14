@@ -4,6 +4,7 @@ import { useAccount } from "wagmi"
 import { toast } from "sonner"
 import { useOnchainID } from "@/hooks/view/onChain/useOnchainID"
 import React from "react"
+import { useRouter } from "next/navigation"
 
 export default function OnchainIDChecker() {
   const { address: userAddress } = useAccount()
@@ -12,14 +13,21 @@ export default function OnchainIDChecker() {
     userAddress,
     idFactoryAddress,
   })
+  const router = useRouter()
 
   React.useEffect(() => {
     if (hasOnchainID === false && !onchainIDLoading) {
       toast.warning(
-        "You do not have an OnchainID yet. Please complete KYC to create one."
+        "You do not have an OnchainID yet. Please complete KYC to create one.",
+        {
+          action: {
+            label: "Complete Profile",
+            onClick: () => router.push("/app/profile"),
+          },
+        }
       )
     }
-  }, [hasOnchainID, onchainIDLoading])
+  }, [hasOnchainID, onchainIDLoading, router])
 
   return null
 }

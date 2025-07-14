@@ -30,6 +30,7 @@ import {
   TrendingUp,
   BarChart3,
 } from "lucide-react"
+import KYCFlow from "@/components/KYCFlow"
 
 export default function SettingsPage() {
   return (
@@ -57,7 +58,7 @@ export default function SettingsPage() {
 
       <Tabs defaultValue="profile" className="space-y-6">
         <div className="bg-white rounded-2xl p-2 shadow-md border-0">
-          <TabsList className="grid w-full grid-cols-3 bg-transparent gap-1">
+          <TabsList className="grid w-full grid-cols-2 bg-transparent gap-1">
             <TabsTrigger
               value="profile"
               className="flex items-center gap-2 data-[state=active]:bg-slate-100 rounded-xl"
@@ -66,18 +67,11 @@ export default function SettingsPage() {
               <span className="hidden sm:inline">Profile</span>
             </TabsTrigger>
             <TabsTrigger
-              value="notifications"
-              className="flex items-center gap-2 data-[state=active]:bg-slate-100 rounded-xl"
-            >
-              <Bell className="h-4 w-4" />
-              <span className="hidden sm:inline">Notifications</span>
-            </TabsTrigger>
-            <TabsTrigger
-              value="security"
+              value="kyc"
               className="flex items-center gap-2 data-[state=active]:bg-slate-100 rounded-xl"
             >
               <Shield className="h-4 w-4" />
-              <span className="hidden sm:inline">Security</span>
+              <span className="hidden sm:inline">KYC</span>
             </TabsTrigger>
           </TabsList>
         </div>
@@ -151,166 +145,9 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
 
-        {/* Notification Settings */}
-        <TabsContent value="notifications" className="space-y-6">
-          <Card className="border-0 shadow-md">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bell className="h-5 w-5 text-blue-600" />
-                Notification Preferences
-              </CardTitle>
-              <CardDescription>
-                Choose how you want to be notified about market changes and
-                account updates
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-6">
-                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-emerald-100 rounded-lg">
-                      <TrendingUp className="h-4 w-4 text-emerald-600" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium">Price Alerts</h4>
-                      <p className="text-sm text-gray-600">
-                        Get notified when stock prices hit your target
-                      </p>
-                    </div>
-                  </div>
-                  <Switch defaultChecked />
-                </div>
-                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <BarChart3 className="h-4 w-4 text-blue-600" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium">Portfolio Updates</h4>
-                      <p className="text-sm text-gray-600">
-                        Daily portfolio performance summaries
-                      </p>
-                    </div>
-                  </div>
-                  <Switch defaultChecked />
-                </div>
-                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-purple-100 rounded-lg">
-                      <Globe className="h-4 w-4 text-purple-600" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium">Market News</h4>
-                      <p className="text-sm text-gray-600">
-                        Breaking news and market analysis
-                      </p>
-                    </div>
-                  </div>
-                  <Switch />
-                </div>
-                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-red-100 rounded-lg">
-                      <Shield className="h-4 w-4 text-red-600" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium">Security Alerts</h4>
-                      <p className="text-sm text-gray-600">
-                        Login attempts and security notifications
-                      </p>
-                    </div>
-                  </div>
-                  <Switch defaultChecked />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Security Settings */}
-        <TabsContent value="security" className="space-y-6">
-          <Card className="border-0 shadow-md">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-red-600" />
-                Security & Privacy
-              </CardTitle>
-              <CardDescription>
-                Manage your account security and privacy settings
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-6 border rounded-2xl hover:bg-slate-50 transition-colors">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-blue-100 rounded-xl">
-                      <Key className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-medium">Two-Factor Authentication</h4>
-                      <p className="text-sm text-gray-600">
-                        Add an extra layer of security to your account
-                      </p>
-                    </div>
-                  </div>
-                  <Button variant="outline" className="hover:bg-blue-50">
-                    Enable
-                  </Button>
-                </div>
-                <div className="flex items-center justify-between p-6 border rounded-2xl hover:bg-slate-50 transition-colors">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-green-100 rounded-xl">
-                      <CreditCard className="h-5 w-5 text-green-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-medium">API Keys</h4>
-                      <p className="text-sm text-gray-600">
-                        Manage your API access keys
-                      </p>
-                    </div>
-                  </div>
-                  <Button variant="outline" className="hover:bg-green-50">
-                    Manage
-                  </Button>
-                </div>
-              </div>
-
-              <div className="space-y-4 pt-6 border-t">
-                <h4 className="font-medium">Change Password</h4>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="currentPassword">Current Password</Label>
-                    <Input
-                      id="currentPassword"
-                      type="password"
-                      className="bg-slate-50 border-slate-200"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="newPassword">New Password</Label>
-                    <Input
-                      id="newPassword"
-                      type="password"
-                      className="bg-slate-50 border-slate-200"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">
-                      Confirm New Password
-                    </Label>
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      className="bg-slate-50 border-slate-200"
-                    />
-                  </div>
-                  <Button className="bg-red-600 hover:bg-red-700">
-                    Update Password
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* KYC Tab (was Notifications) */}
+        <TabsContent value="kyc" className="space-y-6">
+          <KYCFlow />
         </TabsContent>
       </Tabs>
     </div>

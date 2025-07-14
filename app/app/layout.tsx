@@ -7,6 +7,7 @@ import {
   DashboardSidebarNavClient,
   DashboardNavbarHeaderClient,
 } from "@/components/DashboardNavClient"
+import { Toaster } from "@/components/ui/sonner"
 
 export default function DashboardLayout({
   children,
@@ -14,20 +15,19 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   return (
-    <ProtectedRoute>
-      <SidebarProvider defaultOpen={true}>
-        <div className="flex min-h-screen w-full bg-gray-50">
-          <Sidebar collapsible="none" className="border-r bg-white">
-            <DashboardSidebarNavClient />
-          </Sidebar>
+    <SidebarProvider defaultOpen={true}>
+      <Toaster position="top-right" />
+      <div className="flex min-h-screen w-full bg-gray-50">
+        <Sidebar collapsible="none" className="border-r bg-white">
+          <DashboardSidebarNavClient />
+        </Sidebar>
 
-          <SidebarInset className="flex-1">
-            <DashboardNavbarHeaderClient />
-            <OnchainIDChecker />
-            <main className="sflex-1 p-6 bg-gray-50">{children}</main>
-          </SidebarInset>
-        </div>
-      </SidebarProvider>
-    </ProtectedRoute>
+        <SidebarInset className="flex-1">
+          <DashboardNavbarHeaderClient />
+          <OnchainIDChecker />
+          <main className="flex-1 p-6 bg-gray-50">{children}</main>
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
   )
 }

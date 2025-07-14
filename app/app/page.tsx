@@ -18,10 +18,7 @@ import {
   Activity,
   DollarSign,
   PieChart,
-  Users,
   Zap,
-  Target,
-  Clock,
 } from "lucide-react"
 import { useTokenBalance } from "@/hooks/view/onChain/useTokenBalance"
 import { useMarketData } from "@/hooks/api/useMarketData"

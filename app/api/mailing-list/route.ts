@@ -25,8 +25,11 @@ export async function POST(req: NextRequest) {
     }
     emails.push(email)
     await fs.writeFile(MAILING_LIST_PATH, JSON.stringify(emails, null, 2))
-    return NextResponse.json({ message: "Thank you for joining our mailing list!" }, { status: 200 })
+    return NextResponse.json(
+      { message: "Thank you for joining our mailing list!" },
+      { status: 200 }
+    )
   } catch (e) {
     return NextResponse.json({ error: "Server error" }, { status: 500 })
   }
-} 
+}

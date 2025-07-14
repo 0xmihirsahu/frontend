@@ -4,9 +4,7 @@ import "react-toastify/dist/ReactToastify.css"
 import type { Metadata } from "next"
 import { Public_Sans, IBM_Plex_Mono } from "next/font/google"
 import { Providers } from "@/components/Providers"
-import Navbar from "@/components/NavBar"
 import { cn } from "@/lib/utils"
-import { Toaster } from "sonner"
 import { ConditionalNavbar } from "@/components/ConditionalNavbar"
 
 const publicSans = Public_Sans({
@@ -51,7 +49,6 @@ export default async function RootLayout({
         <Providers>
           <ConditionalNavbar />
           <main className="flex-1">{children}</main>
-          <Toaster />
         </Providers>
       </body>
     </html>

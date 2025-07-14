@@ -91,14 +91,6 @@ export function DashboardSidebarNavClient() {
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isActive("/app/kyc")}>
-              <Link href="/app/kyc" className="flex items-center gap-3">
-                <Shield className="h-4 w-4" />
-                <span>KYC Verification</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
             <SidebarMenuButton
               asChild
               isActive={isActive("/app/proof-of-reserve")}
