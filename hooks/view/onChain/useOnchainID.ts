@@ -1,57 +1,36 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { ethers } from "ethers"
+import { useReadContract } from "wagmi"
 import idFactoryABI from "@/abi/idfactory.json"
 
 export function useOnchainID({
   userAddress,
   idFactoryAddress,
-  provider,
 }: {
   userAddress: string | undefined | null
   idFactoryAddress: string
-  provider: ethers.Provider
 }) {
-  const [hasOnchainID, setHasOnchainID] = useState<boolean | null>(null)
-  const [onchainIDAddress, setOnchainIDAddress] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const {
+    data: onchainID,
+    isLoading,
+    error,
+  } = useReadContract({
+    address: idFactoryAddress as `0x${string}`,
+    abi: idFactoryABI,
+    functionName: "getIdentity",
+    args: [userAddress as `0x${string}`],
+    query: { enabled: !!userAddress },
+  })
 
-  useEffect(() => {
-    if (!userAddress || !idFactoryAddress || !provider) {
-      setHasOnchainID(null)
-      setOnchainIDAddress(null)
-      setError(null)
-      return
-    }
-    setLoading(true)
-    setError(null)
-    async function checkOnchainID() {
-      try {
-        const idFactory = new ethers.Contract(
-          idFactoryAddress,
-          idFactoryABI,
-          provider
-        )
-        const onchainID = await idFactory.getIdentity(userAddress)
-        if (!onchainID || onchainID === ethers.ZeroAddress) {
-          setHasOnchainID(false)
-          setOnchainIDAddress(null)
-        } else {
-          setHasOnchainID(true)
-          setOnchainIDAddress(onchainID)
-        }
-      } catch (err: any) {
-        setError(err.message || "Failed to check OnchainID")
-        setHasOnchainID(null)
-        setOnchainIDAddress(null)
-      } finally {
-        setLoading(false)
-      }
-    }
-    checkOnchainID()
-  }, [userAddress, idFactoryAddress, provider])
+  const hasOnchainID =
+    onchainID &&
+    typeof onchainID === "string" &&
+    onchainID !== "0x0000000000000000000000000000000000000000"
 
-  return { hasOnchainID, onchainIDAddress, loading, error }
+  return {
+    hasOnchainID,
+    onchainIDAddress: onchainID,
+    loading: isLoading,
+    error,
+  }
 }
