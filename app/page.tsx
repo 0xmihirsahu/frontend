@@ -12,6 +12,86 @@ import { Waves } from "@/components/wave-background"
 import { useReserveContract } from "@/hooks/view/onChain/useReserveContract"
 import { useTotalSupply } from "@/hooks/view/onChain/useTotalSupply"
 import { useMarketData } from "@/hooks/api/useMarketData"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Button as JoinButton } from "@/components/ui/button"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
+import { useEffect, useState } from "react"
+import { LoadingSpinner } from "@/components/LoadingSpinner"
+
+const mailingListSchema = z.object({
+  email: z.string().email("Invalid email address").optional().or(z.literal("")),
+})
+
+type MailingListFormData = z.infer<typeof mailingListSchema>
+
+function JoinMailingList() {
+  const [email, setEmail] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setMessage(null)
+    setError(null)
+    if (!email) {
+      setError("Please enter your email.")
+      return
+    }
+    setLoading(true)
+    try {
+      const res = await fetch("/api/mailing-list", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setMessage(data.message || "Thank you for joining!")
+        setEmail("")
+      } else {
+        setError(data.error || data.message || "Something went wrong.")
+      }
+    } catch (err) {
+      setError("Network error. Please try again.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col sm:flex-row gap-2 w-full max-w-xs mx-auto"
+    >
+      <Input
+        type="email"
+        placeholder="Join our mailing list"
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+        className="flex-1 bg-white/80 border-slate-200 focus-visible:ring-emerald-600"
+        disabled={loading}
+        required
+      />
+      <JoinButton
+        type="submit"
+        className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-xl font-semibold"
+        isDisabled={loading}
+      >
+        {loading ? <LoadingSpinner size="sm" /> : "Join"}
+      </JoinButton>
+      {message && (
+        <div className="w-full text-center text-emerald-700 text-xs mt-2">{message}</div>
+      )}
+      {error && (
+        <div className="w-full text-center text-red-500 text-xs mt-2">{error}</div>
+      )}
+    </form>
+  )
+}
 
 export default function HomePage() {
   const screenSize = useScreenSize()
@@ -62,6 +142,47 @@ export default function HomePage() {
     { symbol: "TSLA", price: "$248.42", change: "-1.3%", volume: "32.1M" },
     { symbol: "MSFT", price: "$424.58", change: "+0.8%", volume: "28.7M" },
   ]
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<MailingListFormData>({
+    resolver: zodResolver(mailingListSchema),
+  })
+
+  const onSubmit = async (data: MailingListFormData) => {
+    if (!data.email) {
+      alert("Email is required to join the mailing list.")
+      return
+    }
+
+    try {
+      const response = await fetch("/api/mailing-list", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      })
+
+      if (response.ok) {
+        alert("You have successfully joined the mailing list!")
+        reset()
+      } else {
+        const errorData = await response.json()
+        alert(`Failed to join mailing list: ${errorData.message}`)
+      }
+    } catch (error) {
+      alert("An error occurred while joining the mailing list.")
+      console.error(error)
+    }
+  }
+
+  useEffect(() => {
+    reset()
+  }, [reset])
 
   return (
     <div className="min-h-screen bg-white">
@@ -117,6 +238,11 @@ export default function HomePage() {
                 View Markets
               </Button>
             </Link>
+          </div>
+
+          {/* Mailing List Join Box */}
+          <div className="flex flex-col items-center justify-center mb-10">
+            <JoinMailingList />
           </div>
 
           {/* Live Stats */}
