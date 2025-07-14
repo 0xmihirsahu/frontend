@@ -1,3 +1,5 @@
+"use client"
+
 import {
   Card,
   CardContent,
@@ -9,30 +11,35 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import {
   User,
-  Bell,
   Shield,
-  Palette,
-  Globe,
-  Database,
   Mail,
   Phone,
-  CreditCard,
-  Key,
-  Download,
-  Trash2,
   Settings as SettingsIcon,
-  Zap,
   CheckCircle,
-  TrendingUp,
-  BarChart3,
 } from "lucide-react"
 import KYCFlow from "@/components/KYCFlow"
+import { useSearchParams, useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 
 export default function SettingsPage() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const initialTab = searchParams?.get("tab") || "profile"
+  const [tab, setTab] = useState(initialTab)
+
+  // Keep tab in sync with URL
+  useEffect(() => {
+    setTab(initialTab)
+  }, [initialTab])
+
+  const handleTabChange = (value: string) => {
+    setTab(value)
+    router.replace(`/app/profile?tab=${value}`)
+  }
+
   return (
     <div className="space-y-8">
       {/* Header Section */}
@@ -56,7 +63,7 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      <Tabs defaultValue="profile" className="space-y-6">
+      <Tabs value={tab} onValueChange={handleTabChange} className="space-y-6">
         <div className="bg-white rounded-2xl p-2 shadow-md border-0">
           <TabsList className="grid w-full grid-cols-2 bg-transparent gap-1">
             <TabsTrigger

@@ -22,7 +22,7 @@ export default function OnchainIDChecker() {
         {
           action: {
             label: "Complete Profile",
-            onClick: () => router.push("/app/profile"),
+            onClick: () => router.push("/app/profile?tab=kyc"),
           },
           duration: Infinity,
         }
