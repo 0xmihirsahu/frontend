@@ -23,11 +23,11 @@ import {
 import React, { useEffect, useState, useCallback } from "react"
 import { useAccount, useConfig } from "wagmi"
 import { encryptValue } from "@/lib/inco-lite"
-import { useERC20Approve } from "@/hooks/useERC20Approve"
+import { useERC20Approve } from "@/hooks/writes/onChain/useERC20Approve"
 import { useConfidentialOrdersContract } from "@/hooks/useConfidentialOrdersContract"
 import { waitForTransactionReceipt } from "wagmi/actions"
-import { useTokenBalance } from "@/hooks/view/useTokenBalance"
-import { useUSDCTokenBalance } from "@/hooks/view/useUSDCTokenBalance"
+import { useTokenBalance } from "@/hooks/view/onChain/useTokenBalance"
+import { useUSDCTokenBalance } from "@/hooks/view/onChain/useUSDCTokenBalance"
 
 const TOKENS = [
   { label: "LQD", value: "LQD" },

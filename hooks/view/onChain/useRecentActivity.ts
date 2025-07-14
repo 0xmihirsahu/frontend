@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { useWatchContractEvent, usePublicClient, useReadContract } from "wagmi"
-import { useMarketData } from "@/hooks/useMarketData"
+import { useMarketData } from "@/hooks/api/useMarketData"
 import erc3643ABI from "@/abi/erc3643.json"
 
 export interface ActivityEvent {

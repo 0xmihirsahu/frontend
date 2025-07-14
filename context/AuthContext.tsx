@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext, ReactNode } from "react"
-import { useAuth } from "@/hooks/useAuth"
+import { useAuth } from "@/hooks/auth/useAuth"
 import { User } from "@supabase/supabase-js"
 
 interface Profile {
@@ -25,9 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const authState = useAuth()
 
   return (
-    <AuthContext.Provider value={authState}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={authState}>{children}</AuthContext.Provider>
   )
 }
 
@@ -37,4 +35,4 @@ export function useAuthContext() {
     throw new Error("useAuthContext must be used within an AuthProvider")
   }
   return context
-} 
+}

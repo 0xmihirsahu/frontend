@@ -11,10 +11,10 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useReserveContract } from "@/hooks/useReserveContract"
-import { useTotalSupply } from "@/hooks/view/useTotalSupply"
-import { useMarketData } from "@/hooks/useMarketData"
-import { useYieldData } from "@/hooks/useYieldData"
+import { useReserveContract } from "@/hooks/view/onChain/useReserveContract"
+import { useTotalSupply } from "@/hooks/view/onChain/useTotalSupply"
+import { useMarketData } from "@/hooks/api/useMarketData"
+import { useYieldData } from "@/hooks/api/useYieldData"
 import {
   TrendingUp,
   Shield,

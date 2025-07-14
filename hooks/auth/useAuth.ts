@@ -29,7 +29,9 @@ export function useAuth() {
   useEffect(() => {
     // Get initial session
     const getInitialSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
       if (session?.user) {
         await fetchProfile(session.user)
       } else {
@@ -40,15 +42,15 @@ export function useAuth() {
     getInitialSession()
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (session?.user) {
-          await fetchProfile(session.user)
-        } else {
-          setAuthState({ user: null, profile: null, loading: false })
-        }
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        await fetchProfile(session.user)
+      } else {
+        setAuthState({ user: null, profile: null, loading: false })
       }
-    )
+    })
 
     return () => subscription.unsubscribe()
   }, [])
@@ -75,4 +77,4 @@ export function useAuth() {
   }
 
   return authState
-} 
+}

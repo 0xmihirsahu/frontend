@@ -23,10 +23,10 @@ import {
   Target,
   Clock,
 } from "lucide-react"
-import { useTokenBalance } from "@/hooks/view/useTokenBalance"
-import { useMarketData } from "@/hooks/useMarketData"
+import { useTokenBalance } from "@/hooks/view/onChain/useTokenBalance"
+import { useMarketData } from "@/hooks/api/useMarketData"
 import { useAccount } from "wagmi"
-import { useRecentActivity } from "@/hooks/useRecentActivity"
+import { useRecentActivity } from "@/hooks/view/onChain/useRecentActivity"
 
 export default function DashboardPage() {
   const { address: userAddress } = useAccount()
