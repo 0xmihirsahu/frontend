@@ -18,12 +18,13 @@ export default function OnchainIDChecker() {
   React.useEffect(() => {
     if (hasOnchainID === false && !onchainIDLoading) {
       toast.warning(
-        "You do not have an OnchainID yet. Please complete KYC to create one.",
+        "Complete KYC and create your onchainIdentity to buy Spout tokens",
         {
           action: {
             label: "Complete Profile",
             onClick: () => router.push("/app/profile"),
           },
+          duration: Infinity,
         }
       )
     }
