@@ -19,7 +19,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: "Spout Finance",
   description:
-    "Spout Finance is a RWA platform tokenizing T-Bills and Corporate Bonds",
+    "Spout Finance is a RWA platform tokenizing efficient collateral assets and building the next gen of collateral infrastructure",
   keywords: [
     "finance",
     "portfolio",

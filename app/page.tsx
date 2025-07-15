@@ -102,7 +102,7 @@ function JoinMailingList() {
         ) : null}
       </AnimatePresence>
       {joined && (
-        <div className="flex items-center justify-center w-full mt-2">
+        <div className="flex items-center justify-center w-full mt-2 flex-nowrap whitespace-nowrap">
           <CheckCircle className="h-8 w-8 text-emerald-600 mr-2" />
           <span className="text-emerald-700 font-semibold text-lg align-middle">
             {message || "Already joined!"}

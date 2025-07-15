@@ -199,7 +199,7 @@ const DefaultFooter = () => {
     { href: "/app/markets", label: "Markets" },
     { href: "/app/portfolio", label: "Portfolio" },
     { href: "/app/trade", label: "Trading" },
-    { href: "/app/earn", label: "Earn" },
+    // { href: "/app/earn", label: "Earn" },
   ]
 
   const rightLinks = [
