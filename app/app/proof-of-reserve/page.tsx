@@ -237,14 +237,6 @@ const ProofOfReservePage = () => {
                       Secure
                     </Badge>
                   </div>
-
-                  <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-5 w-5 text-purple-600" />
-                      <span className="font-medium">Last Audit</span>
-                    </div>
-                    <span className="text-sm text-gray-600">Today</span>
-                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -356,7 +348,7 @@ const ProofOfReservePage = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="flex flex-row justify-center gap-x-24">
             <div className="text-center">
               <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
                 <CheckCircle className="h-6 w-6 text-green-600" />
@@ -374,15 +366,6 @@ const ProofOfReservePage = () => {
               <p className="text-sm text-gray-600">
                 All assets held by qualified U.S. custodians with regulatory
                 oversight
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Eye className="h-6 w-6 text-purple-600" />
-              </div>
-              <h4 className="font-semibold mb-2">Public Verification</h4>
-              <p className="text-sm text-gray-600">
-                Blockchain-based proof allowing public verification of reserves
               </p>
             </div>
           </div>
