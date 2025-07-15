@@ -141,11 +141,13 @@ export default function KYCFlow() {
       title: "KYC Verification",
       description: "Complete KYC verification with signature",
       icon: Shield,
-      status: kycSignature
+      status: hasExistingIdentity
         ? "completed"
-        : hasExistingIdentity || isDeployed
-          ? "current"
-          : "pending",
+        : kycSignature
+          ? "completed"
+          : hasExistingIdentity || isDeployed
+            ? "current"
+            : "pending",
     },
     {
       id: 4,
@@ -156,9 +158,15 @@ export default function KYCFlow() {
     },
   ]
 
+  // Filter out Add Claim step if KYC is complete
+  const visibleSteps = hasExistingIdentity
+    ? steps.filter((step) => step.id !== 4)
+    : steps
+
   // Modify progress calculation to show 80% when KYC is verified but claim not added
-  const progress =
-    kycSignature && !isClaimAdded
+  const progress = hasExistingIdentity
+    ? 100
+    : kycSignature && !isClaimAdded
       ? 80
       : ((currentStep - 1) / (steps.length - 1)) * 100
 
@@ -360,6 +368,13 @@ export default function KYCFlow() {
   }, [isClaimAdded])
 
   const getStepIcon = (step: (typeof steps)[0]) => {
+    if (
+      (step.id === 2 && step.status === "completed") ||
+      (step.id === 3 && hasExistingIdentity)
+    ) {
+      // OnchainID or KYC completed: show green check
+      return <CheckCircle className="h-6 w-6 text-emerald-600" />
+    }
     const Icon = step.icon
     if (step.status === "completed") {
       return <CheckCircle className="h-6 w-6 text-emerald-600" />
@@ -423,7 +438,7 @@ export default function KYCFlow() {
 
       {/* Steps */}
       <div className="grid gap-6">
-        {steps.map((step, index) => (
+        {visibleSteps.map((step, index) => (
           <Card
             key={step.id}
             className={`transition-all duration-300 ${
@@ -552,7 +567,20 @@ export default function KYCFlow() {
               {/* Step 3: KYC Verification */}
               {step.id === 3 && (
                 <div className="space-y-4">
-                  {!kycSignature ? (
+                  {hasExistingIdentity ? (
+                    <div className="flex items-center space-x-3 p-4 bg-emerald-50 rounded-lg">
+                      <CheckCircle className="h-5 w-5 text-emerald-600" />
+                      <div>
+                        <p className="font-medium text-emerald-800">
+                          KYC Verification Completed
+                        </p>
+                        <p className="text-sm text-emerald-600">
+                          Your KYC verification is complete and your onchain
+                          identity is active.
+                        </p>
+                      </div>
+                    </div>
+                  ) : !kycSignature ? (
                     <div className="space-y-4">
                       <div className="p-4 bg-purple-50 rounded-lg">
                         <h4 className="font-medium text-purple-800 mb-2">
@@ -664,7 +692,7 @@ export default function KYCFlow() {
               )}
 
               {/* Step 4: Add Claim to Identity */}
-              {step.id === 4 && (
+              {step.id === 4 && !hasExistingIdentity && (
                 <div className="space-y-4">
                   {!isClaimAdded ? (
                     <div className="space-y-4">

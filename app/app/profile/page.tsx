@@ -23,12 +23,18 @@ import {
 import KYCFlow from "@/components/KYCFlow"
 import { useSearchParams, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import { useAccount } from "wagmi"
+import { useOnchainID } from "@/hooks/view/onChain/useOnchainID"
 
 export default function SettingsPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const initialTab = searchParams?.get("tab") || "profile"
   const [tab, setTab] = useState(initialTab)
+
+  const { address: userAddress } = useAccount()
+  const idFactoryAddress = "0xb04eAce0e3D886Bc514e84Ed42a7C43FC2183536"
+  const { hasOnchainID } = useOnchainID({ userAddress, idFactoryAddress })
 
   // Keep tab in sync with URL
   useEffect(() => {
@@ -64,8 +70,8 @@ export default function SettingsPage() {
       </div>
 
       <Tabs value={tab} onValueChange={handleTabChange} className="space-y-6">
-        <div className="bg-white rounded-2xl p-2 shadow-md border-0">
-          <TabsList className="grid w-full grid-cols-2 bg-transparent gap-1">
+        <div className={`bg-white rounded-2xl p-2 shadow-md border-0`}>
+          <TabsList className={`grid w-full grid-cols-2 bg-transparent gap-1`}>
             <TabsTrigger
               value="profile"
               className="flex items-center gap-2 data-[state=active]:bg-slate-100 rounded-xl"
