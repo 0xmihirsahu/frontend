@@ -25,6 +25,12 @@ import { useSearchParams, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useAccount } from "wagmi"
 import { useOnchainID } from "@/hooks/view/onChain/useOnchainID"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 export default function SettingsPage() {
   const searchParams = useSearchParams()
@@ -39,9 +45,13 @@ export default function SettingsPage() {
   // Keep tab in sync with URL
   useEffect(() => {
     setTab(initialTab)
+    if (initialTab !== "kyc") {
+      router.replace("/app/profile?tab=kyc")
+    }
   }, [initialTab])
 
   const handleTabChange = (value: string) => {
+    if (value === "profile") return
     setTab(value)
     router.replace(`/app/profile?tab=${value}`)
   }
@@ -71,14 +81,25 @@ export default function SettingsPage() {
 
       <Tabs value={tab} onValueChange={handleTabChange} className="space-y-6">
         <div className={`bg-white rounded-2xl p-2 shadow-md border-0`}>
-          <TabsList className={`grid w-full grid-cols-2 bg-transparent gap-1`}>
-            <TabsTrigger
-              value="profile"
-              className="flex items-center gap-2 data-[state=active]:bg-slate-100 rounded-xl"
-            >
-              <User className="h-4 w-4" />
-              <span className="hidden sm:inline">Profile</span>
-            </TabsTrigger>
+          <TabsList className="flex justify-center w-full bg-transparent gap-1">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <TabsTrigger
+                    value="profile"
+                    className="flex items-center gap-2 data-[state=active]:bg-slate-100 rounded-xl opacity-60 cursor-not-allowed"
+                    tabIndex={-1}
+                    aria-disabled="true"
+                  >
+                    <User className="h-4 w-4" />
+                    <span className="hidden sm:inline">Profile</span>
+                  </TabsTrigger>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" align="center">
+                  Coming soon
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <TabsTrigger
               value="kyc"
               className="flex items-center gap-2 data-[state=active]:bg-slate-100 rounded-xl"
@@ -88,75 +109,6 @@ export default function SettingsPage() {
             </TabsTrigger>
           </TabsList>
         </div>
-
-        {/* Profile Settings */}
-        <TabsContent value="profile" className="space-y-6">
-          <Card className="border-0 shadow-md">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5 text-emerald-600" />
-                Profile Information
-              </CardTitle>
-              <CardDescription>
-                Update your personal information and contact details
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name</Label>
-                  <Input
-                    id="firstName"
-                    className="bg-slate-50 border-slate-200"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <Input
-                    id="lastName"
-                    className="bg-slate-50 border-slate-200"
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
-                <div className="flex items-center gap-3">
-                  <div className="relative flex-1">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-                    <Input
-                      id="email"
-                      type="email"
-                      defaultValue="paul.vanmierlo@example.com"
-                      className="pl-10 bg-slate-50 border-slate-200"
-                    />
-                  </div>
-                  <Badge
-                    variant="secondary"
-                    className="bg-green-100 text-green-700 flex items-center gap-1"
-                  >
-                    <CheckCircle className="h-3 w-3" />
-                    Verified
-                  </Badge>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-                  <Input
-                    id="phone"
-                    type="tel"
-                    defaultValue="+1 (555) 123-4567"
-                    className="pl-10 bg-slate-50 border-slate-200"
-                  />
-                </div>
-              </div>
-              <Button className="bg-emerald-600 hover:bg-emerald-700">
-                Save Changes
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         {/* KYC Tab (was Notifications) */}
         <TabsContent value="kyc" className="space-y-6">

@@ -13,7 +13,6 @@ import { useReserveContract } from "@/hooks/view/onChain/useReserveContract"
 import { useTotalSupply } from "@/hooks/view/onChain/useTotalSupply"
 import { useMarketData } from "@/hooks/api/useMarketData"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Button as JoinButton } from "@/components/ui/button"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -161,12 +160,6 @@ export default function HomePage() {
     { value: "1,247", label: "Active Users", change: "+8.2%" },
     { value: "99.9%", label: "Uptime", change: "Stable" },
     { value: "0.1%", label: "Trading Fees", change: "Low Cost" },
-  ]
-
-  const liveMarkets = [
-    { symbol: "AAPL", price: "$189.84", change: "+2.1%", volume: "45.2M" },
-    { symbol: "TSLA", price: "$248.42", change: "-1.3%", volume: "32.1M" },
-    { symbol: "MSFT", price: "$424.58", change: "+0.8%", volume: "28.7M" },
   ]
 
   const {
