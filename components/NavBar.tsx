@@ -1,4 +1,4 @@
-"use client";
+"use client"
 import {
   Navbar as ResizableNavbar,
   NavBody,
@@ -9,37 +9,43 @@ import {
   MobileNavHeader,
   MobileNavMenu,
   MobileNavToggle,
-} from "./ui/resizable-navbar";
-import React, { useState } from "react";
-import Link from "next/link";
-import { useAuthContext } from "@/context/AuthContext";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { LogOut } from "lucide-react";
-import { signOut } from "@/lib/supabase/auth";
+} from "./ui/resizable-navbar"
+import React, { useState } from "react"
+import Link from "next/link"
+import { useAuthContext } from "@/context/AuthContext"
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu"
+import { LogOut } from "lucide-react"
+import { signOut } from "@/lib/supabase/auth"
 const navItems = [
   { name: "Markets", link: "/app/markets" },
   { name: "Trade", link: "/app/trade" },
   { name: "Earn", link: "/app/earn" },
-];
+]
 
 export default function Navbar() {
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const { user, profile } = useAuthContext();
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const { user, profile } = useAuthContext()
 
   const handleSignOut = async () => {
-    await signOut();
-    window.location.reload();
-  };
+    await signOut()
+    window.location.reload()
+  }
 
   const displayName = profile?.first_name
     ? `${profile.first_name} ${profile.last_name ?? ""}`
-    : user?.email;
+    : user?.email
 
   return (
     <ResizableNavbar>
       <NavBody>
         <NavbarLogo />
         <NavItems items={navItems} />
+        {/*
         {!user && (
           <Link
             href="/auth/login"
@@ -49,6 +55,7 @@ export default function Navbar() {
             Login
           </Link>
         )}
+        */}
         {user && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -57,7 +64,10 @@ export default function Navbar() {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem onClick={handleSignOut} className="text-red-600 cursor-pointer">
+              <DropdownMenuItem
+                onClick={handleSignOut}
+                className="text-red-600 cursor-pointer"
+              >
                 <LogOut className="mr-2 h-4 w-4" /> Log out
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -67,10 +77,14 @@ export default function Navbar() {
       <MobileNav>
         <MobileNavHeader>
           <NavbarLogo />
-          <MobileNavToggle isOpen={mobileOpen} onClick={() => setMobileOpen((v) => !v)} />
+          <MobileNavToggle
+            isOpen={mobileOpen}
+            onClick={() => setMobileOpen((v) => !v)}
+          />
         </MobileNavHeader>
         <MobileNavMenu isOpen={mobileOpen} onClose={() => setMobileOpen(false)}>
           <NavItems items={navItems} onItemClick={() => setMobileOpen(false)} />
+          {/*
           {!user && (
             <Link
               href="/auth/login"
@@ -80,6 +94,7 @@ export default function Navbar() {
               Login
             </Link>
           )}
+          */}
           {user && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -88,7 +103,10 @@ export default function Navbar() {
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-40">
-                <DropdownMenuItem onClick={handleSignOut} className="text-red-600 cursor-pointer">
+                <DropdownMenuItem
+                  onClick={handleSignOut}
+                  className="text-red-600 cursor-pointer"
+                >
                   <LogOut className="mr-2 h-4 w-4" /> Log out
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -97,5 +115,5 @@ export default function Navbar() {
         </MobileNavMenu>
       </MobileNav>
     </ResizableNavbar>
-  );
-} 
+  )
+}

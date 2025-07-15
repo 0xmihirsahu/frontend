@@ -237,7 +237,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-6 justify-center mb-20">
+          <div className="flex justify-center mb-20">
             <Link href="/app">
               <Button
                 size="lg"
@@ -245,16 +245,6 @@ export default function HomePage() {
               >
                 Launch Platform
                 <ArrowRight className="ml-3 h-5 w-5" />
-              </Button>
-            </Link>
-            <Link href="/markets">
-              <Button
-                variant="outline"
-                size="lg"
-                className="border-2 border-slate-300 hover:border-emerald-600 text-slate-700 hover:text-emerald-600 px-10 py-4 text-lg font-semibold rounded-2xl transition-all duration-300"
-              >
-                <BarChart3 className="mr-3 h-5 w-5" />
-                View Markets
               </Button>
             </Link>
           </div>
