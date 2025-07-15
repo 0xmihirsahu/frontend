@@ -1,30 +1,12 @@
 "use client"
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import {
-  User,
-  Shield,
-  Mail,
-  Phone,
-  Settings as SettingsIcon,
-  CheckCircle,
-} from "lucide-react"
+import { User, Shield, Settings as SettingsIcon } from "lucide-react"
 import KYCFlow from "@/components/KYCFlow"
 import { useSearchParams, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useAccount } from "wagmi"
-import { useOnchainID } from "@/hooks/view/onChain/useOnchainID"
 import {
   Tooltip,
   TooltipContent,
@@ -37,10 +19,6 @@ export default function SettingsPage() {
   const router = useRouter()
   const initialTab = searchParams?.get("tab") || "profile"
   const [tab, setTab] = useState(initialTab)
-
-  const { address: userAddress } = useAccount()
-  const idFactoryAddress = "0xb04eAce0e3D886Bc514e84Ed42a7C43FC2183536"
-  const { hasOnchainID } = useOnchainID({ userAddress, idFactoryAddress })
 
   // Keep tab in sync with URL
   useEffect(() => {
