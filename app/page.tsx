@@ -156,10 +156,10 @@ export default function HomePage() {
   }
 
   const platformStats = [
-    { value: getTotalVolume(), label: "Total Volume", change: "+12.5%" },
-    { value: "1,247", label: "Active Users", change: "+8.2%" },
-    { value: "99.9%", label: "Uptime", change: "Stable" },
-    { value: "0.1%", label: "Trading Fees", change: "Low Cost" },
+    // { value: getTotalVolume(), label: "Total Volume", change: "+12.5%" },
+    // { value: "1,247", label: "Active Users", change: "+8.2%" },
+    // { value: "99.9%", label: "Uptime", change: "Stable" },
+    // { value: "0.1%", label: "Trading Fees", change: "Low Cost" },
   ]
 
   const {
@@ -255,24 +255,28 @@ export default function HomePage() {
           </div>
 
           {/* Live Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {platformStats.map((stat, index) => (
-              <div
-                key={index}
-                className="text-center p-6 rounded-3xl bg-white/80 backdrop-blur-sm border border-slate-200/50 shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <div className="text-3xl font-bold text-slate-900 mb-2">
-                  {stat.value}
-                </div>
-                <div className="text-sm text-slate-600 mb-1">{stat.label}</div>
+          {/*
+          <div className="flex justify-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {platformStats.map((stat, index) => (
                 <div
-                  className={`text-xs font-medium ${stat.change.includes("+") ? "text-emerald-600" : stat.change.includes("-") ? "text-red-500" : "text-slate-500"}`}
+                  key={index}
+                  className="text-center p-6 rounded-3xl bg-white/80 backdrop-blur-sm border border-slate-200/50 shadow-lg hover:shadow-xl transition-all duration-300"
                 >
-                  {stat.change}
+                  <div className="text-3xl font-bold text-slate-900 mb-2">
+                    {stat.value}
+                  </div>
+                  <div className="text-sm text-slate-600 mb-1">{stat.label}</div>
+                  <div
+                    className={`text-xs font-medium ${stat.change.includes("+") ? "text-emerald-600" : stat.change.includes("-") ? "text-red-500" : "text-slate-500"}`}
+                  >
+                    {stat.change}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
+          */}
         </div>
       </section>
 
