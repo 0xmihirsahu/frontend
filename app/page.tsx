@@ -255,7 +255,7 @@ export default function HomePage() {
             <JoinMailingList />
           </div>
           {/* Partner Ticker Section */}
-          <section className="w-full max-w-4xl mx-auto mb-16">
+          <section className="w-full max-w-4xl mx-auto mt-20">
             <PartnerTicker />
           </section>
 
