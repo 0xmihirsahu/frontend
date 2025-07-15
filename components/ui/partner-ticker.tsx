@@ -45,7 +45,7 @@ export default function PartnerTicker() {
   const [offset, setOffset] = useState(0)
   const tickerRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
-  const speed = 1
+  const speed = 0.6
 
   useEffect(() => {
     let frame: number

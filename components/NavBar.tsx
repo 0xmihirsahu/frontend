@@ -22,9 +22,9 @@ import {
 import { LogOut } from "lucide-react"
 import { signOut } from "@/lib/supabase/auth"
 const navItems = [
-  { name: "Markets", link: "/app/markets" },
+  // { name: "Markets", link: "/app/markets", soon: true },
   { name: "Trade", link: "/app/trade" },
-  { name: "Earn", link: "/app/earn" },
+  { name: "Earn", link: "/app/earn", soon: true },
 ]
 
 export default function Navbar() {
