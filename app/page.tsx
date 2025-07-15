@@ -21,6 +21,7 @@ import { useEffect, useState } from "react"
 import { LoadingSpinner } from "@/components/LoadingSpinner"
 import { motion, AnimatePresence } from "framer-motion"
 import { CheckCircle } from "lucide-react"
+import PartnerTicker from "@/components/ui/partner-ticker"
 
 const mailingListSchema = z.object({
   email: z.string().email("Invalid email address").optional().or(z.literal("")),
@@ -253,6 +254,10 @@ export default function HomePage() {
           <div className="flex flex-col items-center justify-center mb-10">
             <JoinMailingList />
           </div>
+          {/* Partner Ticker Section */}
+          <section className="w-full max-w-4xl mx-auto mb-16">
+            <PartnerTicker />
+          </section>
 
           {/* Live Stats */}
           {/*

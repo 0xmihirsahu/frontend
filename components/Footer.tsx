@@ -136,42 +136,22 @@ export const Footer: React.FC<FooterProps> = ({
         </div>
 
         <div className="space-y-6">
-          <div className="grid grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 gap-8">
             <div>
               <h4 className="font-semibold text-white mb-4 text-lg">
                 Platform
               </h4>
               <ul className="space-y-3">
-                {rightLinks
-                  .slice(0, Math.ceil(rightLinks.length / 2))
-                  .map((link, index) => (
-                    <li key={index}>
-                      <Link
-                        href={link.href}
-                        className="text-slate-300 hover:text-emerald-400 transition-colors duration-300"
-                      >
-                        {link.label}
-                      </Link>
-                    </li>
-                  ))}
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold text-white mb-4 text-lg">Support</h4>
-              <ul className="space-y-3">
-                {rightLinks
-                  .slice(Math.ceil(rightLinks.length / 2))
-                  .map((link, index) => (
-                    <li key={index}>
-                      <Link
-                        href={link.href}
-                        className="text-slate-300 hover:text-emerald-400 transition-colors duration-300"
-                      >
-                        {link.label}
-                      </Link>
-                    </li>
-                  ))}
+                {rightLinks.map((link, index) => (
+                  <li key={index}>
+                    <Link
+                      href={link.href}
+                      className="text-slate-300 hover:text-emerald-400 transition-colors duration-300"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
@@ -203,14 +183,14 @@ const DefaultFooter = () => {
   ]
 
   const rightLinks = [
-    { href: "/help", label: "Help Center" },
     { href: "/contact", label: "Contact Us" },
-    { href: "/privacy", label: "Privacy Policy" },
-    { href: "/terms", label: "Terms of Service" },
-    { href: "/about", label: "About Us" },
-    { href: "/careers", label: "Careers" },
-    { href: "/blog", label: "Blog" },
-    { href: "/security", label: "Security" },
+    { href: "/company", label: "Company" },
+    // { href: "/help", label: "Help Center" },
+    // { href: "/privacy", label: "Privacy Policy" },
+    // { href: "/terms", label: "Terms of Service" },
+    // { href: "/careers", label: "Careers" },
+    // { href: "/blog", label: "Blog" },
+    // { href: "/security", label: "Security" },
   ]
 
   return (
