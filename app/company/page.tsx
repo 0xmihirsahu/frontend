@@ -1,14 +1,11 @@
 "use client"
 import Image from "next/image"
-import Link from "next/link"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+
 import { PixelTrail } from "@/components/ui/pixel-trail"
-import DefaultFooter from "@/components/Footer"
+import DefaultFooter from "@/components/footer"
 import { Linkedin } from "lucide-react"
 import { motion } from "framer-motion"
 import { useState } from "react"
-import { ArrowRight, BarChart3, Zap, CheckCircle } from "lucide-react"
 
 const team = [
   {
@@ -35,6 +32,8 @@ const team = [
 ]
 
 export default function AboutPage() {
+  const [isHovered, setIsHovered] = useState(false)
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Full-page PixelTrail background */}
@@ -60,7 +59,6 @@ export default function AboutPage() {
       </section>
       <section className="relative z-10 max-w-4xl mx-auto px-6 py-12 space-y-24">
         {team.map((member, idx) => {
-          const [isHovered, setIsHovered] = useState(false)
           return (
             <div
               key={member.name}

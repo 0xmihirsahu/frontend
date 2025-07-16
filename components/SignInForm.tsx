@@ -44,15 +44,25 @@ export default function SignInForm() {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-white to-emerald-50">
-        <Waves className="absolute top-0 left-0 w-full h-full" />
+      <Waves className="absolute top-0 left-0 w-full h-full" />
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-emerald-100 p-10 relative z-10">
         <div className="text-center flex flex-col items-center mb-8">
-        <Image src="/Spout_complete.png" alt="Spout Logo" width={250} height={250} />
-          <p className="text-slate-600 mt-4 text-lg">Welcome back! Please enter your details and Sign In.</p>
+          <Image
+            src="/Spout_complete.png"
+            alt="Spout Logo"
+            width={250}
+            height={250}
+          />
+          <p className="text-slate-600 mt-4 text-lg">
+            Welcome back! Please enter your details and Sign In.
+          </p>
         </div>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-slate-700 mb-2"
+            >
               Email Address
             </label>
             <input
@@ -63,18 +73,23 @@ export default function SignInForm() {
                 required: "Email is required",
                 pattern: {
                   value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: "Invalid email address"
-                }
+                  message: "Invalid email address",
+                },
               })}
               className="w-full px-4 py-3 border border-slate-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-emerald-50 text-slate-900 text-base"
               placeholder="Enter your email"
             />
             {errors.email && (
-              <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+              <p className="mt-1 text-sm text-red-600">
+                {errors.email.message}
+              </p>
             )}
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-slate-700 mb-2"
+            >
               Password
             </label>
             <div className="relative">
@@ -86,8 +101,8 @@ export default function SignInForm() {
                   required: "Password is required",
                   minLength: {
                     value: 6,
-                    message: "Password must be at least 6 characters"
-                  }
+                    message: "Password must be at least 6 characters",
+                  },
                 })}
                 className="w-full px-4 py-3 border border-slate-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-emerald-50 text-slate-900 text-base pr-12"
                 placeholder="Enter your password"
@@ -99,11 +114,17 @@ export default function SignInForm() {
                 onClick={() => setShowPassword((v) => !v)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
-                {showPassword ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                {showPassword ? (
+                  <Eye className="w-5 h-5" />
+                ) : (
+                  <EyeOff className="w-5 h-5" />
+                )}
               </button>
             </div>
             {errors.password && (
-              <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+              <p className="mt-1 text-sm text-red-600">
+                {errors.password.message}
+              </p>
             )}
           </div>
           <button
@@ -120,12 +141,18 @@ export default function SignInForm() {
           )}
         </form>
         <div className="mt-8 text-center space-y-2">
-          <a href="/auth/forgot-password" className="text-emerald-600 hover:underline mr-4 font-medium">
+          <a
+            href="/auth/forgot-password"
+            className="text-emerald-600 hover:underline mr-4 font-medium"
+          >
             Forgot password?
           </a>
           <div>
-            <span className="text-slate-700">Don't have an account? </span>
-            <Link href="/auth/register" className="font-semibold text-emerald-600 hover:text-emerald-700">
+            <span className="text-slate-700">Don&#39;t have an account? </span>
+            <Link
+              href="/auth/register"
+              className="font-semibold text-emerald-600 hover:text-emerald-700"
+            >
               Sign up here
             </Link>
           </div>
@@ -133,4 +160,4 @@ export default function SignInForm() {
       </div>
     </div>
   )
-} 
+}

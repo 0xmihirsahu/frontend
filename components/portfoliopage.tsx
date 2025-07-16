@@ -34,10 +34,7 @@ import { useRecentActivity } from "@/hooks/view/onChain/useRecentActivity"
 import { Activity } from "lucide-react"
 import { useReturns } from "@/hooks/api/useReturns"
 
-import { format } from "date-fns"
-import { Suspense } from "react"
-
-function PortfolioPage() {
+export default function PortfolioPage() {
   const { address: userAddress } = useAccount()
   const {
     balance: tokenBalance,
@@ -642,11 +639,3 @@ function PortfolioPage() {
     </div>
   )
 }
-export default function PortfolioPageWrapper() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <PortfolioPage />
-    </Suspense>
-  )
-}
-

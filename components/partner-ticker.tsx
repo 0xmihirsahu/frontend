@@ -2,6 +2,7 @@
 
 import React, { useRef, useEffect, useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 
 const initialPartners = [
   {
@@ -96,9 +97,11 @@ export default function PartnerTicker() {
                   transition: "opacity 0.3s linear",
                 }}
               >
-                <img
+                <Image
                   src={partner.src}
                   alt={partner.alt}
+                  width={80}
+                  height={48}
                   className="h-12 w-auto object-contain drop-shadow-md transition-transform duration-300 hover:scale-105"
                   draggable={false}
                   style={{ userSelect: "none" }}

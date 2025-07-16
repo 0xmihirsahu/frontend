@@ -1,12 +1,11 @@
 import { Sidebar, SidebarInset } from "@/components/ui/sidebar"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
-import ProtectedRoute from "@/components/ProtectedRoute"
 import OnchainIDChecker from "@/components/contract/OnchainIDChecker"
 import {
   DashboardSidebarNavClient,
   DashboardNavbarHeaderClient,
-} from "@/components/DashboardNavClient"
+} from "@/components/dashboardNavClient"
 import { Toaster } from "@/components/ui/sonner"
 
 export default function DashboardLayout({

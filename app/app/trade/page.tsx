@@ -1,5 +1,5 @@
 "use client"
-import StockChart from "@/components/StockChart"
+import StockChart from "@/components/stockChart"
 import {
   Card,
   CardContent,

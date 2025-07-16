@@ -110,7 +110,7 @@ interface StockData {
   dataSource?: string
 }
 
-function MarketsPage() {
+export default function MarketsPage() {
   const [stocks, setStocks] = useState<StockData[]>(popularStocks)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -466,13 +466,5 @@ function MarketsPage() {
         </CardContent>
       </Card>
     </div>
-  )
-}
-
-export default function MarketsPageWrapper() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <MarketsPage />
-    </Suspense>
   )
 }

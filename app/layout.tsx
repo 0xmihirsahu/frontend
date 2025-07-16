@@ -3,9 +3,9 @@ import "@rainbow-me/rainbowkit/styles.css"
 import "react-toastify/dist/ReactToastify.css"
 import type { Metadata } from "next"
 import { Public_Sans, IBM_Plex_Mono } from "next/font/google"
-import { Providers } from "@/components/Providers"
+import { Providers } from "@/components/providers"
 import { cn } from "@/lib/utils"
-import { ConditionalNavbar } from "@/components/ConditionalNavbar"
+import { ConditionalNavbar } from "@/components/conditionalNavbar"
 
 const publicSans = Public_Sans({
   subsets: ["latin"],

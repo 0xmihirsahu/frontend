@@ -24,8 +24,9 @@ import { useTokenBalance } from "@/hooks/view/onChain/useTokenBalance"
 import { useMarketData } from "@/hooks/api/useMarketData"
 import { useAccount } from "wagmi"
 import { useRecentActivity } from "@/hooks/view/onChain/useRecentActivity"
+import { Suspense } from "react"
 
-export default function DashboardPage() {
+function DashboardPage() {
   const { address: userAddress } = useAccount()
   const {
     balance: tokenBalance,
@@ -458,5 +459,13 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function AppPageWrapper() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <DashboardPage />
+    </Suspense>
   )
 }

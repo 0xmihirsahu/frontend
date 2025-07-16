@@ -24,7 +24,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { useSidebar } from "@/components/ui/sidebar"
 import Image from "next/image"
 import CustomConnectWallet from "@/components/custom-connect-wallet"
-import SignOutButton from "@/components/SignOutButton"
+import SignOutButton from "@/components/signOutButton"
 import React from "react"
 
 export function DashboardSidebarNavClient() {

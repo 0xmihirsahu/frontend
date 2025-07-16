@@ -17,18 +17,11 @@ import { useTotalSupply } from "@/hooks/view/onChain/useTotalSupply"
 import { useMarketData } from "@/hooks/api/useMarketData"
 import { useYieldData } from "@/hooks/api/useYieldData"
 import {
-  TrendingUp,
   Shield,
-  DollarSign,
   BarChart3,
   RefreshCw,
-  Download,
-  Eye,
-  Calendar,
   Percent,
-  ArrowUpRight,
   CheckCircle,
-  AlertCircle,
   RefreshCcw,
 } from "lucide-react"
 
@@ -45,7 +38,7 @@ const formatNumber = (num: number) => {
   return new Intl.NumberFormat("en-US").format(num)
 }
 
-function ProofOfReservePage() {
+export default function ProofOfReservePage() {
   const { totalSupply, isLoading: totalSupplyLoading } = useTotalSupply()
   const { price: currentPrice, isLoading: priceLoading } = useMarketData("LQD")
   const { data: lqdYield, isLoading: lqdYieldLoading } = useYieldData("LQD")
@@ -373,13 +366,5 @@ function ProofOfReservePage() {
         </CardContent>
       </Card>
     </div>
-  )
-}
-
-export default function ProofOfReservePageWrapper() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <ProofOfReservePage />
-    </Suspense>
   )
 }

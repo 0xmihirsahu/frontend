@@ -6,7 +6,6 @@ import { User, Shield, Settings as SettingsIcon } from "lucide-react"
 import KYCFlow from "@/components/kycFlow"
 import { useSearchParams, useRouter } from "next/navigation"
 import { useEffect, useState, Suspense } from "react"
-import { useAccount } from "wagmi"
 import {
   Tooltip,
   TooltipContent,
@@ -14,7 +13,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-function SettingsPage() {
+export default function ProfilePage() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const initialTab = searchParams?.get("tab") || "profile"
@@ -94,13 +93,5 @@ function SettingsPage() {
         </TabsContent>
       </Tabs>
     </div>
-  )
-}
-
-export default function ProfilePageWrapper() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <SettingsPage />
-    </Suspense>
   )
 }
