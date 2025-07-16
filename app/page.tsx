@@ -7,11 +7,117 @@ import { useScreenSize } from "@/hooks/use-screen-size"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Features } from "@/components/features"
-import DefaultFooter from "@/components/Footer"
+import DefaultFooter from "@/components/footer"
 import { Waves } from "@/components/wave-background"
-import { useReserveContract } from "@/hooks/useReserveContract"
-import { useTotalSupply } from "@/hooks/view/useTotalSupply"
-import { useMarketData } from "@/hooks/useMarketData"
+import { useReserveContract } from "@/hooks/view/onChain/useReserveContract"
+import { useTotalSupply } from "@/hooks/view/onChain/useTotalSupply"
+import { useMarketData } from "@/hooks/api/useMarketData"
+import { Input } from "@/components/ui/input"
+import { Button as JoinButton } from "@/components/ui/button"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
+import { useEffect, useState } from "react"
+import { LoadingSpinner } from "@/components/loadingSpinner"
+import { motion, AnimatePresence } from "framer-motion"
+import { CheckCircle } from "lucide-react"
+import PartnerTicker from "@/components/partner-ticker"
+
+const mailingListSchema = z.object({
+  email: z.string().email("Invalid email address").optional().or(z.literal("")),
+})
+
+type MailingListFormData = z.infer<typeof mailingListSchema>
+
+function JoinMailingList() {
+  const [email, setEmail] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [joined, setJoined] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setMessage(null)
+    setError(null)
+    if (!email) {
+      setError("Please enter your email.")
+      return
+    }
+    setLoading(true)
+    try {
+      const res = await fetch("/api/mailing-list", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setMessage(data.message || "Thank you for joining!")
+        setEmail("")
+        setJoined(true)
+      } else {
+        setError(data.error || data.message || "Something went wrong.")
+      }
+    } catch (err) {
+      setError("Network error. Please try again.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col sm:flex-row gap-2 w-full max-w-xs mx-auto items-center"
+    >
+      {!joined && (
+        <Input
+          type="email"
+          placeholder="Join our mailing list"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="flex-1 bg-white/80 border-slate-200 focus-visible:ring-emerald-600"
+          disabled={loading}
+          required
+        />
+      )}
+      <AnimatePresence initial={false} mode="wait">
+        {!joined ? (
+          <motion.div
+            key="join"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="flex"
+          >
+            <JoinButton
+              type="submit"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-xl font-semibold"
+              isDisabled={loading}
+            >
+              {loading ? <LoadingSpinner size="sm" /> : "Join"}
+            </JoinButton>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+      {joined && (
+        <div className="flex items-center justify-center w-full mt-2 flex-nowrap whitespace-nowrap">
+          <CheckCircle className="h-8 w-8 text-emerald-600 mr-2" />
+          <span className="text-emerald-700 font-semibold text-lg align-middle">
+            {message || "Already joined!"}
+          </span>
+        </div>
+      )}
+      {error && !joined && (
+        <div className="w-full text-center text-red-500 text-xs mt-2">
+          {error}
+        </div>
+      )}
+    </form>
+  )
+}
 
 export default function HomePage() {
   const screenSize = useScreenSize()
@@ -51,17 +157,52 @@ export default function HomePage() {
   }
 
   const platformStats = [
-    { value: getTotalVolume(), label: "Total Volume", change: "+12.5%" },
-    { value: "1,247", label: "Active Users", change: "+8.2%" },
-    { value: "99.9%", label: "Uptime", change: "Stable" },
-    { value: "0.1%", label: "Trading Fees", change: "Low Cost" },
+    // { value: getTotalVolume(), label: "Total Volume", change: "+12.5%" },
+    // { value: "1,247", label: "Active Users", change: "+8.2%" },
+    // { value: "99.9%", label: "Uptime", change: "Stable" },
+    // { value: "0.1%", label: "Trading Fees", change: "Low Cost" },
   ]
 
-  const liveMarkets = [
-    { symbol: "AAPL", price: "$189.84", change: "+2.1%", volume: "45.2M" },
-    { symbol: "TSLA", price: "$248.42", change: "-1.3%", volume: "32.1M" },
-    { symbol: "MSFT", price: "$424.58", change: "+0.8%", volume: "28.7M" },
-  ]
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<MailingListFormData>({
+    resolver: zodResolver(mailingListSchema),
+  })
+
+  const onSubmit = async (data: MailingListFormData) => {
+    if (!data.email) {
+      alert("Email is required to join the mailing list.")
+      return
+    }
+
+    try {
+      const response = await fetch("/api/mailing-list", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      })
+
+      if (response.ok) {
+        alert("You have successfully joined the mailing list!")
+        reset()
+      } else {
+        const errorData = await response.json()
+        alert(`Failed to join mailing list: ${errorData.message}`)
+      }
+    } catch (error) {
+      alert("An error occurred while joining the mailing list.")
+      console.error(error)
+    }
+  }
+
+  useEffect(() => {
+    reset()
+  }, [reset])
 
   return (
     <div className="min-h-screen bg-white">
@@ -97,7 +238,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-6 justify-center mb-20">
+          <div className="flex justify-center mb-20">
             <Link href="/app">
               <Button
                 size="lg"
@@ -107,37 +248,40 @@ export default function HomePage() {
                 <ArrowRight className="ml-3 h-5 w-5" />
               </Button>
             </Link>
-            <Link href="/markets">
-              <Button
-                variant="outline"
-                size="lg"
-                className="border-2 border-slate-300 hover:border-emerald-600 text-slate-700 hover:text-emerald-600 px-10 py-4 text-lg font-semibold rounded-2xl transition-all duration-300"
-              >
-                <BarChart3 className="mr-3 h-5 w-5" />
-                View Markets
-              </Button>
-            </Link>
           </div>
 
-          {/* Live Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {platformStats.map((stat, index) => (
-              <div
-                key={index}
-                className="text-center p-6 rounded-3xl bg-white/80 backdrop-blur-sm border border-slate-200/50 shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <div className="text-3xl font-bold text-slate-900 mb-2">
-                  {stat.value}
-                </div>
-                <div className="text-sm text-slate-600 mb-1">{stat.label}</div>
-                <div
-                  className={`text-xs font-medium ${stat.change.includes("+") ? "text-emerald-600" : stat.change.includes("-") ? "text-red-500" : "text-slate-500"}`}
-                >
-                  {stat.change}
-                </div>
-              </div>
-            ))}
+          {/* Mailing List Join Box */}
+          <div className="flex flex-col items-center justify-center mb-10">
+            <JoinMailingList />
           </div>
+          {/* Partner Ticker Section */}
+          <section className="w-full max-w-4xl mx-auto mt-20">
+            <PartnerTicker />
+          </section>
+
+          {/* Live Stats */}
+          {/*
+          <div className="flex justify-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {platformStats.map((stat, index) => (
+                <div
+                  key={index}
+                  className="text-center p-6 rounded-3xl bg-white/80 backdrop-blur-sm border border-slate-200/50 shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  <div className="text-3xl font-bold text-slate-900 mb-2">
+                    {stat.value}
+                  </div>
+                  <div className="text-sm text-slate-600 mb-1">{stat.label}</div>
+                  <div
+                    className={`text-xs font-medium ${stat.change.includes("+") ? "text-emerald-600" : stat.change.includes("-") ? "text-red-500" : "text-slate-500"}`}
+                  >
+                    {stat.change}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          */}
         </div>
       </section>
 

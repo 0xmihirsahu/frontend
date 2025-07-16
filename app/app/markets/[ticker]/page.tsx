@@ -1,14 +1,27 @@
-'use client'
+"use client"
 
-import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { ArrowLeft, TrendingUp, TrendingDown, BarChart3, Clock, DollarSign } from 'lucide-react'
-import StockChart from '@/components/StockChart'
+import { useEffect, useState } from "react"
+import { useParams, useRouter } from "next/navigation"
+import Link from "next/link"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import {
+  ArrowLeft,
+  TrendingUp,
+  TrendingDown,
+  BarChart3,
+  Clock,
+  DollarSign,
+} from "lucide-react"
+import StockChart from "@/components/stockChart"
 
 interface StockData {
   time: string
@@ -44,15 +57,15 @@ export default function TickerPage() {
       try {
         setLoading(true)
         const response = await fetch(`/api/stocks/${ticker}`)
-        
+
         if (!response.ok) {
-          throw new Error('Failed to fetch stock data')
+          throw new Error("Failed to fetch stock data")
         }
-        
+
         const data = await response.json()
         setStockInfo(data)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred')
+        setError(err instanceof Error ? err.message : "An error occurred")
       } finally {
         setLoading(false)
       }
@@ -82,9 +95,11 @@ export default function TickerPage() {
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <div className="text-red-600 text-6xl mb-4">⚠️</div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Error Loading Data</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              Error Loading Data
+            </h1>
             <p className="text-gray-600 mb-4">
-              {error || 'Unable to load stock data'}
+              {error || "Unable to load stock data"}
             </p>
             <Button onClick={() => router.back()}>
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -116,18 +131,23 @@ export default function TickerPage() {
         </Link>
         <div className="flex-1">
           <div className="flex items-center gap-3">
-            <h1 className="text-4xl font-bold text-gray-900">{stockInfo.ticker}</h1>
-            {stockInfo.dataSource === 'mock' && (
+            <h1 className="text-4xl font-bold text-gray-900">
+              {stockInfo.ticker}
+            </h1>
+            {stockInfo.dataSource === "mock" && (
               <Badge variant="secondary">DEMO DATA</Badge>
             )}
-            {stockInfo.dataSource === 'real' && (
+            {stockInfo.dataSource === "real" && (
               <Badge variant="default">LIVE DATA</Badge>
             )}
           </div>
           <p className="text-lg text-gray-600">
-            Stock Details & Chart 
-            {stockInfo.lastUpdated && stockInfo.dataSource === 'real' && (
-              <span className="text-sm text-gray-500"> • Updated: {stockInfo.lastUpdated}</span>
+            Stock Details & Chart
+            {stockInfo.lastUpdated && stockInfo.dataSource === "real" && (
+              <span className="text-sm text-gray-500">
+                {" "}
+                • Updated: {stockInfo.lastUpdated}
+              </span>
             )}
           </p>
         </div>
@@ -146,14 +166,18 @@ export default function TickerPage() {
             <div className="text-3xl font-bold text-gray-900">
               ${stockInfo.currentPrice.toLocaleString()}
             </div>
-            <div className={`flex items-center mt-1 ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+            <div
+              className={`flex items-center mt-1 ${isPositive ? "text-green-600" : "text-red-600"}`}
+            >
               {isPositive ? (
                 <TrendingUp className="w-4 h-4 mr-1" />
               ) : (
                 <TrendingDown className="w-4 h-4 mr-1" />
               )}
               <span className="font-medium">
-                {isPositive ? '+' : ''}${stockInfo.priceChange.toFixed(2)} ({isPositive ? '+' : ''}{stockInfo.priceChangePercent.toFixed(2)}%)
+                {isPositive ? "+" : ""}${stockInfo.priceChange.toFixed(2)} (
+                {isPositive ? "+" : ""}
+                {stockInfo.priceChangePercent.toFixed(2)}%)
               </span>
             </div>
           </CardContent>
@@ -186,9 +210,7 @@ export default function TickerPage() {
             <div className="text-2xl font-bold text-gray-900">
               {formatMarketCap(stockInfo.marketCap)}
             </div>
-            <div className="text-sm text-gray-600 mt-1">
-              Total market value
-            </div>
+            <div className="text-sm text-gray-600 mt-1">Total market value</div>
           </CardContent>
         </Card>
 
@@ -215,13 +237,15 @@ export default function TickerPage() {
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
-              <CardTitle className="text-2xl">{stockInfo.ticker} Chart</CardTitle>
+              <CardTitle className="text-2xl">
+                {stockInfo.ticker} Chart
+              </CardTitle>
               <CardDescription>
                 Interactive candlestick chart with volume indicator
               </CardDescription>
             </div>
             <Badge variant={isPositive ? "default" : "destructive"}>
-              {isPositive ? 'BULLISH' : 'BEARISH'}
+              {isPositive ? "BULLISH" : "BEARISH"}
             </Badge>
           </div>
         </CardHeader>
@@ -232,8 +256,8 @@ export default function TickerPage() {
               <TabsTrigger value="data">Raw Data</TabsTrigger>
             </TabsList>
             <TabsContent value="chart" className="mt-6">
-              <StockChart 
-                data={stockInfo.data} 
+              <StockChart
+                data={stockInfo.data}
                 ticker={stockInfo.ticker}
                 height={500}
               />
@@ -252,16 +276,29 @@ export default function TickerPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {stockInfo.data.slice(-10).reverse().map((item, index) => (
-                      <tr key={index} className="border-b hover:bg-gray-50">
-                        <td className="p-2 font-medium">{item.time}</td>
-                        <td className="p-2 text-right">${item.open.toFixed(2)}</td>
-                        <td className="p-2 text-right">${item.high.toFixed(2)}</td>
-                        <td className="p-2 text-right">${item.low.toFixed(2)}</td>
-                        <td className="p-2 text-right">${item.close.toFixed(2)}</td>
-                        <td className="p-2 text-right">{item.volume.toLocaleString()}</td>
-                      </tr>
-                    ))}
+                    {stockInfo.data
+                      .slice(-10)
+                      .reverse()
+                      .map((item, index) => (
+                        <tr key={index} className="border-b hover:bg-gray-50">
+                          <td className="p-2 font-medium">{item.time}</td>
+                          <td className="p-2 text-right">
+                            ${item.open.toFixed(2)}
+                          </td>
+                          <td className="p-2 text-right">
+                            ${item.high.toFixed(2)}
+                          </td>
+                          <td className="p-2 text-right">
+                            ${item.low.toFixed(2)}
+                          </td>
+                          <td className="p-2 text-right">
+                            ${item.close.toFixed(2)}
+                          </td>
+                          <td className="p-2 text-right">
+                            {item.volume.toLocaleString()}
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
               </div>
@@ -278,27 +315,32 @@ export default function TickerPage() {
           </CardHeader>
           <CardContent>
             <p className="text-gray-600">
-              Real-time stock data and interactive charts for {stockInfo.ticker}. 
-              The chart shows candlestick patterns with volume indicators to help 
-              you analyze price movements and trading activity.
+              Real-time stock data and interactive charts for {stockInfo.ticker}
+              . The chart shows candlestick patterns with volume indicators to
+              help you analyze price movements and trading activity.
             </p>
             <div className="mt-4 space-y-2">
               <div className="flex justify-between">
                 <span className="text-gray-600">52-Week High:</span>
                 <span className="font-medium">
-                  ${Math.max(...stockInfo.data.map(d => d.high)).toFixed(2)}
+                  ${Math.max(...stockInfo.data.map((d) => d.high)).toFixed(2)}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">52-Week Low:</span>
                 <span className="font-medium">
-                  ${Math.min(...stockInfo.data.map(d => d.low)).toFixed(2)}
+                  ${Math.min(...stockInfo.data.map((d) => d.low)).toFixed(2)}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Average Volume:</span>
                 <span className="font-medium">
-                  {(stockInfo.data.reduce((sum, d) => sum + d.volume, 0) / stockInfo.data.length / 1000000).toFixed(1)}M
+                  {(
+                    stockInfo.data.reduce((sum, d) => sum + d.volume, 0) /
+                    stockInfo.data.length /
+                    1000000
+                  ).toFixed(1)}
+                  M
                 </span>
               </div>
             </div>

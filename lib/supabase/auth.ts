@@ -7,6 +7,11 @@ interface SignUpArgs {
   lastName: string
 }
 
+interface SignInArgs {
+  email: string
+  password: string
+}
+
 async function signUpWithProfile({
   email,
   password,
@@ -45,7 +50,7 @@ async function signUpWithProfile({
   return { success: true }
 }
 
-async function loginAndFetchProfile({ email, password }: SignUpArgs) {
+async function signInWithProfile({ email, password }: SignInArgs) {
   // Step 1: Sign in the user
   const { data: loginData, error: loginError } =
     await supabase.auth.signInWithPassword({
@@ -75,4 +80,28 @@ async function loginAndFetchProfile({ email, password }: SignUpArgs) {
   return { user, profile }
 }
 
-export { signUpWithProfile, loginAndFetchProfile }
+async function signOut() {
+  const { error } = await supabase.auth.signOut()
+  if (error) {
+    console.error("Sign out error:", error.message)
+    return { error: error.message }
+  }
+  return { success: true }
+}
+
+// Keep the old function name for backward compatibility
+async function loginAndFetchProfile(args: SignInArgs) {
+  return signInWithProfile(args)
+}
+
+async function sendPasswordResetEmail(email: string) {
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/auth/reset-password`,
+  })
+  if (error) {
+    return { error: error.message }
+  }
+  return { success: true }
+}
+
+export { signUpWithProfile, signInWithProfile, signOut, loginAndFetchProfile, sendPasswordResetEmail }

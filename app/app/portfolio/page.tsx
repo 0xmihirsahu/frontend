@@ -20,23 +20,24 @@ import {
   Clock,
 } from "lucide-react"
 import Link from "next/link"
-import { useTokenBalance } from "@/hooks/view/useTokenBalance"
-import { useMarketData } from "@/hooks/useMarketData"
+import { useTokenBalance } from "@/hooks/view/onChain/useTokenBalance"
+import { useMarketData } from "@/hooks/api/useMarketData"
 import { useAccount } from "wagmi"
-import { useCurrentUser } from "@/hooks/useCurrentUser"
+import { useCurrentUser } from "@/hooks/auth/useCurrentUser"
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
   TooltipProvider,
 } from "@/components/ui/tooltip"
-import { useRecentActivity } from "@/hooks/useRecentActivity"
+import { useRecentActivity } from "@/hooks/view/onChain/useRecentActivity"
 import { Activity } from "lucide-react"
-import { useReturns } from "@/hooks/useReturns"
+import { useReturns } from "@/hooks/api/useReturns"
 
 import { format } from "date-fns"
+import { Suspense } from "react"
 
-export default function PortfolioPage() {
+function PortfolioPage() {
   const { address: userAddress } = useAccount()
   const {
     balance: tokenBalance,
@@ -641,3 +642,11 @@ export default function PortfolioPage() {
     </div>
   )
 }
+export default function PortfolioPageWrapper() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <PortfolioPage />
+    </Suspense>
+  )
+}
+

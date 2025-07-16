@@ -3,11 +3,9 @@ import "@rainbow-me/rainbowkit/styles.css"
 import "react-toastify/dist/ReactToastify.css"
 import type { Metadata } from "next"
 import { Public_Sans, IBM_Plex_Mono } from "next/font/google"
-import { Providers } from "@/components/Providers"
-import Navbar from "@/components/NavBar"
+import { Providers } from "@/components/providers"
 import { cn } from "@/lib/utils"
-import { Toaster } from "sonner"
-import { ConditionalNavbar } from "@/components/ConditionalNavbar"
+import { ConditionalNavbar } from "@/components/conditionalNavbar"
 
 const publicSans = Public_Sans({
   subsets: ["latin"],
@@ -21,7 +19,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: "Spout Finance",
   description:
-    "Spout Finance is a RWA platform tokenizing T-Bills and Corporate Bonds",
+    "Spout Finance is a RWA platform tokenizing efficient collateral assets and building the next gen of collateral infrastructure",
   keywords: [
     "finance",
     "portfolio",
@@ -51,7 +49,6 @@ export default async function RootLayout({
         <Providers>
           <ConditionalNavbar />
           <main className="flex-1">{children}</main>
-          <Toaster />
         </Providers>
       </body>
     </html>

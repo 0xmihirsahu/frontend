@@ -1,5 +1,5 @@
 "use client"
-import StockChart from "@/components/StockChart"
+import StockChart from "@/components/stockChart"
 import {
   Card,
   CardContent,
@@ -23,11 +23,11 @@ import {
 import React, { useEffect, useState, useCallback } from "react"
 import { useAccount, useConfig } from "wagmi"
 import { encryptValue } from "@/lib/inco-lite"
-import { useERC20Approve } from "@/hooks/useERC20Approve"
+import { useERC20Approve } from "@/hooks/writes/onChain/useERC20Approve"
 import { useConfidentialOrdersContract } from "@/hooks/useConfidentialOrdersContract"
 import { waitForTransactionReceipt } from "wagmi/actions"
-import { useTokenBalance } from "@/hooks/view/useTokenBalance"
-import { useUSDCTokenBalance } from "@/hooks/view/useUSDCTokenBalance"
+import { useTokenBalance } from "@/hooks/view/onChain/useTokenBalance"
+import { useUSDCTokenBalance } from "@/hooks/view/onChain/useUSDCTokenBalance"
 
 const TOKENS = [
   { label: "LQD", value: "LQD" },
@@ -634,9 +634,9 @@ const Page = () => {
         )}
       </div>
       {/* Trading Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-7 gap-8">
+      <div className="flex justify-center items-center min-h-[60vh]">
         {/* Main Trading Interface */}
-        <div className="lg:col-span-4">
+        <div className="w-full max-w-xl">
           <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-slate-50 hover:shadow-xl transition-shadow duration-200">
             <CardHeader className="pb-4">
               {/* Buy/Sell Toggle */}
@@ -942,112 +942,6 @@ const Page = () => {
                   </Button>
                 </>
               )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Trading Info Sidebar */}
-        <div className="space-y-6 lg:col-span-3">
-          {/* Recent Trades */}
-          <Card className="border-0 shadow-md">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    Recent Trades
-                    <Shield className="w-4 h-4 text-purple-500" />
-                  </CardTitle>
-                  <CardDescription>
-                    Your confidential trading history
-                  </CardDescription>
-                </div>
-                <button
-                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition-all flex items-center gap-2 text-sm"
-                  onClick={() => {
-                    setLogsLoading(true)
-                    fetchTradeLogs()
-                  }}
-                >
-                  <RefreshCcw
-                    className={`w-4 h-4 ${logsLoading ? "animate-spin" : ""}`}
-                  />
-                  {!logsLoading && "Refresh"}
-                </button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                {tradeLogs.length === 0 ? (
-                  <div className="text-center py-8 text-slate-500">
-                    <Shield className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">No transactions yet</p>
-                    <p className="text-xs">Start trading to see logs here</p>
-                  </div>
-                ) : (
-                  tradeLogs.map((log) => {
-                    // Extract pair info from message for better display
-                    const getPairFromMessage = (message: string) => {
-                      if (message.includes("USDC → "))
-                        return (
-                          message.match(/USDC → (\w+)/)?.[0] || "USDC → Token"
-                        )
-                      if (message.includes("→ USDC"))
-                        return (
-                          message.match(/(\w+) → USDC/)?.[0] || "Token → USDC"
-                        )
-                      return message
-                    }
-
-                    return (
-                      <div
-                        key={log.id}
-                        className="flex items-center justify-between p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors"
-                      >
-                        <div>
-                          <p className="text-sm font-medium">
-                            {getPairFromMessage(log.message)}
-                          </p>
-                          <p className="text-xs text-slate-500 flex items-center gap-1">
-                            <span className="font-mono text-purple-600">
-                              *****
-                            </span>
-                            <span>encrypted amount</span>
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <Badge
-                            variant="secondary"
-                            className={`text-xs ${
-                              log.type === "ORDER_FILLED"
-                                ? "bg-green-100 text-green-700"
-                                : log.type === "ORDER_SUBMITTED"
-                                  ? "bg-blue-100 text-blue-700"
-                                  : log.type === "ORDER_PENDING"
-                                    ? "bg-orange-100 text-orange-700"
-                                    : log.type === "ORDER_FAILED"
-                                      ? "bg-red-100 text-red-700"
-                                      : "bg-slate-100 text-slate-700"
-                            }`}
-                          >
-                            {log.type === "ORDER_FILLED"
-                              ? "Completed"
-                              : log.type === "ORDER_SUBMITTED"
-                                ? "Submitted"
-                                : log.type === "ORDER_PENDING"
-                                  ? "Pending"
-                                  : log.type === "ORDER_FAILED"
-                                    ? "Failed"
-                                    : log.type.replace("_", " ")}
-                          </Badge>
-                          <p className="text-xs text-slate-500 mt-1">
-                            {log.time}
-                          </p>
-                        </div>
-                      </div>
-                    )
-                  })
-                )}
-              </div>
             </CardContent>
           </Card>
         </div>

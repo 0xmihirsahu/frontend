@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { WagmiProvider, http } from "wagmi"
 import { RainbowKitProvider, getDefaultConfig } from "@rainbow-me/rainbowkit"
 import { baseSepolia } from "wagmi/chains"
+import { AuthProvider } from "@/context/AuthContext"
 
 const queryClient = new QueryClient()
 
@@ -22,7 +23,11 @@ const config = getDefaultConfig({
 const Providers = ({ children }: { children: ReactNode }) => (
   <WagmiProvider config={config}>
     <QueryClientProvider client={queryClient}>
-      <RainbowKitProvider>{children}</RainbowKitProvider>
+      <RainbowKitProvider>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </RainbowKitProvider>
     </QueryClientProvider>
   </WagmiProvider>
 )

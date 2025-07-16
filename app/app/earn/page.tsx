@@ -17,8 +17,9 @@ import {
   Shield,
   Users,
 } from "lucide-react"
+import { Suspense } from "react"
 
-export default function EarnPage() {
+function EarnPage() {
   const comingSoonFeatures = [
     {
       icon: BarChart3,
@@ -257,5 +258,13 @@ export default function EarnPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function EarnPageWrapper() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <EarnPage />
+    </Suspense>
   )
 }

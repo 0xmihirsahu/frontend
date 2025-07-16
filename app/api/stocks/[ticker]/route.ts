@@ -98,9 +98,14 @@ async function fetchHistoricalData(
   retryCount = 0
 ): Promise<any[]> {
   try {
-    // Use fixed dates from the UI
-    const startStr = "2025-04-05"
-    const endStr = "2025-07-04"
+    // Calculate start and end dates: last 90 days, ending yesterday
+    const today = new Date()
+    const endDate = new Date(today)
+    endDate.setDate(today.getDate() - 1) // yesterday
+    const startDate = new Date(endDate)
+    startDate.setDate(endDate.getDate() - 89)
+    const startStr = startDate.toISOString().split("T")[0]
+    const endStr = endDate.toISOString().split("T")[0]
 
     console.log("Date range:", {
       start: startStr,
@@ -180,67 +185,36 @@ async function fetchHistoricalData(
       return []
     }
 
-    // Process auctions into daily OHLC data
+    // Process auctions: for each day, use the 'p' value from the closing auction (auction.c)
     const dailyData = new Map()
-
     for (const auction of allAuctions) {
-      const date = auction.d // Use the date field directly
-
-      // Initialize the daily data if not exists
-      if (!dailyData.has(date)) {
-        dailyData.set(date, {
-          t: date,
-          o: null, // Will be set by opening auction
-          h: -Infinity,
-          l: Infinity,
-          c: null, // Will be set by closing auction
-          v: 0,
-        })
-      }
-
-      const dayData = dailyData.get(date)
-
-      // Process opening auctions
-      if (auction.o && Array.isArray(auction.o)) {
-        for (const trade of auction.o) {
-          if (dayData.o === null) {
-            dayData.o = trade.p // Set opening price from first opening auction
-          }
-          dayData.h = Math.max(dayData.h, trade.p)
-          dayData.l = Math.min(dayData.l, trade.p)
-          dayData.v += trade.s
-        }
-      }
-
-      // Process closing auctions
-      if (auction.c && Array.isArray(auction.c)) {
-        for (const trade of auction.c) {
-          dayData.h = Math.max(dayData.h, trade.p)
-          dayData.l = Math.min(dayData.l, trade.p)
-          dayData.c = trade.p // Last closing auction price becomes the close
-          dayData.v += trade.s
-        }
-      }
-
-      // If we somehow don't have an opening price, use the first price we saw
-      if (dayData.o === null && dayData.c !== null) {
-        dayData.o = dayData.c
-      }
-
-      // Reset infinity values if no trades
-      if (dayData.h === -Infinity) dayData.h = dayData.o || 0
-      if (dayData.l === Infinity) dayData.l = dayData.o || 0
+      const date = auction.d
+      if (!auction.c || !Array.isArray(auction.c) || auction.c.length === 0)
+        continue
+      // Use the last closing auction's 'p' value for the day
+      const lastClose = auction.c[auction.c.length - 1]
+      if (!lastClose || typeof lastClose.p !== "number") continue
+      const price = lastClose.p
+      const volume = lastClose.s || 0
+      dailyData.set(date, {
+        time: date,
+        open: price,
+        high: price,
+        low: price,
+        close: price,
+        volume: volume,
+      })
     }
 
     // Convert to array and sort by date
-    const result = Array.from(dailyData.values())
-      .filter((day) => day.o !== null && day.c !== null) // Only include days with valid data
-      .sort((a, b) => a.t.localeCompare(b.t))
+    const result = Array.from(dailyData.values()).sort((a, b) =>
+      a.time.localeCompare(b.time)
+    )
 
-    console.log("Processed daily data:", {
+    console.log("Processed daily data for chart:", {
       days: result.length,
-      firstDay: result[0]?.t,
-      lastDay: result[result.length - 1]?.t,
+      firstDay: result[0]?.time,
+      lastDay: result[result.length - 1]?.time,
       sampleData: result[0],
     })
 
@@ -308,7 +282,8 @@ export async function GET(
         currentPrice,
         priceChange,
         priceChangePercent,
-        historicalData,
+        data: historicalData,
+        dataSource: "real",
       })
     )
   } catch (error) {

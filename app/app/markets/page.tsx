@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, Suspense } from "react"
 import Link from "next/link"
 import {
   Card,
@@ -110,7 +110,7 @@ interface StockData {
   dataSource?: string
 }
 
-export default function MarketsPage() {
+function MarketsPage() {
   const [stocks, setStocks] = useState<StockData[]>(popularStocks)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -466,5 +466,13 @@ export default function MarketsPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function MarketsPageWrapper() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <MarketsPage />
+    </Suspense>
   )
 }

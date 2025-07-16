@@ -1,86 +1,92 @@
-'use client'
+"use client"
 
-import { useEffect, useState, useCallback } from 'react'
-import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { TrendingUp, TrendingDown, RefreshCw } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { useEffect, useState, useCallback, Suspense } from "react"
+import Link from "next/link"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { TrendingUp, TrendingDown, RefreshCw } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 // Popular stocks with company names - prices will be fetched from API
 const popularStocks = [
   {
-    ticker: 'AAPL',
-    name: 'Apple Inc.',
+    ticker: "AAPL",
+    name: "Apple Inc.",
     price: 0, // Will be updated from API
     change: 0,
     changePercent: 0,
-    volume: '0',
-    marketCap: '0'
+    volume: "0",
+    marketCap: "0",
   },
   {
-    ticker: 'TSLA',
-    name: 'Tesla, Inc.',
+    ticker: "TSLA",
+    name: "Tesla, Inc.",
     price: 0,
     change: 0,
     changePercent: 0,
-    volume: '0',
-    marketCap: '0'
+    volume: "0",
+    marketCap: "0",
   },
   {
-    ticker: 'MSFT',
-    name: 'Microsoft Corporation',
+    ticker: "MSFT",
+    name: "Microsoft Corporation",
     price: 0,
     change: 0,
     changePercent: 0,
-    volume: '0',
-    marketCap: '0'
+    volume: "0",
+    marketCap: "0",
   },
   {
-    ticker: 'GOOGL',
-    name: 'Alphabet Inc.',
+    ticker: "GOOGL",
+    name: "Alphabet Inc.",
     price: 0,
     change: 0,
     changePercent: 0,
-    volume: '0',
-    marketCap: '0'
+    volume: "0",
+    marketCap: "0",
   },
   {
-    ticker: 'AMZN',
-    name: 'Amazon.com, Inc.',
+    ticker: "AMZN",
+    name: "Amazon.com, Inc.",
     price: 0,
     change: 0,
     changePercent: 0,
-    volume: '0',
-    marketCap: '0'
+    volume: "0",
+    marketCap: "0",
   },
   {
-    ticker: 'NVDA',
-    name: 'NVIDIA Corporation',
+    ticker: "NVDA",
+    name: "NVIDIA Corporation",
     price: 0,
     change: 0,
     changePercent: 0,
-    volume: '0',
-    marketCap: '0'
+    volume: "0",
+    marketCap: "0",
   },
   {
-    ticker: 'META',
-    name: 'Meta Platforms, Inc.',
+    ticker: "META",
+    name: "Meta Platforms, Inc.",
     price: 0,
     change: 0,
     changePercent: 0,
-    volume: '0',
-    marketCap: '0'
+    volume: "0",
+    marketCap: "0",
   },
   {
-    ticker: 'IBM',
-    name: 'IBM Corporation',
+    ticker: "IBM",
+    name: "IBM Corporation",
     price: 0,
     change: 0,
     changePercent: 0,
-    volume: '0',
-    marketCap: '0'
-  }
+    volume: "0",
+    marketCap: "0",
+  },
 ]
 
 interface StockData {
@@ -94,7 +100,7 @@ interface StockData {
   dataSource?: string
 }
 
-export default function MarketsPage() {
+function MarketsPage() {
   const [stocks, setStocks] = useState<StockData[]>(popularStocks)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -121,13 +127,13 @@ export default function MarketsPage() {
         const data = await response.json()
         return {
           ticker: data.ticker,
-          name: popularStocks.find(s => s.ticker === ticker)?.name || ticker,
+          name: popularStocks.find((s) => s.ticker === ticker)?.name || ticker,
           price: data.currentPrice,
           change: data.priceChange,
           changePercent: data.priceChangePercent,
           volume: formatVolume(data.volume),
           marketCap: formatMarketCap(data.marketCap),
-          dataSource: data.dataSource
+          dataSource: data.dataSource,
         }
       }
     } catch (error) {
@@ -139,14 +145,18 @@ export default function MarketsPage() {
   const fetchAllStocks = useCallback(async () => {
     setRefreshing(true)
     try {
-      const promises = popularStocks.map(stock => fetchStockData(stock.ticker))
+      const promises = popularStocks.map((stock) =>
+        fetchStockData(stock.ticker)
+      )
       const results = await Promise.all(promises)
-      
-      const validStocks = results.filter(stock => stock !== null) as StockData[]
+
+      const validStocks = results.filter(
+        (stock) => stock !== null
+      ) as StockData[]
       setStocks(validStocks)
       setLastUpdated(new Date())
     } catch (error) {
-      console.error('Error fetching stocks:', error)
+      console.error("Error fetching stocks:", error)
     } finally {
       setLoading(false)
       setRefreshing(false)
@@ -163,21 +173,25 @@ export default function MarketsPage() {
       <div className="mb-8 flex justify-between items-center">
         <div>
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Markets</h1>
-          <p className="text-lg text-gray-600">Track real-time stock prices and market data</p>
+          <p className="text-lg text-gray-600">
+            Track real-time stock prices and market data
+          </p>
           {lastUpdated && (
             <p className="text-sm text-gray-500 mt-1">
               Last updated: {lastUpdated.toLocaleTimeString()}
             </p>
           )}
         </div>
-        <Button 
-          onClick={fetchAllStocks} 
+        <Button
+          onClick={fetchAllStocks}
           variant="outline"
           size="sm"
-          className={refreshing ? 'opacity-50 cursor-not-allowed' : ''}
+          className={refreshing ? "opacity-50 cursor-not-allowed" : ""}
         >
-          <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-          {refreshing ? 'Refreshing...' : 'Refresh'}
+          <RefreshCw
+            className={`w-4 h-4 mr-2 ${refreshing ? "animate-spin" : ""}`}
+          />
+          {refreshing ? "Refreshing..." : "Refresh"}
         </Button>
       </div>
 
@@ -214,26 +228,34 @@ export default function MarketsPage() {
           {stocks.map((stock) => (
             <Link href={`/markets/${stock.ticker}`} key={stock.ticker}>
               <Card className="hover:shadow-lg transition-shadow duration-200 cursor-pointer relative">
-                {stock.dataSource === 'mock' && (
+                {stock.dataSource === "mock" && (
                   <div className="absolute top-2 right-2 z-10">
-                    <Badge variant="secondary" className="text-xs">DEMO</Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      DEMO
+                    </Badge>
                   </div>
                 )}
                 <CardHeader className="pb-3">
                   <div className="flex justify-between items-start">
                     <div>
-                      <CardTitle className="text-xl font-bold">{stock.ticker}</CardTitle>
+                      <CardTitle className="text-xl font-bold">
+                        {stock.ticker}
+                      </CardTitle>
                       <CardDescription className="text-sm text-gray-600">
                         {stock.name}
                       </CardDescription>
                     </div>
-                    <Badge variant={stock.change >= 0 ? "default" : "destructive"} className="text-xs">
+                    <Badge
+                      variant={stock.change >= 0 ? "default" : "destructive"}
+                      className="text-xs"
+                    >
                       {stock.change >= 0 ? (
                         <TrendingUp className="w-3 h-3 mr-1" />
                       ) : (
                         <TrendingDown className="w-3 h-3 mr-1" />
                       )}
-                      {stock.changePercent >= 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%
+                      {stock.changePercent >= 0 ? "+" : ""}
+                      {stock.changePercent.toFixed(2)}%
                     </Badge>
                   </div>
                 </CardHeader>
@@ -243,10 +265,12 @@ export default function MarketsPage() {
                       <span className="text-2xl font-bold">
                         ${stock.price.toLocaleString()}
                       </span>
-                      <span className={`text-sm font-medium ${
-                        stock.change >= 0 ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {stock.change >= 0 ? '+' : ''}${stock.change.toFixed(2)}
+                      <span
+                        className={`text-sm font-medium ${
+                          stock.change >= 0 ? "text-green-600" : "text-red-600"
+                        }`}
+                      >
+                        {stock.change >= 0 ? "+" : ""}${stock.change.toFixed(2)}
                       </span>
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
@@ -268,7 +292,9 @@ export default function MarketsPage() {
       )}
 
       <div className="mt-12">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Market Overview</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          Market Overview
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card>
             <CardHeader>
@@ -301,4 +327,12 @@ export default function MarketsPage() {
       </div>
     </div>
   )
-} 
+}
+
+export default function MarketsPageWrapper() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <MarketsPage />
+    </Suspense>
+  )
+}
