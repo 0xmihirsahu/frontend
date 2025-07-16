@@ -14,7 +14,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-function SettingsPage() {
+function ProfilePage() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const initialTab = searchParams?.get("tab") || "profile"
@@ -100,7 +100,7 @@ function SettingsPage() {
 export default function ProfilePageWrapper() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <SettingsPage />
+      <ProfilePage />
     </Suspense>
   )
 }

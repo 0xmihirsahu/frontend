@@ -7,6 +7,7 @@ import {
   DashboardNavbarHeaderClient,
 } from "@/components/dashboardNavClient"
 import { Toaster } from "@/components/ui/sonner"
+import { Suspense } from "react"
 
 export default function DashboardLayout({
   children,
@@ -23,7 +24,9 @@ export default function DashboardLayout({
 
         <SidebarInset className="flex-1">
           <DashboardNavbarHeaderClient />
-          <OnchainIDChecker />
+          <Suspense fallback={<div>Loading...</div>}>
+            <OnchainIDChecker />
+          </Suspense>
           <main className="flex-1 p-6 bg-gray-50">{children}</main>
         </SidebarInset>
       </div>
